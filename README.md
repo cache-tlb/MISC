@@ -1,2 +1,2 @@
 # MISC
-Some simple projects
+A collection of some of my simple projects
