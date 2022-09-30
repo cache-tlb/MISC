@@ -1,0 +1,1959 @@
+\chapter{几何}
+
+\noindent 中线长公式:
+
+$\triangle ABC$中, $BC$ 的中点为 $D$, 则 $AB^2 + AC^2 = 2(AD^2+BD^2)$.
+
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[cap=round,scale=1]
+\tikzstyle{axes}=[line width=1pt]
+\coordinate[label=below:$D$,] (D) at (0.0,0.0);
+\coordinate[label=below:$B$] (B) at (-2.5,0.0);
+\coordinate[label=below:$C$] (C) at (2.5,0.0);
+\coordinate[label=above:$A$] (A) at (1.0,3.0);
+\draw[] (B) to [edge label = $c$] (A);
+\draw[] (A) to [edge label = $b$] (C);
+\draw[] (C) to (B);
+\draw[densely dashed] (A) to (D);
+\foreach \p in {A,B,C,D}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+\end{figure*}
+
+\begin{proof}
+由余弦定理:
+\begin{align*}
+AB^2 &= AD^2+BD^2-2AD\cdot BD \cdot \cos\angle ADB, \\
+AC^2 &= AD^2+CD^2-2AD\cdot CD \cdot \cos\angle ADC.
+\end{align*}
+又因为 $BD=CD$, 以及 $\cos\angle ADB=-\cos\angle ADC$, 所以上面两式相加得到:
+\[AB^2 + AC^2 = 2(AD^2+BD^2).\]
+\end{proof}
+
+
+%------------------------------------------------------------------------------%
+\newpage
+托勒密定理: 圆内接四边形两条对角线的乘积等于两对对边乘积之和.
+
+如下图所示, $ABCD$ 为圆内接四边形, 则对角线 $AC$ 与 $BD $ 的乘积等于一对对边 $AB$ 与 $CD$ 的乘积加上另一对对边 $AD$ 与 $BC$ 的乘积, 即 $AC\cdot BD = AB\cdot CD + AD\cdot BC$.
+
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.0]
+\coordinate[] (O) at (0,0);
+\coordinate[label=left:$B$] (B) at (-1.74,-0.99);
+\coordinate[label=$A$] (A) at (-1.33,1.49);
+\coordinate[label=$D$] (D) at (1.1,1.67);
+\coordinate[label=right:$C$] (C) at (1.92,-0.57);
+\draw [line width=1pt] (O) circle (2cm);
+\draw [line width=1pt] (A) -- (B) -- (C) -- (D) -- cycle;
+\draw [line width=1pt] (A) -- (C);
+\draw [line width=1pt] (B) -- (D);
+\foreach \p in {A,B,C,D}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+\end{figure*}
+
+证法1: (构造等角)
+
+不失一般性, 可以假设 $\angle ADB < \angle BDC$, 过点 $D$ 作直线 $DE$ 交 $AC$ 于 $E$, 且满足 $\angle CDE = \angle ADB$, 如下图所示.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.0]
+\coordinate[] (O) at (0,0);
+\coordinate[label=left:$B$] (B) at (-1.74,-0.99);
+\coordinate[label=$A$] (A) at (-1.33,1.49);
+\coordinate[label=$D$] (D) at (1.1,1.67);
+\coordinate[label=right:$C$] (C) at (1.92,-0.57);
+\coordinate[label=below left:$E$] (E) at (0.62,0.25);
+\draw [line width=1pt] (O) circle (2cm);
+\draw [line width=1pt] (B) -- (A) -- (D) -- (C) -- cycle;
+\draw [line width=1pt] (A) -- (C);
+\draw [line width=1pt] (B) -- (D);
+\draw [dashed,line width=1pt] (D) -- (E);
+\foreach \p in {A,B,C,D,E}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\draw pic[draw,line width=1pt, angle eccentricity=1.5, angle radius=0.5cm] {angle=A--D--B};
+\draw pic[draw,line width=1pt, angle eccentricity=1.5, angle radius=0.5cm] {angle=E--D--C};
+\end{tikzpicture}
+\end{figure*}
+
+先证 $\triangle BDA \sim \triangle CDE$. 可以根据 $\angle BDA = \angle CDE$ 和 $\angle ABD = \angle ECD$ 得到. 于是 $AB : CE = BD : CD$, 即 $AB\cdot CD = BD\cdot CE$.
+
+再证 $\triangle DBC \sim \triangle DAE$. 可以根据 $\angle DBC = \angle DAE$ 和 $\angle BDC = \angle ADE$ 得到. 于是 $BD : AD = BC : AE$, 即 $BD\cdot AE = BC\cdot AD$.
+
+两式相加得: $BD\cdot(AE+CE) = AB\cdot CD + AD\cdot BC$, 即 $AC\cdot BD = AB\cdot CD + AD\cdot BC$.
+
+~
+
+证法2: (构造等角)
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.0]
+\coordinate[] (O) at (0,0);
+\coordinate[label=$A$] (A) at (0,2);
+\coordinate[label=above left:$B$] (B) at (-1.78,0.92);
+\coordinate[label=right:$C$] (C) at (1.29,-1.53);
+\coordinate[label=right:$D$] (D) at (1.51,1.32);
+\coordinate[label=left:$P$] (P) at (-3.72,-0.27);
+\draw [line width=1pt] (O) circle (2cm);
+\draw [line width=1pt] (B) -- (A) -- (D) -- (C) -- cycle;
+\draw [line width=1pt] (A) -- (C);
+\draw [line width=1pt] (B) -- (D);
+\draw [dashed,line width=1pt] (B) -- (P) -- (C);
+\foreach \p in {A,B,C,D,P}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\draw pic[draw,line width=1pt, angle eccentricity=1.5, angle radius=0.5cm] {angle=D--C--A};
+\draw pic[draw,line width=1pt, angle eccentricity=1.5, angle radius=0.5cm] {angle=B--C--P};
+\end{tikzpicture}
+\end{figure*}
+
+在 $AB$ 的延长线上取一点 $P$, 使得 $\angle BCP = \angle DCA$, 于是 $\angle ACP = \angle DCB$.
+
+再由 $\angle PAC = \angle BDC$, 得 $\triangle ACP\sim\triangle DCB$, 于是$AC:CD = AP:BD$, 即$AC\cdot BD = AP\cdot CD$.
+
+另一方面, 根据 $\angle CBP=180\degree - \angle CBA = \angle CDA$ 和 $\angle BCP=\angle DCA$, 得 $\triangle ACD\sim\triangle PCB$, 于是 $AD:PB=CD:CB$, 即 $AD\cdot CB = CD\cdot BP$.
+
+两式相减得到 $AC\cdot BD - AD \cdot CB = CD(AP-PB)$, 即 $AB\cdot CD+AD\cdot BC = AC\cdot BD$.
+
+~
+
+证法3: (正弦定理)
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.0]
+\coordinate[] (O) at (0,0);
+\coordinate[label=left:$B$] (B) at (-1.74,-0.99);
+\coordinate[label=$A$] (A) at (-1.33,1.49);
+\coordinate[label=$D$] (D) at (1.1,1.67);
+\coordinate[label=right:$C$] (C) at (1.92,-0.57);
+\draw [line width=1pt] (O) circle (2cm);
+\draw [line width=1pt] (B) -- (A) -- (D) -- (C) -- cycle;
+\draw [line width=1pt] (A) -- (C);
+\draw [line width=1pt] (B) -- (D);
+\foreach \p in {A,B,C,D}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\draw pic["$\alpha$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.35cm] {angle=B--A--C};
+\draw pic["$\alpha$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.35cm] {angle=B--D--C};
+\draw pic["$\beta$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.35cm] {angle=D--B--A};
+\draw pic["$\beta$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.35cm] {angle=D--C--A};
+\draw pic["$\theta$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.5cm] {angle=A--D--B};
+\draw pic["$\theta$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.5cm] {angle=A--C--B};
+\draw pic["$\varphi$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.5cm] {angle=C--B--D};
+\draw pic["$\varphi$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.5cm] {angle=C--A--D};
+\end{tikzpicture}
+\end{figure*}
+
+如图, 相等的角用相同的希腊字母表示. 
+\[\alpha+\beta+\theta+\varphi=\pi .\]
+
+要证 $AB\cdot CD + BC\cdot AD = AC\cdot BD$, 由正弦定理等价于证
+\[\sin\theta \sin\varphi + \sin\alpha \sin\beta = \sin(\alpha+\theta)\sin(\alpha+\varphi).\]
+由 $\beta = \pi - (\alpha+\theta+\varphi)$, 则 $\sin\beta = \sin(\alpha+\theta+\varphi)$. 利用和差化积与积化和差将上面的待证等式进行变换.
+\begin{align*}
+& \sin\theta \sin\varphi + \sin\alpha \sin\beta \\
+=& \frac{1}{2}\left[\cos(\theta-\varphi) - \cos(\theta+\varphi)\right]+\frac{1}{2}\left[\cos(\theta+\varphi) - \cos(2\alpha+\theta+\varphi)\right]\\
+=& \frac{1}{2}\left[\cos(\theta-\varphi) - \cos(2\alpha+\theta+\varphi)\right]\\
+=& \sin(\frac{2\alpha+\theta+\varphi+\theta-\varphi}{2})\sin(\frac{2\alpha+\theta+\varphi+\varphi-\theta}{2})\\
+=& \sin(\alpha+\theta)\sin(\alpha+\varphi).
+\end{align*}
+
+~
+
+证法4: (余弦定理)
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.0]
+\coordinate[] (O) at (0,0);
+\coordinate[label=left:$B$] (B) at (-1.74,-0.99);
+\coordinate[label=$A$] (A) at (-1.33,1.49);
+\coordinate[label=$D$] (D) at (1.1,1.67);
+\coordinate[label=right:$C$] (C) at (1.92,-0.57);
+\draw [line width=1pt] (O) circle (2cm);
+\draw [line width=1pt] (A) to[edge label'=$a$](B);
+\draw [line width=1pt] (B) to[edge label'=$b$](C);
+\draw [line width=1pt] (C) to[edge label'=$c$](D);
+\draw [line width=1pt] (D) to[edge label'=$d$](A);
+\draw [line width=1pt] (A) -- (C) node [near end,above] {$m$};
+\draw [line width=1pt] (B) to[edge label'=$n$] (D);
+\foreach \p in {A,B,C,D}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\draw pic["$\theta$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.5cm] {angle=C--B--A};
+\end{tikzpicture}
+\end{figure*}
+
+如图, 设 $AB=a, BC=b, CD=c, DA=d, AC=m, BD=n, \angle ABC=\theta$.
+
+在 $\triangle ABC$ 和 $\triangle ADC$ 中, 由余弦定理有:
+\begin{align*}
+m^2 &= a^2+b^2-2ab\cos\theta \qquad\cdots\qquad \textcircled{1} \\
+m^2 &= c^2+d^2+2cd\cos\theta \qquad\cdots\qquad \textcircled{2}
+\end{align*}
+由 $\textcircled{1}\times cd + \textcircled{2}\times ab$ 得:
+\begin{align*} 
+(ab+cd)m^2 &= cd(a^2+b^2)+ab(c^2+d^2) \\
+&= (ac+bd)(ad+bc)
+\end{align*}
+于是
+\[ m^2 = \frac{(ac+bd)(ad+bc)}{ab+cd} .\]
+同理, 
+\[n^2 =  \dfrac{(ac+bd)(ab+cd)}{ad+bc} .\]
+相乘可得: $(mn)^2=(ac+bd)^2$. 所以 $AB\cdot CD+BC\cdot AD=AC\cdot BD$.
+
+~
+
+证法5: (面积法)
+
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.0]
+\coordinate[] (O) at (0,0);
+\coordinate[label=$A$] (A) at (0.33,1.97);
+\coordinate[label=left:$B$] (B) at (-1.9,-0.62);
+\coordinate[label=below:$C$] (C) at (0.55,-1.92);
+\coordinate[label=right:$D$] (D) at (1.69,1.08);
+\coordinate[label=left:$E$] (E) at (-1.73,1.0);
+\coordinate[label=right:$F$] (F) at (0.41,0.47);
+\draw [line width=1pt] (O) circle (2cm);
+\draw [line width=1pt] (A) -- (B) -- (C) -- (D) -- cycle;
+\draw [line width=1pt] (A) -- (C);
+\draw [line width=1pt] (B) -- (D);
+\draw [dashed,line width=1pt] (A) -- (E) -- (B);
+\draw [dashed,line width=1pt] (C) -- (E) -- (D);
+\foreach \p in {A,B,C,D,E,F}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\draw pic["$\alpha$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.4cm] {angle=D--B--A};
+\draw pic["$\alpha$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.4cm] {angle=E--D--B};
+\draw pic["$\beta$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.45cm] {angle=B--A--C};
+\draw pic["$\beta$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.45cm] {angle=B--D--C};
+\end{tikzpicture}
+\end{figure*}
+
+如图, $AB,CD$的交点记为$F$, 作 $AE$ 平行于 $BD$ 交圆与 $E$ 点, 并连接 $BE, CE, DE$. 于是四边形 $AEBD$ 为等腰梯形, $EB = AD$. 图中相等得角用相同得希腊字母标出. 易知 $\angle AFD = \alpha+\beta=\angle EDC$.
+
+记四边形$ABCD$的面积为 $S_1$, 四边形$EBCD$的面积为 $S_2$. 则
+\begin{align*}
+S_1 &= S_{\triangle ABD} + S_{\triangle BCD}\\
+&= \frac{1}{2} BD \cdot AF \sin\angle AFD + \frac{1}{2} BD \cdot CF \sin\angle BFC\\
+&= \frac{1}{2} BD\cdot AC \sin\angle AFD \\
+&= \frac{1}{2} BD\cdot AC \sin\angle EDC \\
+S_2 &= S_{\triangle EBC} + S_{\triangle EDC}\\
+&= \frac{1}{2} EB \cdot BC \sin\angle EBC + \frac{1}{2} ED \cdot CD \sin\angle EDC
+\end{align*}
+因为 $\angle EBC$ 与 $\angle EDC$ 互补, 所以 $\sin\angle EBC = \sin\angle EDC$; 再由 $EB=AD$, $ED=AB$, 代入 $S_2$表达式得到:
+\[ S_2 = \frac{1}{2}(AD\cdot BC + AB\cdot CD)\sin\angle EDC .\]
+
+另一方面, $S_1 = S_{\triangle ABD} + S_{\triangle BCD} = S_{\triangle EBD} + S_{\triangle BCD} = S_2$, 所以 $AD\cdot BC + AB\cdot CD = AC\cdot BD$.
+
+~
+
+证法6: (无字证明)
+\begin{figure*}[htbp]
+\centering
+\begin{minipage}[t]{0.4\linewidth}
+\begin{tikzpicture}[scale=1.0]
+\coordinate[] (O) at (0,0);
+\coordinate[label=left:$A$] (A) at (-1.91,-0.6);
+\coordinate[label=above:$B$] (B) at (-0.62,1.9);
+\coordinate[label=right:$C$] (C) at (1.91,-0.6);
+\coordinate[label=below:$D$] (D) at (0,-2);
+\draw [line width=1pt] (O) circle (2cm);
+\draw [line width=1pt] (A) -- (B) node [midway,above,sloped] {$a$};
+\draw [line width=1pt] (B) -- (C) node [midway,above,sloped] {$b$};
+\draw [line width=1pt] (C) -- (D) node [midway,above,sloped] {$c$};
+\draw [line width=1pt] (D) -- (A) node [midway,above,sloped] {$d$};
+\draw [line width=1pt] (A) -- (C) node [near start,above,sloped] {$e$};
+\draw [line width=1pt] (B) -- (D) node [midway,below,sloped] {$f$};
+\foreach \p in {A,B,C,D}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\draw pic["$\beta$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.35cm] {angle=C--A--B};
+\draw pic["$\beta$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.35cm] {angle=C--D--B};
+\draw pic["$\delta$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.35cm] {angle=A--B--D};
+\draw pic["$\delta$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.35cm] {angle=A--C--D};
+\draw pic["$\alpha$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.5cm] {angle=B--D--A};
+\draw pic["$\alpha$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.5cm] {angle=B--C--A};
+\draw pic["$\gamma$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.5cm] {angle=D--B--C};
+\draw pic["$\gamma$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.5cm] {angle=D--A--C};
+\node at (0,-3.0) {$\alpha+\beta+\gamma+\delta=\pi$};
+\end{tikzpicture}
+\end{minipage}
+\begin{minipage}[t]{0.5\linewidth}
+\begin{tikzpicture}[scale=1.35]
+\coordinate[] (A) at (0,0);
+\coordinate[] (B) at (4,0);
+\coordinate[] (C) at (3.57,2.63);
+\coordinate[] (D) at (-0.43,2.63);
+\coordinate[] (E) at (1.35,2.63);
+\draw [line width=1pt] (A) -- (B) node [midway,below,sloped] {$e\cdot f$};
+\draw [line width=1pt] (B) to[edge label'=$a\cdot b$] (C);
+\draw [line width=1pt] (C) -- (E) node [midway,above,sloped] {$b\cdot d$};
+\draw [line width=1pt] (E) -- (D) node [midway,above,sloped] {$a\cdot c$};
+\draw [line width=1pt] (D) to[edge label'=$a\cdot b$] (A);
+\draw [line width=1pt] (A) to[edge label'=$a\cdot f$] (E);
+\draw [line width=1pt] (E) to[edge label'=$b\cdot f$] (B);
+\foreach \p in {A,B,C,D,E}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\draw pic["$\alpha+\delta$",draw,line width=1pt, angle eccentricity=2.2, angle radius=0.35cm] {angle=A--D--E};
+\draw pic["$\beta$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.35cm] {angle=D--E--A};
+\draw pic["$\gamma$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.35cm] {angle=E--A--D};
+\draw pic["$\beta$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.45cm] {angle=B--A--E};
+\draw pic["$\gamma+\delta$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.45cm] {angle=A--E--B};
+\draw pic["$\alpha$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.45cm] {angle=E--B--A};
+\draw pic["$\alpha$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.35cm] {angle=B--E--C};
+\draw pic["$\delta$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.35cm] {angle=C--B--E};
+\draw pic["$\beta+\gamma$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.35cm] {angle=E--C--B};
+\node at (2,-1.0) {$a\cdot c+b\cdot d=e\cdot f$};
+\end{tikzpicture}
+\end{minipage}
+\end{figure*}
+
+~
+
+证法7: (复数法)
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.0]
+\coordinate[] (O) at (0,0);
+\coordinate[label=left:$A$] (A) at (-1.91,-0.6);
+\coordinate[label=above:$D$] (D) at (-0.62,1.9);
+\coordinate[label=right:$C$] (C) at (1.91,-0.6);
+\coordinate[label=below:$B$] (B) at (0,-2);
+\draw [line width=1pt] (O) circle (2cm);
+\draw [line width=1pt] (A) -- (B) -- (C) -- (D) -- cycle;
+\draw [line width=1pt] (A) -- (C);
+\draw [line width=1pt] (B) -- (D);
+\foreach \p in {A,B,C,D}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+\end{figure*}
+
+用 $a,b,c,d$ 分别表示 $A,B,C,D$ 的复数. 则
+\begin{align*}
+%overrightarrow
+\vec{AB} &= b-a, \qquad \vec{AD} = d-a, \qquad \vec{AC} = c-a, \\
+\vec{CD} &= d-c, \qquad \vec{BC} = c-b, \qquad \vec{BD} = d-b. 
+\end{align*}
+考虑到 
+\begin{align*}
+\angle DAB &= \arg\vec{AD}-\arg\vec{AB}\\
+ &= \arg(d-a) - \arg(b-a)\\
+\angle DCB &= 2\pi - (\arg\vec{CD} - \arg\vec{CB})\\
+&= \arg(b-c)-\arg(d-c) + 2\pi
+\end{align*}
+由 $\angle DAB + \angle DCB = \pi$, 将上两式相加得:
+\[\arg(d-a) - \arg(b-a) + \arg(b-c)-\arg(d-c) + \pi = 0\]
+移项并注意到对于任意复数 $z$, $\arg(z)\pm\pi = \arg(-z)$, 得:
+\[\arg(d-a) + \arg(c-b) = \arg(b-a) + \arg(d-c) \]
+由辐角公式推出:
+\[\arg[(d-a)(c-b)] = \arg[(b-a)(d-c)].\]
+这表明两个复数$(d-a)(c-b)$和$(b-a)(d-c)$共线且同向, 于是模长之和等于和的模长:
+\begin{align*}
+|(b-a)(d-c)| + |(d-a)(c-b)| &= |(b-a)(d-c)+(d-a)(c-b)|\\
+&= |(c-a)(d-b)|
+\end{align*}
+复数模长的乘积等于乘积的模长, 上面的等式就是
+\[|\vec{AB}|\cdot|\vec{CD}| + |\vec{AD}|\cdot|\vec{BC}| = |\vec{AC}|\cdot|\vec{BD}|\]
+
+~
+
+证法8: (反演变换)
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.0]
+\coordinate[] (O) at (0,0);
+\coordinate[label=left:$A$] (A) at (-1.417,-1.411);
+\coordinate[label=above left:$B$] (B) at (-0.635,1.897);
+\coordinate[label=below right:$C$] (C) at (1.995,-0.138);
+\coordinate[label=below right:$D$] (D) at (1.505,-1.317);
+\coordinate[label=above:$B'$] (BB) at (-0.223,3.64);
+\coordinate[label=right:$C'$] (CC) at (3.12, 0.282);
+\coordinate[label=right:$D'$] (DD) at (4.613, -1.217);
+\coordinate[label=below:$K$] (K) at (1.417,1.411);
+\draw [line width=1pt] (O) circle (2cm);
+\draw [line width=1pt] (A) -- (B) -- (C) -- (D) -- cycle;
+\draw [line width=1pt] (A) -- (C);
+\draw [line width=1pt] (B) -- (D);
+\draw [dashed,line width=1pt] (B) -- (BB);
+\draw [dashed,line width=1pt] (C) -- (CC);
+\draw [dashed,line width=1pt] (D) -- (DD);
+\draw [dashed,line width=1pt] (BB) -- (DD);
+\draw [dashed,line width=1pt] (B) -- (K) -- (A);
+\foreach \p in {A,B,C,D,BB,CC,DD,K}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+\end{figure*}
+
+对 $B,C,D$ 三点作反演变换, 反演的圆心为点 $A$, 半径为 1, 变换后得到的点为 $B', C', D'$. 则:
+\[ AB\cdot AB'=AC\cdot AC'=AD\cdot AD'=1 \].
+由余弦定理:
+\begin{align*}
+C'D' &= \sqrt{AC'^2 + AD'^2 - 2AC'\cdot AD'\cos\angle CAD}\\
+&= \sqrt{AC^2 + AD^2-2AC\cdot AD\cos\angle CAD}\cdot\left(\frac{1}{AC}\cdot\frac{1}{AD}\right)\\
+&= \frac{CD}{AC\cdot AD} .
+\end{align*}
+同理可得: \[B'C' = \dfrac{BC}{AB\cdot AC}, B'D'=\dfrac{BD}{AB\cdot AD} .\]
+因为 $A,B,C,D$ 共圆, 所以 $B',C',D'$共线, 于是有: $B'C'+C'D'=B'D'$, 即:
+\[\frac{BC}{AB\cdot AC}+\frac{CD}{AC\cdot AD} = \frac{BD}{AB\cdot AD}.\]
+两边都乘以 $AB\cdot AC\cdot AD$ 得: $BC\cdot AD+ AB\cdot CD = BD\cdot AC$.
+
+~
+
+补充: 类似的思路, 但不需要用反演的性质, 可以用向量的方法, 在 $AB, AC, AD$的延长线上分别取  $B',C',D'$, 满足 $\vec{AB}\cdot\vec{AB'}=\vec{AC}\cdot\vec{AC'}=\vec{AD}\cdot\vec{AD'}=1$. 下面证明 $B',C',D'$ 共线. 
+
+设 $AK$ 是圆 $ABCD$ 的直径, 则$AB\perp BK$, 向量 $\vec{AK}$ 在 $AB$ 上的投影就是 $\vec{AB}$, 故 $\vec{AK}\cdot\vec{AB'}=1$. 同理也有 $\vec{AK}\cdot\vec{AC'}=\vec{AK}\cdot\vec{AD'}=1$. 于是有 $\vec{AK}\cdot(\vec{AC'}-\vec{AB'}) = \vec{AK}\cdot\vec{B'C'} = 0$ 和 $\vec{AK}\cdot(\vec{AD'}-\vec{AC'}) = \vec{AK}\cdot\vec{C'D'} = 0$, 说明 $\vec{B'C'}, \vec{C'D'}$ 都垂直于 $\vec{AK}$, 所以 $B'C'D'$ 共线. 
+
+剩余部分用反演法中的余弦定理往下推导即可.
+
+~
+
+证法9: (向量法)
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.0]
+\coordinate[] (O) at (0,0);
+\coordinate[label=left:$A$] (A) at (-1.416,-1.412);
+\coordinate[label=below:$B$] (B) at (1.413,-1.415);
+\coordinate[label=above:$C$] (C) at (1.814,0.842);
+\coordinate[label=above left:$D$] (D) at (-0.955,1.757);
+\coordinate[label=right:$B'$] (BB) at (3.802,-1.418);
+\coordinate[label=above right:$C'$] (CC) at (4.393, 2.642);
+\coordinate[label=above:$D'$] (DD) at (-0.825, 2.647);
+\coordinate[label=above:$K$] (K) at (1.416,1.412);
+\draw [line width=1pt] (O) circle (2cm);
+\draw [line width=1pt] (A) -- (B) -- (C) -- (D) -- cycle;
+\draw [line width=1pt] (A) -- (C);
+\draw [line width=1pt] (B) -- (D);
+\draw [dashed,line width=1pt] (B) -- (BB);
+\draw [dashed,line width=1pt] (C) -- (CC);
+\draw [dashed,line width=1pt] (D) -- (DD);
+\draw [dashed,line width=1pt] (BB) -- (CC) -- (DD);
+\draw [dashed,line width=1pt] (A) -- (K);
+\foreach \p in {A,B,C,D,BB,CC,DD,K}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+\end{figure*}
+
+在 $AB, AC, CD$ 上各取一点 $B',C',D'$, 使得$AB'C'D'$是平行四边形. 由 $\angle C'AB' = \angle CDB$ 和 $\angle AC'B' = \angle C'AD = \angle DBC$, 得 $\triangle C'AB'\sim\triangle BDC$, 所以
+\[\frac{|\vec{BD}|}{|\vec{AC'}|} = \frac{|\vec{CD}|}{|\vec{AB'}|} = \frac{|\vec{BC}|}{|\vec{B'C'}|} \qquad\cdots\qquad \textcircled{1}.\]
+
+设 $AK$ 是圆的直径, 所以$\vec{AK}$ 在$AB,AC,AD$上的投影分别是$\vec{AB},\vec{AC},\vec{AD}$, 于是
+\begin{align*}
+\vec{AC}\cdot\vec{AC'} &= \vec{AF}\cdot\vec{AC'} = \vec{AK}\cdot(\vec{AB'}+\vec{AD'})\\
+&= \vec{AK}\cdot\vec{AB'}+\vec{AK}\cdot\vec{AD'}\\
+&= \vec{AB}\cdot\vec{AB'}+\vec{AD}\cdot\vec{AD'}
+\end{align*}
+即: \[|\vec{AC}|\cdot|\vec{AC'}| = |\vec{AB}|\cdot|\vec{AB'}| + |\vec{AD}|\cdot|\vec{AD'}| .\]
+上式乘以$\textcircled{1}$式得: 
+\[|\vec{AC}|\cdot|\vec{AC'}|\cdot\frac{|\vec{BD}|}{|\vec{AC'}|} = |\vec{AB}|\cdot|\vec{AB'}|\cdot\frac{|\vec{CD}|}{|\vec{AB'}|} + |\vec{AD}|\cdot|\vec{AD'}|\cdot\frac{|\vec{BC}|}{|\vec{B'C'}|} .\]
+注意到 $\vec{B'C'}=\vec{AD'}$, 所以 $|\vec{AC}|\cdot|\vec{BD}| = |\vec{AB}|\cdot|\vec{CD}|+|\vec{AD}|\cdot|\vec{BC}|$.
+
+~
+
+证法10: (坐标解析法, 本质是正弦定理)
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.0]
+\tikzstyle{axes}=[line width=1pt]
+\coordinate[] (O) at (0,0);
+\coordinate[label=above:$A$] (A) at (1.814,0.842);
+\coordinate[label=above left:$B$] (B) at (-0.955,1.757);
+\coordinate[label=left:$C$] (C) at (-1.416,-1.412);
+\coordinate[label=below:$D$] (D) at (1.413,-1.415);
+\draw [line width=1pt] (O) circle (2cm);
+\draw [line width=1pt] (A) -- (B) -- (C) -- (D) -- cycle;
+\draw [line width=1pt] (A) -- (C);
+\draw [line width=1pt] (B) -- (D);
+\begin{scope}[style=axes]
+    \draw[->] (-3,0) -- (3,0) node[right] {$x$};
+    \draw[->] (0,-3) -- (0,3) node[above] {$y$};
+\end{scope}
+\foreach \p in {A,B,C,D,O}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+\end{figure*}
+
+设圆的半径为1, $A,B,C,D$ 四点的坐标分别是 $A=(\cos\alpha,\sin\alpha)$, $B=(\cos\beta,\sin\beta)$, $C=(\cos\gamma,\sin\gamma)$, $D=(\cos\delta,\sin\delta)$, 其中 $\alpha<\beta<\gamma<\delta$. 由正弦定理可得: 
+\begin{align*}
+|AB| &= 2\sin(\frac{\beta-\alpha}{2}),\qquad |CD| = 2\sin(\frac{\delta-\gamma}{2}), \\
+|AD| &= 2\sin(\frac{\delta-\alpha}{2}), \qquad |BC| = 2\sin(\frac{\gamma-\beta}{2}),\\
+|AC| &= 2\sin(\frac{\gamma-\alpha}{2}), \qquad |BD| = 2\sin(\frac{\delta-\beta}{2}).
+\end{align*}
+进而:
+\begin{align*}
+&|AB|\cdot|CD|+|AD|\cdot|BC| \\
+=& 4\sin(\frac{\beta-\alpha}{2})\sin(\frac{\delta-\gamma}{2}) + 4\sin(\frac{\delta-\alpha}{2})\sin(\frac{\gamma-\beta}{2}) \\
+=& 2\cos(\frac{\beta-\alpha-\delta+\gamma}{2}) - 2\cos(\frac{\delta-\alpha+\gamma-\beta}{2})\\
+=&4\sin(\frac{\gamma-\alpha}{2})\sin(\frac{\delta-\beta}{2})\\
+=&|AC|\cdot|BD|
+\end{align*}
+
+~
+
+证法11: (反演变换2.0)
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.0]
+\coordinate[] (O) at (0,0);
+\coordinate[label=left:$A$] (A) at (-1.789,0.894);
+\coordinate[label=above left:$B$] (B) at (-0.935,1.768);
+\coordinate[label=above right:$C$] (C) at (0.635,1.897);
+\coordinate[label=right:$D$] (D) at (1.914,0.58);
+\coordinate[label=above:$A'$] (AA) at (-3.129,3.063);
+\coordinate[label=above:$B'$] (BB) at (-1.257,3.063);
+\coordinate[label=above right:$C'$] (CC) at (0.825, 3.063);
+\coordinate[label=above:$D'$] (DD) at (3.756, 3.063);
+\coordinate[label=below:$P$] (P) at (0, -2);
+\draw [line width=1pt] (O) circle (2cm);
+\draw [line width=1pt] (A) -- (B) -- (C) -- (D) -- cycle;
+\draw [line width=1pt] (A) -- (C);
+\draw [line width=1pt] (B) -- (D);
+\draw [dashed,line width=1pt] (B) -- (P) -- (A);
+\draw [dashed,line width=1pt] (D) -- (P) -- (C);
+\draw [dashed,line width=1pt] (A) -- (AA);
+\draw [dashed,line width=1pt] (B) -- (BB);
+\draw [dashed,line width=1pt] (C) -- (CC);
+\draw [dashed,line width=1pt] (D) -- (DD);
+\draw [dashed,line width=1pt] (AA) -- (BB) -- (CC) -- (DD);
+\foreach \p in {A,B,C,D,AA,BB,CC,DD,P}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+\end{figure*}
+
+在圆上取不同于 $A,B,C,D$ 的一点 $P$, 对$A,B,C,D$分别作反演变换, 反演中心为 $P$, 半径为 1. 则
+\[ PA\cdot PA'=PB\cdot PB'=PC\cdot PC'=PD\cdot PD'=1 .\]
+考虑 $\triangle PAB$ 和 $\triangle PB'A'$, 因为 $PA:PB = PB':PA'$, 再加上一个公共角 $\angle A'PB'=\angle BPA$, 所以 $\triangle PAB \sim \triangle PB'A'$, 故 $A'B':BA = PA':PB$, 于是
+\[ A'B' = \frac{AB\cdot PA'}{PB} = \frac{AB}{PA\cdot PB} .\]
+同理还有
+\begin{align*}
+A'C' &= \frac{AC}{PA\cdot PC}, \qquad A'D' = \frac{AD}{PA\cdot PD}, \qquad B'C' = \frac{BC}{PB\cdot PC}\\
+C'D' &= \frac{CD}{PC\cdot PD}, \qquad B'D' = \frac{BD}{PB\cdot PD} .
+\end{align*}
+由反演性质知$A',B',C',D'$共线, 所以
+\begin{align*}
+A'C'\cdot B'D' &= (A'B'+B'C')\cdot(B'C'+C'D')\\
+&=A'B'\cdot C'D'+B'C'\cdot(A'B'+B'C'+C'D')\\
+&=A'B'\cdot C'D'+B'C'\cdot A'D'
+\end{align*}
+将上面各式代入后, 并约去分母, 得到: $AC\cdot BD = AB\cdot CD+BC\cdot AD$.
+
+~
+
+证法12: (余弦定理)
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.0]
+\coordinate[] (O) at (0,0);
+\coordinate[label=right:$A$] (A) at (1.595,1.207);
+\coordinate[label=above left:$B$] (B) at (-0.794,1.836);
+\coordinate[label=left:$C$] (C) at (-1.869,-0.711);
+\coordinate[label=below right:$D$] (D) at (1.789,-0.894);
+\coordinate[label=below:$P$] (P) at (0.417,0.555);
+\draw [line width=1pt] (O) circle (2cm);
+\draw [line width=1pt] (A) -- (B) -- (C) -- (D) -- cycle;
+\draw [line width=1pt] (A) -- (P) node [midway,above,sloped] {$x$};
+\draw [line width=1pt] (P) -- (C) node [midway,below,sloped] {$K/x$};
+\draw [line width=1pt] (B) -- (P) node [midway,below,sloped] {$K/y$};
+\draw [line width=1pt] (P) -- (D)  node [midway,below,sloped] {$y$};
+\foreach \p in {A,B,C,D,P}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\draw pic["$\alpha$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.35cm] {angle=D--P--A};
+\end{tikzpicture}
+\end{figure*}
+
+设 $AC, BD$ 交于 $P$ 点, $\angle APD = \alpha$. 设 $PA=x, PD=y$, 由圆幂定理得
+\[PA\cdot PC = PB\cdot PD = K, \]
+于是 $PB = \dfrac{K}{y}, PC = \dfrac{K}{x}$. 由余弦定理:
+\begin{align*}
+AD &= \sqrt{x^2+y^2-2xy\cdot\cos\alpha}\\
+BC &= \frac{K}{xy}\sqrt{x^2+y^2-2xy\cdot\cos\alpha}\\
+AB &= \sqrt{x^2+\frac{K^2}{y^2}+2x\cdot\frac{K}{y}\cdot\cos\alpha}\\
+CD &= \frac{y}{x}\sqrt{x^2+\frac{K^2}{y^2}+2x\cdot\frac{K}{y}\cdot\cos\alpha}\\
+AC&= x + \frac{K}{x} , \qquad BD = y + \frac{K}{y}
+\end{align*}
+进而:
+\begin{align*}
+AB\cdot CD &= \frac{y}{x}(x^2+\frac{K^2}{y^2}+2x\cdot\frac{K}{y}\cdot\cos\alpha) = xy+\frac{K^2}{xy}+2K\cdot\cos\alpha\\
+AD\cdot BC &= \frac{K}{xy}(x^2+y^2-2xy\cdot\cos\alpha) = \frac{Kx}{y} + \frac{Ky}{x}-2K\cdot\cos\alpha \\
+AB\cdot CD + AD\cdot BC &= K\cdot\frac{x}{y} + K\cdot\frac{y}{x} + xy + \frac{K^2}{xy}\\
+&= (x+\frac{K}{x})(y+\frac{K}{y})\\
+&= AC\cdot BD
+\end{align*}
+
+~
+
+证法13: (函数求导)
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.0]
+\coordinate[] (O) at (0,0);
+\coordinate[label=right:$A$] (A) at (1.741,0.984);
+\coordinate[label=above left:$B$] (B) at (-0.894,1.789);
+\coordinate[label=left:$C$] (C) at (-1.917,-0.57);
+\coordinate[label=below right:$D$] (D) at (1.621,-1.172);
+\coordinate[label=above:$E$] (E) at (0.599,1.333);
+\coordinate[label=left:$F$] (F) at (-1.22,1.037);
+\coordinate[label=below:$G$] (G) at (0.088,-0.911);
+\coordinate[label=right:$H$] (H) at (1.703,0.297);
+\coordinate[label=right:$P$] (P) at (0.307,0.375);
+\draw [line width=1pt] (O) circle (2cm);
+\draw [line width=1pt] (A) -- (B) -- (C) -- (D) -- cycle;
+\draw [line width=1pt] (A) -- (C);
+\draw [line width=1pt] (B) -- (D);
+\draw [dashed,line width=1pt] (P) -- (E) -- (F) -- cycle;
+\foreach \p in {A,B,C,D,E,F,G,H,P}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\draw pic["$\alpha$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.35cm] {angle=C--P--D};
+\tkzMarkRightAngle[line width=1pt](P,E,A);
+\tkzMarkRightAngle[line width=1pt](P,F,C);
+\end{tikzpicture}
+\end{figure*}
+
+设 $AC, BD$ 的交点为 $P$, 固定 $PA,PB,PC,PD$ 的长度, $AC$ 不动, $BD$ 绕着 $P$ 点旋转, 因为恒有 $PA\cdot PC = PB\cdot PD$, 所以 $A,B,C,D$ 四点总是共圆的. 过 $P$ 点作 $AB,BC,CD,DA$ 的垂线, 垂足分别为 $E,F,G,H$.
+
+设 $\angle APB = \alpha$, 则四条边 $AB,BC,CD,DA$ 的长度各自是 $\alpha$ 的一元函数. 例如
+\[ AB^2 = PA^2 + PB^2 - 2PA\cdot PB\cdot\cos\alpha .\]
+两边对 $\alpha$ 求导:
+\[2AB\cdot AB'(\alpha) = 2PA\cdot PB\sin\alpha ,\]
+即 $AB'(\alpha) = \dfrac{PA\cdot PB\sin\alpha}{AB}$, 说明 $AB'(\alpha)$ 等于 $P$ 到 $AB$ 的距离, 即 $AB'(\alpha) = PE$. 
+
+同理, $CD'(\alpha)=PG$. $PB$与$PC$的夹角为 $\pi-\alpha$, 容易得到 $BC'(\alpha)=-PF, AD'(\alpha)=PH$.
+最后, $AC$ 和 $BD$ 的长度不随 $\alpha$ 变化, 所以 $AC'(\alpha)=BD'(\alpha)=0$.
+
+令 $f(\alpha) = AB\cdot CD + AD\cdot BC - AC\cdot BD$, 则
+\begin{align*} f' &= AB'\cdot CD +AB\cdot CD'+ AD'\cdot BC +AD\cdot BC' - AC'\cdot BD-AC\cdot BD'\\
+&= PE\cdot CD + AB\cdot PG - PH\cdot BC - AD\cdot PF
+\end{align*}
+由 $\triangle ABP \sim \triangle DCP$, 得 $PE:PG = AB:CD$, 即 $PE\cdot CD = PG\cdot AB$. 同理由 $\triangle BCP \sim \triangle ADP$, 可得 $PF\cdot AD = PH\cdot BC$. 于是
+\[ f' = 2(PE\cdot CD - PF\cdot AD) .\]
+考虑四边形 $PEBF$, 因为有一组对角都是直角, 所以 $P,E,B,F$ 四点共圆, 由 $\angle EFP = \angle ADB = \angle ACD$, 以及 $\angle FEP = \angle CBD = \angle CAD$, 推出 $\triangle EFP\sim\triangle ACD$, 于是 $PE\cdot CD = PF\cdot AD$. 这说明 $f'(\alpha) = 0$, 所以 $f(\alpha)$ 不随 $\alpha$ 变化.
+
+特别地, 取 $\alpha = 0$, 则 $A,B,C,D$ 共线, 沿着$C$到 $A$ 方向上四个点经过的顺序依次是 $C,D,A,B$, 所以
+\begin{align*}
+f(0) &= AB\cdot CD + AD\cdot BC - AC\cdot BD\\
+&= AB\cdot CD + AD\cdot(CD+AD+AB) - (CD+AD)\cdot(AD+AB)
+&=0
+\end{align*}
+这就证明了 $AB\cdot CD + AD\cdot BC = AC\cdot BD$.
+
+~
+
+证法14: (面积法 2.0)
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.0]
+\coordinate[] (O) at (0,0);
+\coordinate[label=right:$A$] (A) at (2,0);
+\coordinate[label=below right:$B$] (B) at (1.643,-1.14);
+\coordinate[label=below left:$C$] (C) at (-1.347,-1.478);
+\coordinate[label=above left:$D$] (D) at (-1.072,1.688);
+\coordinate[label=left:$E$] (E) at (-1.949,-0.447);
+\coordinate[label=below right:$P$] (P) at (3.659,-0.912);
+\draw [line width=1pt] (O) circle (2cm);
+\draw [line width=1pt] (A) -- (B) -- (C) -- (D) -- cycle;
+\draw [line width=1pt] (A) -- (C);
+\draw [line width=1pt] (B) -- (D);
+\draw [dashed,line width=1pt] (A) -- (E) -- (C);
+\draw [dashed,line width=1pt] (A) -- (P) -- (B);
+\draw [dashed,line width=1pt] (D) -- (E) -- (B);
+\foreach \p in {A,B,C,D,E,P}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\draw pic["$\alpha$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.35cm] {angle=A--P--B};
+\draw pic["$\alpha$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.35cm] {angle=D--A--E};
+\draw pic[draw,line width=1pt, angle eccentricity=2.0, angle radius=0.35cm] {angle=D--B--E};
+\draw pic[draw,line width=1pt, angle eccentricity=2.0, angle radius=0.35cm] {angle=D--C--E};
+\end{tikzpicture}
+\end{figure*}
+
+过 $A$ 作 $AE$ 平行于 $BC$, 交圆于 $E$ 点, 连接 $BE, CE, DE$, 设 $BC$ 与 $AD$ 交于 $P$ 点, $\angle APB  = \alpha$. 
+
+四边形 $ABCE$ 为等腰梯形, $AB= EC, AC=EB$.
+
+%------------------------------------------------------------------------------%
+\newpage
+圆幂, 根轴, 根心, 蒙日定理
+
+圆幂定理: 过一定点 $P$ 作任意直线, 与半径为 $R$ 的圆 $O$ 交于两点$A,B$, 则 $PA$ 与 $PB$ 长度的乘积是定值, 恒为 $|OP^2 - R^2|$, 而 $OP^2 - R^2$ 称为点 $P$ 对于圆 $O$ 的圆幂, 圆内的点的幂为负数，圆外的点的幂为正数，圆上的点的幂为零. 
+
+圆幂定理是对相交弦定理, 切割线定理及割线定理的总结. 
+
+\begin{figure*}[htbp]
+\centering
+\begin{minipage}[t]{0.4\linewidth}
+\begin{tikzpicture}[scale=1]
+\coordinate[label=$O$] (O) at (0,0);
+\coordinate[label=$A$] (A) at (0.47,1.94);
+\coordinate[label=$C$] (C) at (-1.38,1.44);
+\coordinate[label=below:$B$] (B) at (0.98,-1.74);
+\coordinate[label=right:$D$] (D) at (2,0);
+\coordinate[label=above right:$P$] (P) at (0.66,0.58);
+\coordinate[] (E) at (1.5,1.32);
+\coordinate[] (F) at (-1.5,-1.32);
+\draw [line width=1pt] (O) circle (2cm);
+\draw [line width=1pt] (A) to (B);
+\draw [line width=1pt] (C) to (D);
+\foreach \p in {O,A,B,C,D,P}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+\end{minipage}
+\begin{minipage}[t]{0.4\linewidth}
+\begin{tikzpicture}[scale=1]
+\coordinate[label=$O$] (O) at (0,0);
+\coordinate[label=$C$] (C) at (-0.39,1.96);
+\coordinate[label=$P$] (P) at (-3.04,1.44);
+\coordinate[label=right:$A$] (A) at (-1.9,0.62);
+\coordinate[label=right:$B$] (B) at (1.18,-1.62);
+\draw [line width=1pt] (O) circle (2cm);
+\draw [line width=1pt] (P) to (C);
+\draw [line width=1pt] (P) to (B);
+\draw [dashed,line width=1pt] (A) -- (C) -- (B);
+\foreach \p in {O,A,B,C,P}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+\end{minipage}
+\end{figure*}
+
+相交弦定理: 过圆 $O$ 内一点 $P$ 作圆的两个弦 $AB$ 和 $CD$, 则 $PA\cdot PB = PC\cdot PD = (R-OP)(R+OP)$.
+
+切割线定理: 过圆 $O$ 外一点 $P$ 作圆的切线和割线, 割线交圆于 $A,B$ 两点, 而切线的切点为 $C$, 则 $PC^2=PA\cdot PB$.
+
+割线定理: 过圆 $O$ 外一点 $P$ 作圆的两条割线$AB$和$CD$, 则 $PA\cdot PB = PC\cdot PD$. 它们都等于过$P$点的切线长的平方.
+
+根轴: 到固定两圆的圆幂相等的点组成的直线为这两圆的根轴, 这条根轴垂直于连心线.
+\begin{figure*}[htbp]
+\centering
+\begin{minipage}[t]{0.45\linewidth}
+\begin{tikzpicture}[scale=0.8]
+\coordinate[label=below:$A$] (A) at (0.0,0.0);
+\coordinate[label=below:$B$] (B) at (4.0,0.0);
+\coordinate[label=below right:$C$] (C) at (2.375,0);
+\coordinate[label=right:$D$] (D) at (2.375,1.9);
+\coordinate[] (E) at (2.375,3);
+\coordinate[] (F) at (2.375,-3);
+\draw [line width=1pt] (A) circle (2cm);
+\draw [line width=1pt] (B) circle (1cm);
+\draw [line width=1pt] (A) to (B);
+\draw [line width=1pt] (E) to (F);
+\draw [line width=1pt] (A) -- (D) -- (B);
+\foreach \p in {A,B,C,D}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+\end{minipage}
+\begin{minipage}[t]{0.45\linewidth}
+\begin{tikzpicture}[scale=0.75]
+\coordinate[label=below:$A$] (A) at (0.0,0.0);
+\coordinate[label=below:$B$] (B) at (4.0,0.0);
+\coordinate[label=below right:$C$] (C) at (2.63,0);
+\coordinate[label=right:$D$] (D) at (2.63,1.45);
+\coordinate[] (E) at (2.63,3.2);
+\coordinate[] (F) at (2.63,-3.2);
+\draw [line width=1pt] (A) circle (3cm);
+\draw [line width=1pt] (B) circle (2cm);
+\draw [line width=1pt] (A) to (B);
+\draw [line width=1pt] (E) to (F);
+\draw [line width=1pt] (A) -- (D) -- (B);
+\foreach \p in {A,B,C,D}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+\end{minipage}
+\end{figure*}
+
+如上图, 两圆 $A,B$ 的半径分别是 $R$ 和 $r$, 连心线 $AB$ 上的点 $C$ 满足 $AC^2-R^2=BC^2-r^2$, $CD \perp AB$. 
+当两圆不相交时, 有
+\[ AD^2 - R^2 = AC^2+CD^2 - R^2 = BC^2 + CD^2 - r^2 = BD^2 - r^2 .\]
+当两圆相交, 根轴是它们的公共弦, 而两圆相切时, 根轴是公切线, 这两种情况下上式也是成立的.
+注意只要两圆圆心不重合, 不管位置如何, 根轴总是存在的.
+
+蒙日定理: 三个两两不同心的圆，形成三条根轴，则必有下列三种情况之一:
+(1)三根轴两两平行; 
+(2)三根轴完全重合;
+(3)三根轴两两相交，此时三根轴必汇于一点，该点称为三圆的根心.
+
+证明思路如下: 前两种情况对应三个圆心共线的情形, 当三个圆心不共线时, 假设三个圆心分别是 $A,B,C$, 并且 $A,B$ 的根轴为 $l_1$, $A,C$的根轴为 $l_2$, $l_1$ 与 $l_2$ 相交于点 $P$, 于是 $P$ 点到圆 $A$, 圆 $B$, 圆 $C$ 的圆幂都相等, 说明 $P$ 也位于圆 $A$ 和圆 $C$ 的根轴上.
+
+当两圆 $A,B$ 相离时, 利用根心可以找到它们的根轴. 只要任意作一个圆$C$, 与圆 $A$ 和 $B$ 分别相交, $C$ 不在直线 $AB$ 上, 两个公共弦(或其延长线)相交于点 $P$, 过 $P$ 点作 $AB$ 的垂线就得到了圆 $A$ 和圆 $B$ 的根轴.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.5]
+\coordinate[label=below:$A$] (A) at (0.0,0.0);
+\coordinate[label=below right:$B$] (B) at (4.0,0.0);
+\coordinate[label=below:$C$] (C) at (2.8,0.8);
+\coordinate[label=right:$D$] (D) at (1.43,1.4);
+\coordinate[label=above right:$E$] (E) at (1.95,-0.44);
+\coordinate[label=above right:$F$] (F) at (4.26,0.96);
+\coordinate[label=below:$G$] (G) at (3.23,-0.64);
+\coordinate[label=above right:$H$] (H) at (2.38,0);
+\coordinate[] (M) at (2.38,3);
+\coordinate[] (N) at (2.38,-3);
+\coordinate[label=right:$P$] (P) at (2.38,-1.92);
+\draw [line width=1pt] (A) circle (2cm);
+\draw [line width=1pt] (B) circle (1cm);
+\draw [line width=1pt] (C) circle (1.5cm);
+\draw [line width=1pt] (A) to (B);
+\draw [line width=1pt] (D) to (P);
+\draw [line width=1pt] (F) to (P);
+\draw [dashed,line width=1pt] (M) to (N);
+\foreach \p in {A,B,C,D,E,F,G,P}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+\end{figure*}
+
+%------------------------------------------------------------------------------%
+\newpage
+
+等差幂线: 直线 $AB$ 垂直于 $CD$ 的充要条件是 $AC^2 - AD^2 = BC^2 - BD^2$.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.5]
+\coordinate[label=below:$A$] (A) at (0.0,0.0);
+\coordinate[label=right:$B$] (B) at (3.0,0.0);
+\coordinate[label=above:$C$] (C) at (2,2);
+\coordinate[label=below:$D$] (D) at (2,-1);
+\coordinate[label=above right:$P$] (P) at (2,0);
+\draw [line width=1pt] (A) to (B);
+\draw [line width=1pt] (C) to (D);
+\draw [line width=1pt] (A) -- (C) -- (B) -- (D) -- cycle;
+\foreach \p in {A,B,C,D,P}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+\end{figure*}
+
+充分性可以由勾股定理直接得到:
+\begin{align*}
+AC^2 - AD^2 &= (AP^2 + CP^2) - (AP^2 + DP^2) \\
+ &=  CP^2 -  DP^2\\
+ &= (BP^2 + CP^2) - (BP^2 + DP^2) \\
+ &= BC^2 - BD^2.
+\end{align*}
+
+必要性, 已知 $AC^2 - AD^2 = BC^2 - BD^2$, 变形为 $AC^2 - BC^2 = AD^2 - BD^2$. 不失一般性, 可以设 $AC > BC$, 过 $B$ 作一个圆, 半径为 $r$, 过 $A$ 作一个圆, 半径为 $R = \sqrt{AC^2 - (BC^2-r^2)}$, 于是 $C$ 到圆 $A$ 的圆幂是 
+\[ AC^2 - R^2 = BC^2 - r^2 ,\]
+刚好等于$C$ 到圆 $B$ 的圆幂. 
+另一方面, 因为$AC^2 - BC^2 = AD^2 - BD^2$, 所以 $R=\sqrt{AD^2 - (BD^2-r^2)}$, 于是
+\[ AD^2 - R^2 = BD^2 - r^2 .\]
+说明点 $D$ 到圆 $A$ 和 $B$ 的圆幂也是相等的, 所以$CD$是圆 $A$ 和圆 $B$ 的根轴, 从而 $AB$ 垂直于 $CD$.
+
+%------------------------------------------------------------------------------%
+\newpage
+
+戴维斯定理: 三角形 $ABC$ 的三边上分别有2点, 依次为 $D,E,F,G,H,I$, 若 $DEFG$ 共圆, $FGHI$共圆, $HIDE$共圆, 则这6点都共圆.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.0]
+\coordinate[label=below:$O$] (O) at (0.0,0.0);
+\coordinate[label=above:$A$] (A) at (0.0,3.0);
+\coordinate[label=left:$B$] (B) at (-3,-1);
+\coordinate[label=right:$C$] (C) at (3,-2);
+\coordinate[label=above left:$D$] (D) at (-0.92,1.78);
+\coordinate[label=left:$E$] (E) at (-1.96,0.38);
+\coordinate[label=below left:$F$] (F) at (-1.57,-1.24);
+\coordinate[label=below:$G$] (G) at (1.08,-1.68);
+\coordinate[label=right:$H$] (H) at (1.98,-0.3);
+\coordinate[label=above right:$I$] (I) at (0.67,1.88);
+\draw [line width=1pt] (A) -- (B) -- (C) -- cycle;
+\draw [dashed,line width=1pt,red] (O) circle (2cm);
+\foreach \p in {A,B,C,D,E,F,G,H,I,O}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+\end{figure*}
+
+(反证) 若6点不共圆, 则点$DEFG$的外接圆与点$FGHI$的外接圆有公共弦 $FG$, 它是这两个圆的根轴. 类似的, 另外两组相交圆对应两条公共弦为 $HI$ 和 $DE$, 这表明三个圆的根轴不交于一点, 与蒙日定理矛盾了.
+
+%------------------------------------------------------------------------------%
+\newpage
+
+\noindent 来自每日数学打卡
+
+在 $ \triangle ABC $ 中, $ \angle C = 40\degree $, $\angle DAC = 60\degree$, $BD = AC$, 求 $\angle B$ 的度数.
+
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[cap=round,scale=1.5]
+\tikzstyle{axes}=[line width=1pt]
+\coordinate[label=below:$D$] (D) at (0.0,0.0);
+\coordinate[label=below:$B$] (B) at (-3.0,0.0);
+\coordinate[label=above:$A$] (A) at (0.34,1.93);
+\coordinate[label=below:$C$] (C) at (2.64,0.0);
+\draw[line width=1pt] (D) to (A);
+\draw[line width=1pt] (A) -- (C) -- (B) -- cycle;
+\draw pic["$60\degree$", draw, angle eccentricity=1.5] {angle=D--A--C};
+\draw pic["$40\degree$", draw, angle eccentricity=1.5] {angle=A--C--D};
+\draw pic["?", draw, angle eccentricity=1.5] {angle=D--B--A};
+\draw (-1.5, 0) node {$||$} ;
+\draw (1.5,0.95) node[rotate=-40] {$||$};
+\end{tikzpicture}
+\end{figure*}
+
+\noindent 解: 直接建立坐标系. 如下图.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[cap=round,scale=1.5]
+\tikzstyle{axes}=[line width=1pt]
+\coordinate[] (D) at (0.0,0.0);
+\coordinate[] (B) at (-3.0,0.0);
+\coordinate[] (A) at (0.34,1.93);
+\coordinate[] (C) at (2.64,0.0);
+\coordinate[] (E) at (0.34,0.0);
+\draw[line width=1pt] (B) -- (A) -- (D);
+
+\draw pic["$40\degree$", draw, angle eccentricity=1.5] {angle=A--C--D};
+\draw pic["$\alpha$", draw, angle eccentricity=1.5] {angle=D--B--A};
+\draw pic["$100\degree$", draw, angle eccentricity=1.5] {angle=A--D--B};
+\draw (-1.5, 0) node {$||$} ;
+\draw (1.5,0.95) node[rotate=-40] {$||$};
+\draw[dashed, line width=1pt] (A) to[edge label=$y$] (E);
+\draw[line width=1pt] (D) to[edge label'=$1$] (E);
+\draw[line width=1pt] (C) to[edge label=$x$] (E);
+\draw[line width=1pt] (A) to[edge node={node [sloped,above] {$\sqrt{x^2+y^2}$}}] (C);
+\draw[line width=1pt] (B) to[edge label'=$\sqrt{x^2+y^2}$] (D);
+\draw pic["$50\degree$", draw, angle eccentricity=1.5] {angle=E--A--C};
+%\draw pic["$80\degree$", draw, angle eccentricity=1.0] {angle=C--D--A};
+\tkzMarkRightAngle[line width=1pt](C,E,A);
+\end{tikzpicture}
+\end{figure*}
+
+ 设 $BC$ 为 $x$ 轴, $D$ 为原点, $A$ 的坐标为 $(1,y)$, $CD$ 长是 $1+x$. $CA=BD=\sqrt{x^2+y^2}$, 于是 $\tan 10\degree = \dfrac{1}{y}$, $\tan 50\degree = \dfrac{x}{y}$. 进一步, 
+\begin{align*}
+\tan\alpha &= \frac{y}{1+\sqrt{x^2+y^2}} = \frac{1}{\frac{1}{y} + \sqrt{1+\frac{x^2}{y^2}}} \\
+&= \frac{1}{\tan 10\degree + \sqrt{1+\tan^2 50\degree}} = \frac{1}{\tan 10\degree + \frac{1}{\cos 50\degree}} \\
+&= \frac{1}{\frac{\cos 80\degree}{\sin 80\degree} + \frac{1}{\sin 40\degree}} = \frac{\sin 80\degree}{\cos 80\degree + \frac{\sin 80\degree}{\sin 40\degree}} \\
+&= \frac{\sin 80\degree}{\cos 80\degree + 2\cos 40\degree} = \frac{\sin 80\degree}{(\cos 80\degree + \cos 40\degree) + \cos 40\degree} \\
+&= \frac{\sin 80\degree}{2\cos 60\degree \cos 20\degree + \cos 40\degree} = \frac{\sin 80\degree}{\cos 20\degree + \cos 40\degree}\\
+&= \frac{\sin 80\degree}{2\cos 30\degree \cos 10\degree} = \frac{1}{\sqrt{3}}
+\end{align*}
+
+于是 $\alpha=30\degree$.
+
+~
+
+\noindent 官方解答1:
+
+由正弦定理: 
+\[ \frac{\sin(80\degree - \alpha)}{\sin\alpha} = \frac{BD}{AD} = \frac{AC}{AD} = \frac{\sin 80\degree}{\sin 40\degree} = 2\cos 40\degree = \frac{\cos 40\degree}{\cos 60\degree} = \frac{\sin 50\degree}{\sin 30\degree}.\]
+即 $\sin(80\degree - \alpha)\sin 30\degree = \sin 50\degree\sin\alpha$, 由积化和差公式得:
+\[ -\frac{1}{2}\left[ \cos(110\degree - \alpha) - \cos(50\degree - \alpha) \right] = -\frac{1}{2}\left[ \cos(50\degree+\alpha) - \cos(50\degree - \alpha)\right].\]
+于是 $\cos(110\degree-\alpha) = \cos(50\degree+\alpha)$. 而 $\alpha\in(0,\dfrac{\pi}{2})$, 所以 $110\degree - \alpha = \alpha + 50\degree$.
+
+从而 $\alpha=30\degree$.
+
+~
+
+\noindent 官方解答2:
+
+如下图作辅助线, 以 $AC$ 为边下向作等边三角形 $\triangle ACE$, 连接 $BE$, 在 $BC$ 上截取点 $F$ 使得 $DE = EF$.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[cap=round,scale=1.5]
+\tikzstyle{axes}=[line width=1pt]
+\coordinate[label=below:$D$] (D) at (0.0,0.0);
+\coordinate[label=below:$B$] (B) at (-3.0,0.0);
+\coordinate[label=above:$A$] (A) at (0.34,1.93);
+\coordinate[label=below:$C$] (C) at (2.64,0.0);
+\coordinate[label=below:$E$] (E) at (-0.18,-1.03);
+\coordinate[label=above:$F$] (F) at (-0.36,0.0);
+\draw[line width=1pt] (D) to (A);
+\draw[line width=1pt] (A) -- (C) -- (B) -- cycle;
+\draw[dashed,line width=1pt] (B) -- (E) -- (C);
+\draw[dashed,line width=1pt] (D) -- (E) -- (F);
+\draw pic["$60\degree$", draw, angle eccentricity=1.5] {angle=D--A--C};
+\draw pic["$40\degree$", draw, angle eccentricity=1.5] {angle=A--C--D};
+\draw pic["?", draw, angle eccentricity=1.5] {angle=D--B--A};
+\draw (-1.5, 0) node {$||$} ;
+\draw (1.5,0.95) node[rotate=-40] {$||$};
+\draw (1.22,-0.5) node[rotate=20] {$||$};
+\foreach \p in {A,B,C,D,E,F}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+\end{figure*}
+
+所以 $\angle DFE = \angle EDF = 80\degree$, $\angle DEF = 20\degree$.
+
+$\angle CEF= \angle CEA + \angle DEF = 60\degree + 20\degree = 80\degree = \angle CFE$, 所以 $CE=CF$.
+
+又因为 $DE =EF$, $CE=AC=BD$, $\angle CEF = \angle BDE = 80\degree$, 
+
+所以 $\triangle BDE \cong \triangle CEF$. 从而 $BE=CF=CE=BD=AE$, 
+
+由 $BE = AE$, $\angle BEA = 80\degree$ 得 $\angle EBA = 50\degree$, 
+
+再由 $BE=CE$ 得 $\angle EBC = \angle BCE = 20\degree$.
+
+所以 $\angle CBA = \angle EBA - \angle EBC = 30\degree$.
+
+
+%------------------------------------------------------------------------------%
+\newpage
+\noindent 来自微博
+
+下图中 $AB=AC$, $\angle PAC = 60\degree$, $\angle PAB = 20\degree$, $\angle PBA = 10\degree$. 求未知角度 $\angle APC$.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.8]
+\coordinate[label=below left:$A$] (A) at (0,0);
+\coordinate[label=below right:$C$] (C) at (3,0);
+\coordinate[label=above:$B$] (B) at (0.52,2.95);
+\coordinate[label=above right:$P$] (P) at (0.52,0.9);
+\draw [line width=1pt] (A) -- (B) -- (C) -- cycle;
+\draw [line width=1pt] (A) -- (P);
+\draw [line width=1pt] (B) -- (P);
+\draw [line width=1pt] (C) -- (P);
+\foreach \p in {A,B,C,P}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\draw pic["$60\degree$",draw,line width=1pt, angle eccentricity=1.6, angle radius=0.5cm] {angle=C--A--P};
+\draw pic[draw,line width=1pt, angle eccentricity=2.0, angle radius=0.75cm] {angle=P--A--B};
+\draw pic[draw,line width=1pt, angle eccentricity=2.0, angle radius=1.0cm] {angle=A--B--P};
+\draw (-0.1,0.4) node[] {$20\degree$};
+\draw (0.2,2.4) node[] {$10\degree$};
+\draw pic["$?$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.5cm] {angle=A--P--C};
+\draw (1.5,0.0) node[] {$||$};
+\draw (0.26,1.47) node[rotate=80] {$||$};
+\end{tikzpicture}
+\end{figure*}
+
+解: 如下图所示, 以 $AC$ 为边构造等边三角形 $ACD$, 再以 $AP$ 为边构造等边三角形 $AEP$. 连接 $BD$, $DE$, $BE$ 于 $AD$ 的交点为 $F$.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.8]
+\coordinate[label=below left:$A$] (A) at (0,0);
+\coordinate[label=below right:$C$] (C) at (3,0);
+\coordinate[label=above:$B$] (B) at (0.52,2.95);
+\coordinate[label=above:$D$] (D) at (1.5,2.6);
+\coordinate[label=below:$E$] (E) at (1.04,0);
+\coordinate[label=right:$F$] (F) at (0.8,1.38);
+\coordinate[label=above left:$P$] (P) at (0.52,0.9);
+\draw [line width=1pt] (A) -- (B) -- (C) -- cycle;
+\draw [line width=1pt] (A) -- (P);
+\draw [line width=1pt] (B) -- (P);
+\draw [line width=1pt] (C) -- (P);
+\draw [dashed,line width=1pt] (P) -- (E) -- (B);
+\draw [dashed,line width=1pt] (B) -- (D) -- (E);
+\draw [dashed,line width=1pt] (C) -- (D) -- (P);
+\foreach \p in {A,B,C,D,E,F,P}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\draw pic["$60\degree$",draw,line width=1pt, angle eccentricity=1.6, angle radius=0.5cm] {angle=C--A--P};
+\draw pic[draw,line width=1pt, angle eccentricity=2.0, angle radius=0.75cm] {angle=P--A--B};
+\draw pic[draw,line width=1pt, angle eccentricity=2.0, angle radius=1.0cm] {angle=A--B--P};
+\draw (-0.1,0.4) node[] {$20\degree$};
+\draw (0.2,2.4) node[] {$10\degree$};
+%\draw pic["$?$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.5cm] {angle=A--P--C};
+\draw (1.5,0.0) node[] {$||$};
+\draw (0.26,1.47) node[rotate=80] {$||$};
+\end{tikzpicture}
+\end{figure*}
+
+易知 $BP$ 是 $AE$ 的中垂线. 所以 $\triangle ABE$ 是等腰三角形, 顶角为 $20\degree$. 而由 $AB=AC=AD$, $\triangle ABD$ 也是等腰三角形, 顶角为 $20\degree$, 由 $\angle FAB = \angle FBA$ 得 $AF=BF$, 进而 $DF = EF$, 等腰三角形 $ABF$ 与 $DEF$ 顶角相等, 所以它们相似, 于是 $\angle FAB = \angle FBA = \angle FDE = \angle FED = 20\degree$. (事实上, 由 $\triangle ABE \cong \triangle ABD$, 可以立刻得到四边形 $ABDE$ 为等腰梯形)
+
+又因为 $\triangle ACP \cong \triangle ADE$, 所以 $\angle ACP= \angle ADE = 20\degree$, 于是 $\angle APC = 100\degree$.
+
+
+%------------------------------------------------------------------------------%
+\newpage
+\noindent 来自每日数学打卡
+
+两圆 $A,B$ 的半径均为 $R$, 并且有两个交点, 如图所示. 另有两个小圆均与 $A$ 内切而与 $B$ 外切, 且两个小圆也相交. 证明两个小圆的公共弦的延长线一定经过 $AB$ 的中点 $M$.
+
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.2]
+\coordinate[label=left:$M$] (M) at (0,0);
+\coordinate[label=above left:$A$] (A) at (0,1);
+\coordinate[label=above left:$B$] (B) at (0,-1);
+\coordinate[label=above left:$C$] (C) at (-1.13,2.19);
+\coordinate[label=left:$D$] (D) at (-1.94,1.34);
+\coordinate[] (H) at (-1.92,1.87);
+\coordinate[] (Q) at (-1.42,1.38);
+\coordinate[] (W) at (-3.73,3.6);
+\draw [line width=1pt] (A) circle (2.5cm);
+\draw [line width=1pt] (B) circle (2.5cm);
+\draw [line width=1pt] (C) circle (0.86cm);
+\draw [line width=1pt] (D) circle (0.53cm);
+\draw [line width=1pt] (H) -- (M);
+\draw [dashed,line width=1pt] (A) to [edge label = $R$] (2,2.5);
+\draw [dashed,line width=1pt] (B) to [edge label = $R$] (2,0.5);
+\draw [dashed,line width=1pt] (A) to (B);
+\foreach \p in {M,A,B,C,D,H,Q}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+\end{figure*}
+
+\noindent 证明: 
+
+以 $M$ 为原点, $BA$ 方向为 $y$ 轴建立坐标系, 以下大写字母表示已知长度, 小写字母表示未知长度或坐标. 设 $AB = 2H$, 则 $A(0,H), B(0,-H)$, 圆 $C$ 是内切于$A$ 且外切于$B$ 的任意一个圆, 坐标为 $(u,v)$, 半径为 $w$, 由圆 $C$ 与 $A,B$ 的相切关系有: 
+\[ |CA| = R-w, |CB| = R+w. \]
+用坐标表示就是:
+\begin{align*}
+u^2 + (v-H)^2 &= (R-w)^2 \\
+u^2 + (v+H)^2 &= (R+w)^2
+\end{align*}
+由这两个式子可以得到: $v = \dfrac{Rw}{H}$, 以及 $u^2 = R^2+w^2-v^2-H^2$.
+
+现有两圆 $C_1$, $C_2$ 都内切于 $A$ 且外切于 $B$, 圆心分别是 $(u_1,v_1), (u_2,v_2)$, 半径分别是 $w_1, w_2$, 也要满足上面的关系. 圆 $C_1, C_2$ 的方程分别为:
+\begin{align*}
+(x-u_1)^2 + (y-v_1)^2 &= w_1^2 \\
+(x-u_2)^2 + (y-v_2)^2 &= w_2^2 
+\end{align*}
+联立上两式得到圆 $C_1, C_2$ 公共弦的方程:
+\[ 2(u_1-u_2)x + u_2^2-u_1^2 + 2(v_1-v_2)y + v_2^2-v_1^2=w_2-w_1 .\]
+将其中的 $u_1^2, u_2^2$ 分别用 $w_1$ 和 $w_2$ 表示, 可以消去 $v_1^2$ 和 $v_2^2$, 最终得到
+\[ (u_1-u_2)x+(v_1-v_2)y=0 .\]
+这就说明了任意两个这样的圆 $C_1, C_2$ 的公共弦都是经过$(0,0)$点的.
+
+~
+
+\noindent 官方解答:
+
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.2]
+\coordinate[label=left:$M$] (M) at (0,0);
+\coordinate[label=above left:$A$] (A) at (0,1);
+\coordinate[label=above left:$B$] (B) at (0,-1);
+\coordinate[label=above left:$C$] (C) at (-1.13,2.19);
+\coordinate[label=left:$T$] (T) at (-0.73,1.43);
+\coordinate[label=above left:$S$] (S) at (-1.52,2.96);
+%\coordinate[label=left:$D$] (D) at (-1.94,1.34);
+%\coordinate[] (H) at (-1.92,1.87);
+%\coordinate[] (Q) at (-1.42,1.38);
+%\coordinate[] (W) at (-3.73,3.6);
+\draw [line width=1pt] (A) circle (2.5cm);
+\draw [line width=1pt] (B) circle (2.5cm);
+\draw [line width=1pt] (C) circle (0.86cm);
+%\draw [line width=1pt] (D) circle (0.53cm);
+%\draw [line width=1pt] (H) -- (M);
+%\draw [dashed,line width=1pt] (A) to [edge label = $R$] (2,2.5);
+%\draw [dashed,line width=1pt] (B) to [edge label = $R$] (2,0.5);
+\draw [dashed,line width=1pt] (A) to (B);
+\draw [dashed,line width=1pt] (A) to (C);
+\draw [dashed,line width=1pt] (B) to (C);
+\draw [dashed,line width=1pt] (M) to (S);
+\foreach \p in {M,A,B,C,S,T}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+\end{figure*}
+
+设任意一个内切于$A$且外切于$B$小圆 $C$ 的半径为 $r$, 连接 $MC$, 交圆 $C$ 于 $S,T$ 两点; 并连接 $AC, BC$.
+
+根据圆的相切关系可得: $AC=R-r, BC=R+r$, 又因为 $MC$ 是 $\triangle ABC$ 的中线, 由中线长度公式有:
+\[ MC^2 = \frac{1}{2}(AC^2+BC^2) - MA^2 .\]
+
+$M$ 点对圆 $C$ 的圆幂为:
+\begin{align*} 
+MS\cdot MT &= (MC+r)\cdot(MC-r) = MC^2-r^2 \\
+&=\frac{1}{2}(AC^2+BC^2) - MA^2-r^2 \\
+&=  \frac{1}{2}\left((R+r)^2+(R-r)^2\right) - MA^2-r^2\\
+&= R^2 - MA^2.
+\end{align*}
+这说明点 $M$ 对每个小圆的圆幂与其半径 $r$ 是无关的. 特别地, $M$ 对两个相交的小圆 $C,D$ 的圆幂也是相等的. 这说明 $M$ 位于两小圆公共弦所在的直线上(蒙日定理). 所以 $M$ 位于所有相交小圆的公共弦上.
+
+%------------------------------------------------------------------------------%
+\newpage
+
+\noindent IMO 2008 第1题: 
+
+已知 $H$ 是锐角三角形 $ABC$ 的垂心, 以边 $BC$ 的中点为圆心, 过点 $H$ 的圆与直线 $BC$ 相交于两点 $A_1, A_2$; 以边 $CA$ 的中点为圆心, 过点 $H$ 的圆与直线 $CA$ 相交于两点 $B_1, B_2$, 以边 $AB$ 的中点为圆心, 过点 $H$ 的圆与直线 $AB$ 相交于两点 $C_1, C_2$. 证明：六点 $A_1, A_2, B_1, B_2, C_1, C_2$ 共圆.
+
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.2]
+\coordinate[] (O) at (0.0,0.0);
+\coordinate[label=above:$A$] (A) at (0.0,3.0);
+\coordinate[label=left:$B$] (B) at (-3,-1);
+\coordinate[label=right:$C$] (C) at (3,-2);
+\coordinate[label=below right:$H$] (H) at (-0.41,0.56);
+\coordinate[label=right:$D$] (D) at (-1.5,1);
+\coordinate[label=below:$E$] (E) at (0.0,-1.5);
+\coordinate[label=right:$F$] (F) at (1.5,0.5);
+\coordinate[label=left:$C_1$] (C1) at (-0.79,1.94);
+\coordinate[label=left:$C_2$] (C2) at (-2.21,0.06);
+\coordinate[label=below left:$A_1$] (A1) at (-2.07,-1.16);
+\coordinate[label=below right:$A_2$] (A2) at (2.07,-1.84);
+\coordinate[label=right:$B_1$] (B1) at (2.48,-1.14);
+\coordinate[label=below right:$B_2$] (B2) at (0.52,2.14);
+\coordinate[] (M) at (0.2, -0.28);
+\draw [line width=1pt] (A) -- (B) -- (C) -- cycle;
+\draw [line width=1pt,gray] (D) circle (1.179cm);
+\draw [line width=1pt,gray] (E) circle (2.095cm);
+\draw [line width=1pt,gray] (F) circle (1.908cm);
+\draw [dashed,line width=1pt,red] (M) circle (2.435cm);
+\foreach \p in {A,B,C,D,E,F,H,A1,A2,B1,B2,C1,C2}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+\end{figure*}
+
+证明: 因为 $D,F$ 分别是 $AB, AC$ 的中点, 所以 $DF$ 平行于 $BC$. 而 $H$ 是垂心, 则 $AH$ 垂直于 $BC$, 因此也垂直于 $DF$. 而 $H$ 位于圆 $D$ 和圆 $F$ 的根轴上, 说明 $AH$ 就是圆 $D$ 和圆 $F$ 的根轴, 于是 $AC_1\cdot AC_2 = AB_1\cdot AB_2$. 根据割线定理的逆定理, 可知 $B_1, B_2, C_1, C_2$ 四点共圆. 
+
+同理可证 $A_1, A_2, B_1, B_2$ 以及 $A_1, A_2, C_1, C_2$ 分别共圆. 再由戴维斯定理可证明这六个点共圆.
+
+%------------------------------------------------------------------------------%
+\newpage
+
+下图中，$ \triangle EAD $ 是直角三角形，$ B $、$ C $ 在线段 $ AD $ 上，$ AB=3 $，$ BC=2 $，$ CD=1 $，$ \angle EAB= \angle BEC $，求 $ DE $ 的长。
+
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.5]
+\coordinate[label=above left:$A$] (A) at (-4,0);
+\coordinate[label=above left:$B$] (B) at (-1,0);
+\coordinate[label=above left:$C$] (C) at (1,0);
+\coordinate[label=above right:$D$] (D) at (2,0);
+\coordinate[label=right:$E$] (E) at (2,3);
+\draw [line width=1pt] (A) to [edge label = 3] (B);
+\draw [line width=1pt] (B) to [edge label = 2] (C);
+\draw [line width=1pt] (C) to [edge label = 1] (D);
+\draw [line width=1pt] (E) to [edge label = $x$] (D);
+\draw [line width=1pt] (E)-- (A);
+\draw [line width=1pt] (E)-- (B);
+\draw [line width=1pt] (E)-- (C);
+\foreach \p in {A,B,C,D,E}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\draw pic[draw,line width=1pt, angle eccentricity=1.5, angle radius=0.5cm] {angle=B--A--E};
+\draw pic[draw,line width=1pt, angle eccentricity=1.5, angle radius=0.5cm] {angle=B--E--C};
+\tkzMarkRightAngle[line width=1pt](E,D,C);
+
+\end{tikzpicture}
+\end{figure*}
+
+解：找相似三角形，因
+\begin{align*}
+ \angle EBC & = \angle EAB + \angle AEB \\
+ 			& =\angle BEC +\angle AEB = \angle AEC 
+\end{align*}
+
+再由 $ \angle EAB=\angle BEC $，可得 $ \triangle AEC \sim \triangle EBC $，所以 $ BC/EC=EC/AC $；从而 $ EC^2=AC*BC=10 $。所以 $ x=3 $.
+
+%------------------------------------------------------------------------------%
+\newpage
+
+下图中的正六边形内任取一点, 连接它与其他各顶点, 求涂色部分的占比.
+
+\begin{figure*}[htbp]
+\centering
+\definecolor{uuuuuu}{rgb}{0.26666666666666666,0.26666666666666666,0.26666666666666666}
+\definecolor{ududff}{rgb}{0.30196078431372547,0.30196078431372547,1}
+\definecolor{xdxdff}{rgb}{0.49019607843137253,0.49019607843137253,1}
+\begin{tikzpicture}[]
+%\clip(-3.72,-3.56) rectangle (13.84,8.24);
+\coordinate[] (A) at (0,0);
+\coordinate[] (B) at (3,0);
+\coordinate[] (C) at (4.5,2.598076211353316);
+\coordinate[] (D) at (3,5.196152422706633);
+\coordinate[] (E) at (0,5.196152422706634);
+\coordinate[] (F) at (-1.5,2.5980762113533187);
+\coordinate[] (P) at (2.74,1.2);
+\coordinate[] (X) at (1.5,7.794228634059949);
+\coordinate[] (Y) at (-3,0);
+\coordinate[] (Z) at (6,0);
+\fill[orange!50] (A) -- (P) -- (B) -- cycle;
+\fill[orange!50] (C) -- (P) -- (D) -- cycle;
+\fill[orange!50] (E) -- (P) -- (F) -- cycle;
+\draw [line width=1.25pt] (A) -- (B) -- (C) -- (D) -- (E) -- (F) -- cycle;
+\draw [line width=1.25pt]  (A) -- (P) -- (B);
+\draw [line width=1.25pt]  (C) -- (P) -- (D);
+\draw [line width=1.25pt]  (E) -- (P) -- (F);
+
+\begin{scriptsize}
+\draw [fill=uuuuuu] (A) circle (1.25pt);
+\draw [fill=uuuuuu] (B) circle (1.25pt);
+\draw [fill=uuuuuu] (C) circle (1.25pt);
+\draw [fill=uuuuuu] (D) circle (1.25pt);
+\draw [fill=uuuuuu] (E) circle (1.25pt);
+\draw [fill=uuuuuu] (F) circle (1.25pt);
+\draw [fill=uuuuuu] (P) circle (1.25pt);
+%\draw [fill=uuuuuu] (X) circle (2pt);
+%\draw [fill=uuuuuu] (Y) circle (2pt);
+%\draw [fill=uuuuuu] (Z) circle (2pt);
+\end{scriptsize}
+\end{tikzpicture}
+\end{figure*}
+
+解: 将正六边形补全成正三角形, 再连接正六边形内点与正三角形三个顶点. 正三角形被分成三个三角形区域, 每个区域中, 涂色部分与虚线部分的高相同, 但底边是大三角形的三分之一. 所以涂色部分总面积占整个正三角形面积的三分之一. 假设正六边形面积是 $ 1 $, 容易知道正三角形面积是 $ 1.5 $, 所以涂色部分面积是 $ 0.5 $.
+
+\begin{figure*}[htbp]
+\centering
+\definecolor{uuuuuu}{rgb}{0.26666666666666666,0.26666666666666666,0.26666666666666666}
+\definecolor{ududff}{rgb}{0.30196078431372547,0.30196078431372547,1}
+\definecolor{xdxdff}{rgb}{0.49019607843137253,0.49019607843137253,1}
+\begin{tikzpicture}[]
+%\clip(-3.72,-3.56) rectangle (13.84,8.24);
+\coordinate[] (A) at (0,0);
+\coordinate[] (B) at (3,0);
+\coordinate[] (C) at (4.5,2.598076211353316);
+\coordinate[] (D) at (3,5.196152422706633);
+\coordinate[] (E) at (0,5.196152422706634);
+\coordinate[] (F) at (-1.5,2.5980762113533187);
+\coordinate[] (P) at (2.74,1.2);
+\coordinate[] (X) at (1.5,7.794228634059949);
+\coordinate[] (Y) at (-3,0);
+\coordinate[] (Z) at (6,0);
+\fill[orange!50] (A) -- (P) -- (B) -- cycle;
+\fill[orange!50] (C) -- (P) -- (D) -- cycle;
+\fill[orange!50] (E) -- (P) -- (F) -- cycle;
+\draw [line width=1.25pt] (A) -- (B) -- (C) -- (D) -- (E) -- (F) -- cycle;
+\draw [line width=1.25pt]  (A) -- (P) -- (B);
+\draw [line width=1.25pt]  (C) -- (P) -- (D);
+\draw [line width=1.25pt]  (E) -- (P) -- (F);
+\draw [dashed, line width=1.25pt]  (F) -- (Y) -- (A);
+\draw [dashed, line width=1.25pt]  (B) -- (Z) -- (C);
+\draw [dashed, line width=1.25pt]  (D) -- (X) -- (E);
+\draw [dashed, line width=1.25pt]  (P) -- (X);
+\draw [dashed, line width=1.25pt]  (P) -- (Y);
+\draw [dashed, line width=1.25pt]  (P) -- (Z);
+\begin{scriptsize}
+\draw [fill=uuuuuu] (A) circle (1.5pt);
+\draw [fill=uuuuuu] (B) circle (1.5pt);
+\draw [fill=uuuuuu] (C) circle (1.5pt);
+\draw [fill=uuuuuu] (D) circle (1.5pt);
+\draw [fill=uuuuuu] (E) circle (1.5pt);
+\draw [fill=uuuuuu] (F) circle (1.5pt);
+\draw [fill=uuuuuu] (P) circle (1.5pt);
+\draw [fill=uuuuuu] (X) circle (1.5pt);
+\draw [fill=uuuuuu] (Y) circle (1.5pt);
+\draw [fill=uuuuuu] (Z) circle (1.5pt);
+\end{scriptsize}
+\end{tikzpicture}
+\end{figure*}
+
+
+%------------------------------------------------------------------------------%
+\newpage
+
+已知下图中最外面是正六边形, 在其内部取一点, 该点与相邻三边形成的三角形面积分别是8, 9, 11. 求整个正六边形的面积. 
+\begin{figure*}[htbp]
+\centering
+\definecolor{ududff}{rgb}{0.30196078431372547,0.30196078431372547,1}
+\definecolor{uuuuuu}{rgb}{0.26666666666666666,0.26666666666666666,0.26666666666666666}
+\begin{tikzpicture}[scale=1.5]
+\clip(-3.5,-1.05) rectangle (0.05,3.05);
+\coordinate[] (E) at (0,0);
+\coordinate[] (F) at (0,2);
+\coordinate[] (A) at (-1.7320508075688775,3);
+\coordinate[] (B) at (-3.464101615137755,2);
+\coordinate[] (C) at (-3.464101615137755,0);
+\coordinate[] (D) at (-1.7320508075688775,-1);
+\coordinate[label=below right:$P$] (P) at (-2.28,0.39);
+\draw [line width=1.25pt] (E)-- (F) -- (A) -- (B) -- (C) -- (D) -- (E);
+\draw [line width=1.25pt] (B) -- (P)-- (A);
+\draw [line width=1.25pt] (D) -- (P)-- (C);
+\node at (-3.0,0.75) {$9$};
+\node at (-2.5,-0.25) {$8$};
+\node at (-2.5,1.8) {$11$};
+\begin{scriptsize}
+\foreach \p in {A,B,C,D,E,F,P}
+	\draw [fill=uuuuuu] (\p) circle (0.75pt);
+\end{scriptsize}
+\end{tikzpicture}
+\end{figure*}
+
+解: 作下面的辅助线. 延长 $ AB $ 和 $ DC $ 相交于 $O$.
+
+$\triangle ABP $ 的面积和 $ \triangle OBP $ 面积相等, $\triangle CDP $ 的面积和 $ \triangle COP $ 面积相等.
+
+所以 
+\begin{align*} 
+S_{\triangle BOC} &= S_{\triangle COP} + S_{\triangle BOP} - S_{\triangle BCP} \\
+ & = S_{\triangle CDP} + S_{\triangle ABP} - S_{\triangle BCP} = 10.
+\end{align*}
+
+所以整个六边形面积是三角形 $BOC $ 面积的 6 倍, 也就是 60.
+\begin{figure*}[htbp]
+\centering
+\definecolor{ududff}{rgb}{0.30196078431372547,0.30196078431372547,1}
+\definecolor{uuuuuu}{rgb}{0.26666666666666666,0.26666666666666666,0.26666666666666666}
+\begin{tikzpicture}[scale=1.5]
+\clip(-5.5,-1.3) rectangle (2.0,3.3);
+\coordinate[label=below:$E$] (E) at (0,0);
+\coordinate[label=above:$F$] (F) at (0,2);
+\coordinate[label=above:$A$] (A) at (-1.7320508075688775,3);
+\coordinate[label=above:$B$] (B) at (-3.464101615137755,2);
+\coordinate[label=below:$C$] (C) at (-3.464101615137755,0);
+\coordinate[label=below:$D$] (D) at (-1.7320508075688775,-1);
+\coordinate[label=below right:$P$] (P) at (-2.28,0.39);
+\coordinate[label=left:$O$] (O) at (-5.1961524227066325,1);
+\draw [line width=1.25pt] (E)-- (F) -- (A) -- (B) -- (C) -- (D) -- (E);
+\draw [line width=1.25pt] (B) -- (P)-- (A);
+\draw [line width=1.25pt] (D) -- (P)-- (C);
+\draw [line width=1.25pt,dashed] (B) -- (O)-- (C);
+\draw [line width=1.25pt,dashed] (O)-- (P);
+\draw [line width=1.25pt,dashed,color=ududff] (E) -- (P)-- (F);
+\node at (-3.0,0.75) {$9$};
+\node at (-1.0,0.75) {$x - 9$};
+\node at (-2.5,-0.25) {$8$};
+\node at (-1.1,1.7) {$x - 8$};
+\node at (-2.5,1.8) {$11$};
+\node at (-1.1,-0.24) {$x - 11$};
+\begin{scriptsize}
+\foreach \p in {A,B,C,D,E,F,P,O}
+	\draw [fill=uuuuuu] (\p) circle (0.75pt);
+\end{scriptsize}
+\end{tikzpicture}
+\end{figure*}
+
+另一种解法: 容易看出, $ P $ 与正六边形每条边连成的 6 个小三角形中, 底边都是相等的, 而相对的两个三角形的高之和也相等. 所以三组相对的三角形面积之和相等, 不妨设这个和是 $ x $, 则 $\triangle DEP$, $\triangle EFP$, $\triangle FAP$ 的面积分别是 $ x - 11$, $x - 9$, $x-8$. 
+
+此外, 由前面的题可知 $\triangle APB + \triangle CPD + \triangle EPF $ 的面积等于 $\triangle BPC + \triangle DPE + \triangle FPA$ 的面积, 所以有: 
+\[ 11 + 8 + (x - 9) = 9 + (x - 11) + (x - 8) .\] 
+
+解得 $ x = 20 $. 于是, 整个正六边形面积是 60.
+
+
+%------------------------------------------------------------------------------%
+\newpage
+\noindent 来自应老师微博
+
+求下图中 $A,B,C$ 三块各自的面积.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.5]
+\coordinate[] (A) at (0,0);
+\coordinate[] (B) at (2,0);
+\coordinate[] (C) at (3,1.73);
+\coordinate[] (D) at (2,3.46);
+\coordinate[] (E) at (0,3.46);
+\coordinate[] (F) at (-1,1.73);
+\coordinate[] (G) at (0.75,0);
+\coordinate[] (H) at (1.38,1.08);
+\coordinate[] (I) at (-0.63,1.08);
+\coordinate[] (J) at (0.38,1.08);
+\coordinate[] (K) at (1.88,1.95);
+\coordinate[] (L) at (1.38,2.81);
+\coordinate[] (M) at (0.38,2.81);
+\coordinate[] (N) at (-0.13,1.95);
+\coordinate[] (O) at (2.5,0.87);
+\coordinate[] (P) at (-0.5,2.6);
+\coordinate[] (Q) at (0.75,3.46);
+\coordinate[] (R) at (2.38,2.81);
+\filldraw [line width=1.25pt,fill=red!30] (I)--(J)--(P)--(F)--cycle;
+\filldraw [line width=1.25pt,fill=blue!30] (I)--(A)--(G)--(H)--cycle;
+\filldraw [line width=1.25pt,fill=green!30] (G)--(B)--(O)--(K)--cycle;
+\filldraw [line width=1.25pt,fill=cyan!30] (O)--(C)--(R)--(L)--cycle;
+\filldraw [line width=1.25pt,fill=yellow!30] (R)--(D)--(Q)--(M)--cycle;
+\filldraw [line width=1.25pt,fill=magenta!30] (Q)--(E)--(P)--(N)--cycle;
+\draw [line width=1.25pt,dashed] (E)--(B);
+\draw[] (-0.45,1.68) node {$40$};
+\draw[] (0.33,0.6) node {$55$};
+\draw[] (1.88,0.84) node {$65$};
+\draw[] (0,2.8) node {$A$};
+\draw[] (1.4,3.2) node {$B$};
+\draw[] (2.2,2.2) node {$C$};
+\end{tikzpicture}
+\end{figure*}
+
+解: 设右下角和左上角正三角形边长分别为 $x, y$, 中间正六边形边长为 $z$, 外层正六边形边长为 $a$. 可以推出各边长.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.5]
+\coordinate[] (A) at (0,0);
+\coordinate[] (B) at (2,0);
+\coordinate[] (C) at (3,1.73);
+\coordinate[] (D) at (2,3.46);
+\coordinate[] (E) at (0,3.46);
+\coordinate[] (F) at (-1,1.73);
+\coordinate[] (G) at (0.75,0);
+\coordinate[] (H) at (1.38,1.08);
+\coordinate[] (I) at (-0.63,1.08);
+\coordinate[] (J) at (0.38,1.08);
+\coordinate[] (K) at (1.88,1.95);
+\coordinate[] (L) at (1.38,2.81);
+\coordinate[] (M) at (0.38,2.81);
+\coordinate[] (N) at (-0.13,1.95);
+\coordinate[] (O) at (2.5,0.87);
+\coordinate[] (P) at (-0.5,2.6);
+\coordinate[] (Q) at (0.75,3.46);
+\coordinate[] (R) at (2.38,2.81);
+\filldraw [line width=1.25pt,fill=red!30] (I)--(J)--(P)--(F)--cycle;
+\filldraw [line width=1.25pt,fill=blue!30] (I)--(A)--(G)--(H)--cycle;
+\filldraw [line width=1.25pt,fill=green!30] (G)--(B)--(O)--(K)--cycle;
+\filldraw [line width=1.25pt,fill=cyan!30] (O)--(C)--(R)--(L)--cycle;
+\filldraw [line width=1.25pt,fill=yellow!30] (R)--(D)--(Q)--(M)--cycle;
+\filldraw [line width=1.25pt,fill=magenta!30] (Q)--(E)--(P)--(N)--cycle;
+\draw [line width=1.25pt,dashed] (E)--(B);
+%\draw[] (-0.45,1.68) node {$40$};
+%\draw[] (0.33,0.6) node {$55$};
+%\draw[] (1.88,0.84) node {$65$};
+%\draw[] (0,2.8) node {$A$};
+%\draw[] (1.4,3.2) node {$B$};
+%\draw[] (2.2,2.2) node {$C$};
+\draw[] (1.36,0) node[anchor=north] {$x$};
+\draw[] (1.15,0.4) node[] {$x$};
+\draw[] (1.56,0.4) node[] {$x$};
+\draw[] (0.7,3.12) node[] {$y$};
+\draw[] (0.0,3.12) node[] {$y$};
+\draw[] (0.4,3.6) node[] {$y$};
+\draw[] (1.55,1.55) node[] {$z$};
+\draw[] (0.2,1.55) node[] {$z$};
+\draw[] (0.9,1.2) node[] {$z$};
+\draw[] (0.2,2.35) node[] {$z$};
+\draw[] (1.55,2.35) node[] {$z$};
+\draw[] (0.9,2.7) node[] {$z$};
+\draw[] (0.36,0) node[anchor=north] {$a-x$};
+\draw[] (-0.4,0.4) node[] {$x$};
+\draw[] (2.4,0.4) node[] {$z$};
+\draw[] (-0.35,3.1) node[] {$z$};
+\draw[] (-0.2,2.4) node[] {$y$};
+\draw[] (2.25,1.5) node[] {$x$};
+\draw[] (2.4,3.12) node[] {$y$};
+\draw[] (-1.1,2.25) node[] {$a-z$};
+\draw[] (-1.1,1.2) node[] {$a-x$};
+\draw[] (-0.1,0.9) node[] {$a-z$};
+\draw[] (1.4,3.6) node[] {$a-y$};
+\draw[] (3,2.35) node[] {$a-y$};
+\draw[] (3.1,1.2) node[] {$a-z$};
+\draw[] (1.9,2.7) node[] {$a-z$};
+\end{tikzpicture}
+\end{figure*}
+
+由虚线标出的对角线有:
+\[ x+y+2z=2a \qquad\qquad\cdots\qquad (1)\]
+
+根据面积列出三个方程:
+\begin{align*}
+\frac{1}{2}(a-x+y+z)(a-z)\cdot\frac{\sqrt{3}}{2} &= 40 \qquad\cdots\qquad (2)\\
+\frac{1}{2}(a-x+a)\cdot x\cdot\frac{\sqrt{3}}{2} &= 55 \qquad\cdots\qquad (3)\\
+\frac{1}{2}(z+x+z)\cdot x\cdot\frac{\sqrt{3}}{2} &= 65 \qquad\cdots\qquad (4)
+\end{align*}
+(3)/(4), 并由(1)消去 $z$ 得: \[\dfrac{2a - x}{2a-y} = \dfrac{11}{13} ,\]
+进一步可得: \[ 4a = 13x - 11y \qquad\qquad\cdots\qquad (5)\]
+(2)/(3), 同样由(1)消去 $z$ 得: 
+\[ \frac{(4a-3x+y)(x+y)}{4(2a-x)x} = \frac{8}{11} ,\]
+将(5) 代入得
+\[\frac{10(x-y)(x+y)}{22(x-y)x} = \frac{8}{11}.\]
+算出 $3x=5y$, 再根据(5)有 \[x=\dfrac{5}{8}a, y=\dfrac{3}{8}a, z=\dfrac{1}{2}a .\]
+代回任意一个面积关系得 \[\frac{\sqrt{3}}{4}a^2=64. \]
+所以 $A,B,C$ 的面积分别为:
+\begin{align*}
+S_A &= \frac{1}{2}(z+z+y)\cdot y\frac{\sqrt{3}}{2} = 33\\
+S_B &= \frac{1}{2}(a-y+a)\cdot y\frac{\sqrt{3}}{2} = 39\\
+S_C &= \frac{1}{2}(a-y+x+z)\cdot (a-z)\frac{\sqrt{3}}{2} = 56\\
+\end{align*}
+
+%------------------------------------------------------------------------------%
+\newpage
+\noindent 来自应老师微博
+
+如图所示, 切三刀将一个长方体分成八个小长方体, 图中标出了七个可见小长方体得表面积, 请问第八个小长方体得表面积是多少?
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[] (A) at (0,0);
+\coordinate[] (B) at (4,0);
+\coordinate[] (C) at (5,1);
+\coordinate[] (D) at (4,4);
+\coordinate[] (E) at (0,4);
+\coordinate[] (F) at (5,5);
+\coordinate[] (G) at (1,5);
+\coordinate[] (H) at (2.4,5);
+\coordinate[] (I) at (1.4,4);
+\coordinate[] (J) at (1.4,0);
+\coordinate[] (K) at (0,1);
+\coordinate[] (L) at (4,1);
+\coordinate[] (M) at (5,2);
+\coordinate[] (N) at (0.7,4.7);
+\coordinate[] (O) at (4.7,4.7);
+\coordinate[] (P) at (4.7,0.7);
+\draw [line width=1.0pt] (A) -- (B) -- (D) -- (E) -- cycle;
+\draw [line width=1.0pt] (B) -- (C) -- (F) -- (D);
+\draw [line width=1.0pt] (D) -- (F) -- (G) -- (E);
+\draw [line width=1.0pt] (K) -- (L) -- (M);
+\draw [line width=1.0pt] (N) -- (O) -- (P);
+\draw [line width=1.0pt] (H) -- (I) -- (J);
+\draw[] (3.6,3.8) node[] {$148$};
+\draw[] (-0.5,4) node[] {$126$};
+\draw[] (5.2,5.2) node[] {$88$};
+\draw[] (5.2,0.8) node[] {$28$};
+\draw[] (3.7,-0.2) node[] {$58$};
+\draw[] (-0.4,-0.2) node[] {$46$};
+\draw[] (1,5.2) node[] {$72$};
+\end{tikzpicture}
+\end{figure*}
+
+解: 设第八个小长方体的表面积为 $2x$, 并设三组棱被分成的两段长分别为 $a_1, a_2, b_1, b_2, c_1, c_2$, 则根据表面积分别可以得到：
+\begin{align*}
+2(a_1b_1 + b_1c_1 + c_1a_1) &= 23 \qquad\qquad\cdots\qquad (1)\\
+2(a_2b_1 + b_1c_1 + c_1a_2) &= 29 \qquad\qquad\cdots\qquad (2)\\
+2(a_1b_2 + b_2c_1 + c_1a_1) &= 2x \qquad\qquad\cdots\qquad (3)\\
+2(a_2b_2 + b_2c_1 + c_1a_2) &= 14 \qquad\qquad\cdots\qquad (4)\\
+2(a_1b_1 + b_1c_2 + c_2a_1) &= 63 \qquad\qquad\cdots\qquad (5)\\
+2(a_2b_1 + b_1c_2 + c_2a_2) &= 74 \qquad\qquad\cdots\qquad (6)\\
+2(a_1b_2 + b_2c_2 + c_2a_1) &= 36 \qquad\qquad\cdots\qquad (7)\\
+2(a_2b_2 + b_2c_2 + c_2a_2) &= 44 \qquad\qquad\cdots\qquad (8)
+\end{align*}
+
+再由 $(2) - (1), (4) - (3), (6) - (5), (8) - (7)$, 分别得到:
+\begin{align*}
+(b_1+c_1)(a_2-a_1) &= 6 \qquad\qquad\cdots\qquad (9)\\
+(b_2+c_1)(a_2-a_1) &= 14-x \qquad\cdots\qquad (10)\\
+(b_1+c_2)(a_2-a_1) &= 11 \qquad\qquad\cdots\qquad (11)\\
+(b_2+c_2)(a_2-a_1) &= 8 \qquad\qquad\cdots\qquad (12)
+\end{align*}
+
+最后, 由 $(9)+(12)=(10)+(11)$, 得 $x=11$, 所以第八个小长方体表面积为 $22$.
+
+%------------------------------------------------------------------------------%
+\newpage
+
+已知下图中三个正方形的面积分别是 $a^2, b^2, c^2$ , 求 (1) 中心三角形的面积; (2) 整个六边形的面积;
+
+\begin{figure*}[htbp]
+\definecolor{zzttqq}{rgb}{0.6,0.2,0}
+\definecolor{uuuuuu}{rgb}{0.26666666666666666,0.26666666666666666,0.26666666666666666}
+\begin{tikzpicture}[scale=1]
+\clip(-5.36,-3.5) rectangle (12.2,4.5);
+\coordinate[label=below right:$B$] (B) at (0,0);
+\coordinate[label=below left:$C$] (C) at (3,0);
+\coordinate[label=left:$A$] (A) at (2,2);
+\coordinate[label=above:$D$] (D) at (0,4);
+\coordinate[label=left:$E$] (E) at (-2,2);
+\coordinate[label=below:$F$] (F) at (0,-3);
+\coordinate[label=below:$G$] (G) at (3,-3);
+\coordinate[label=right:$P$] (P) at (5,1);
+\coordinate[label=right:$Q$] (Q) at (4,3);
+\draw [line width=1.5pt] (B) to [edge label = $c$] (A);
+\draw [line width=1.5pt] (C) to [edge label = $a$] (B);
+\draw [line width=1.5pt] (A) to [edge label = $b$] (C);
+\draw [line width=1.5pt] (A) -- (D) -- (Q) -- cycle;
+\draw [line width=1.5pt] (B) -- (E) -- (F) -- cycle;
+\draw [line width=1.5pt] (C) -- (P) -- (G) -- cycle;
+\draw [line width=1.5pt] (D) -- (E);
+\draw [line width=1.5pt] (F) -- (G);
+\draw [line width=1.5pt] (P) -- (Q);
+
+\begin{scriptsize}
+\draw [fill=uuuuuu] (2,2) circle (2pt);
+\draw [fill=uuuuuu] (0,0) circle (2pt);
+\draw [fill=uuuuuu] (3,0) circle (2pt);
+\draw [fill=uuuuuu] (0,4) circle (2pt);
+\draw [fill=uuuuuu] (-2,2) circle (2pt);
+\draw [fill=uuuuuu] (5,1) circle (2pt);
+\draw [fill=uuuuuu] (4,3) circle (2pt);
+\draw [fill=uuuuuu] (0,-3) circle (2pt);
+\draw [fill=uuuuuu] (3,-3) circle (2pt);
+\end{scriptsize}
+\end{tikzpicture}
+\end{figure*}
+
+\noindent 解: 可以直接由海伦公式得到中心三角形的面积, 或者简单推导一下:
+
+令 $\theta = \angle BAC $, 则
+\begin{align*} 
+\cos \theta &= \frac{b^2+c^2-a^2}{2bc} \\
+\sin \theta &= \sqrt{1-\cos^2\theta} = \frac{\sqrt{(a^2+b^2+c^2)^2-2(a^4+b^4+c^4)}}{2bc} \\
+S_{\triangle ABC} &= \frac{1}{2}bc\sin\theta = \frac{1}{4}\sqrt{(a^2+b^2+c^2)^2-2(a^4+b^4+c^4)}.
+\end{align*}
+
+同时注意到 $\angle ADQ = \pi - \theta$, 从而 $\sin\angle ADQ = \sin \theta $. 同样可以由正弦定理得到 $\triangle ADQ $ 的面积: $S_{\triangle ADQ} = \dfrac{1}{2}bc\sin\theta = S_{\triangle ABC}$.
+
+同理可以证明 4 个三角形面积都是相等的. 所以整个六边形面积也可以求出来了.
+
+
+%------------------------------------------------------------------------------%
+\newpage
+
+\noindent 环球城市数学竞赛~ 1981 春季~ 初中组
+
+凸四边形 $ ABCD $ 外接于以 $ O $ 为圆心的圆, 且对角线互相垂直. 求证: 折线 $ AOC $ 将四边形分成的两部分面积相等. 
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[]
+\coordinate[label=right:$O$] (O) at (0,0);
+\coordinate[label=below:$A$] (A) at  (-1,-2.82842712474619);
+\coordinate[label=right:$B$] (B) at (2.23606797749979,2);
+\coordinate[label=above:$C$] (C) at (-1,2.8284271247461903);
+\coordinate[label=left:$D$] (D) at (-2.23606797749979,2);
+\coordinate[label=above:$P$] (P) at (0,2);
+\coordinate[label=below left:$E$] (Q) at (intersection of A--C and B--D);
+\draw [line width=1pt] (O) circle (3cm);
+\draw [line width=1pt] (A)--(B)--(C)--(D)--(A);
+\draw [line width=1pt] (A)--(C);
+\draw [line width=1pt] (B)--(D);
+\draw[densely dashed,line width=1pt] (O)--(A);
+\draw[densely dashed,line width=1pt] (O)--(C);
+\draw[densely dashed,line width=1pt] (O)--(P);
+\tkzMarkRightAngle[line width=1pt](O,P,B);
+\tkzMarkRightAngle[line width=1pt](C,Q,D);
+\foreach \p in {A,B,C,D,O,P,Q}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+\end{figure*}
+
+\noindent 证明:
+
+设四边形对角线交点为 $ E $, 则总面积为 \[ S_{ABCD} = \frac{1}{2}AC\cdot(DE+DB) = \frac{1}{2}AC\cdot BD .\]
+过 $ O $ 作 $ BD $ 的垂线, 垂足为 $ P $. 则
+\[ DP= \frac{1}{2}BD .\]
+三角形 $ AOC $ 中, $ AC $ 边上的高等于 $ EP $, 则四边形 $ AOCD $ 面积为 \[ S_{AOCD}=\frac{1}{2}AC\cdot DE + \frac{1}{2}AC\cdot EP=\frac{1}{2}AC\cdot DP = \frac{1}{4}AC\cdot BD .\]
+
+所以四边形 $ AOCD $ 的面积是四边形 $ ABCD $ 面积的一半.
+
+
+%------------------------------------------------------------------------------%
+\newpage
+
+五点共圆问题：$ ABCDE $ 分别是五角星的五个角，$ FGHIJ $ 是五角星内五边形的顶点，过角上五个三角形分别作其各自的外接圆，这五个外接圆之间的另外5个交点为 $ KLMNO $。
+
+求证：$ KLMNO $五点共圆。
+
+\begin{figure*}[htbp]
+\definecolor{wrwrwr}{rgb}{0.3803921568627451,0.3803921568627451,0.3803921568627451}
+\definecolor{rvwvcq}{rgb}{0.08235294117647059,0.396078431372549,0.7529411764705882}
+\centering
+\begin{minipage}[t]{0.49\linewidth}
+\begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=1cm,y=1cm,scale=0.65]
+\clip(-6.5,-5) rectangle (4.5,6.68);
+\draw [line width=1pt] (-5.54,2.96)-- (4.16,3.56);
+\draw [line width=1pt] (4.16,3.56)-- (-3.6,-2.5);
+\draw [line width=1pt] (-3.6,-2.5)-- (-0.86,5.44);
+\draw [line width=1pt] (-0.86,5.44)-- (3.38,-2.94);
+\draw [line width=1pt] (3.38,-2.94)-- (-5.54,2.96);
+\draw [line width=1pt] (-2.4433164627746145,-0.9963680799975226) circle (1.8970571304361306cm);
+\draw [line width=1pt] (-3.555077482979414,2.5776370932566546) circle (2.0214150467008403cm);
+\draw [line width=1pt] (-0.7642623043847099,4.154540880893088) circle (1.2890193378133785cm);
+\draw [line width=1pt] (2.211395100701915,3.049195046903195) circle (2.0144435344969907cm);
+\draw [line width=1pt] (1.6041157881624986,-1.1868179647486399) circle (2.495478307375523cm);
+\draw [line width=1pt] (-0.47649683829968537,1.1931720926743796) circle (3.1223717630981773cm);
+\begin{scriptsize}
+\draw [fill=rvwvcq] (-5.54,2.96) circle (2.5pt);
+\draw[color=rvwvcq] (-5.98,3.27) node {$A$};
+\draw [fill=rvwvcq] (4.16,3.56) circle (2.5pt);
+\draw[color=rvwvcq] (4.32,3.99) node {$B$};
+\draw [fill=rvwvcq] (3.38,-2.94) circle (2.5pt);
+\draw[color=rvwvcq] (3.64,-3.17) node {$C$};
+\draw [fill=rvwvcq] (-3.6,-2.5) circle (2.5pt);
+\draw[color=rvwvcq] (-3.84,-2.79) node {$D$};
+\draw [fill=rvwvcq] (-0.86,5.44) circle (2.5pt);
+\draw[color=rvwvcq] (-0.7,5.87) node {$E$};
+\draw [fill=wrwrwr] (-1.6324085228328071,3.201706689309311) circle (2.5pt);
+\draw[color=wrwrwr] (-1.94,2.99) node {$F$};
+\draw [fill=wrwrwr] (0.2146930693069302,3.215960396039605) circle (2.5pt);
+\draw[color=wrwrwr] (0.72,3.13) node {$G$};
+\draw [fill=wrwrwr] (1.2435677753871115,1.2824768967584919) circle (2.5pt);
+\draw[color=wrwrwr] (1.4,1.71) node {$H$};
+\draw [fill=wrwrwr] (-0.7041848091731506,-0.23857731231820778) circle (2.5pt);
+\draw[color=wrwrwr] (-0.66,0.33) node {$I$};
+\draw [fill=wrwrwr] (-2.4264882263411764,0.9006144097996569) circle (2.5pt);
+\draw[color=wrwrwr] (-2.56,1.41) node {$J$};
+\draw [fill=wrwrwr] (-2.028412126023981,3.9025565922831817) circle (2.5pt);
+\draw[color=wrwrwr] (-2.46,4.01) node {$K$};
+\draw [fill=wrwrwr] (0.5247511775934492,4.150655454869824) circle (2.5pt);
+\draw[color=wrwrwr] (0.62,4.67) node {$L$};
+\draw [fill=wrwrwr] (2.643885376931414,1.0817258820511362) circle (2.5pt);
+\draw[color=wrwrwr] (2.9,1.51) node {$M$};
+\draw [fill=wrwrwr] (-0.7830264809539287,-1.914116919497978) circle (2.5pt);
+\draw[color=wrwrwr] (-0.82,-2.39) node {$N$};
+\draw [fill=wrwrwr] (-3.5332353590293155,0.5563400560426999) circle (2.5pt);
+\draw[color=wrwrwr] (-3.38,0.99) node {$O$};
+\end{scriptsize}
+\end{tikzpicture}
+\end{minipage}
+\begin{minipage}[t]{0.49\linewidth}
+\begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=1cm,y=1cm,scale=0.65]
+\clip(-6.5,-5) rectangle (4.5,6.68);
+\draw [line width=1pt] (-5.54,2.96)-- (4.16,3.56);
+\draw [line width=1pt] (4.16,3.56)-- (-3.6,-2.5);
+\draw [line width=1pt] (-3.6,-2.5)-- (-0.86,5.44);
+\draw [line width=1pt] (-0.86,5.44)-- (3.38,-2.94);
+\draw [line width=1pt] (3.38,-2.94)-- (-5.54,2.96);
+\draw [line width=1pt] (-2.4433164627746145,-0.9963680799975226) circle (1.8970571304361306cm);
+\draw [line width=1pt] (-3.555077482979414,2.5776370932566546) circle (2.0214150467008403cm);
+\draw [line width=1pt] (-0.7642623043847099,4.154540880893088) circle (1.2890193378133785cm);
+\draw [line width=1pt] (2.211395100701915,3.049195046903195) circle (2.0144435344969907cm);
+\draw [line width=1pt] (1.6041157881624986,-1.1868179647486399) circle (2.495478307375523cm);
+\draw [line width=1pt] (-2.028412126023981,3.9025565922831817)-- (-3.5332353590293155,0.5563400560426999);
+\draw [line width=1pt] (-3.5332353590293155,0.5563400560426999)-- (-0.7830264809539287,-1.914116919497978);
+\draw [line width=1pt] (-0.7830264809539287,-1.914116919497978)-- (2.643885376931414,1.0817258820511362);
+\draw [line width=1pt] (2.643885376931414,1.0817258820511362)-- (0.5247511775934492,4.150655454869824);
+\draw [line width=1pt] (0.5247511775934492,4.150655454869824)-- (-2.028412126023981,3.9025565922831817);
+\draw [line width=1pt] (4.16,3.56)-- (2.643885376931414,1.0817258820511362);
+\draw [line width=1pt] (2.643885376931414,1.0817258820511362)-- (1.2435677753871115,1.2824768967584919);
+\draw [line width=1pt] (-0.7041848091731506,-0.23857731231820778)-- (2.643885376931414,1.0817258820511362);
+\draw [line width=1pt] (-5.54,2.96)-- (-3.5332353590293155,0.5563400560426999);
+\draw [line width=1pt] (-3.5332353590293155,0.5563400560426999)-- (2.643885376931414,1.0817258820511362);
+\draw [line width=1pt] (0.5247511775934492,4.150655454869824)-- (0.2146930693069302,3.315960396039605);
+\draw [line width=1pt] (-1.6324085228328071,3.201706689309311)-- (-2.028412126023981,3.9025565922831817);
+\begin{scriptsize}
+\draw [fill=rvwvcq] (-5.54,2.96) circle (2.5pt);
+\draw[color=rvwvcq] (-5.98,3.27) node {$A$};
+\draw [fill=rvwvcq] (4.16,3.56) circle (2.5pt);
+\draw[color=rvwvcq] (4.32,3.99) node {$B$};
+\draw [fill=rvwvcq] (3.38,-2.94) circle (2.5pt);
+\draw[color=rvwvcq] (3.64,-3.17) node {$C$};
+\draw [fill=rvwvcq] (-3.6,-2.5) circle (2.5pt);
+\draw[color=rvwvcq] (-3.84,-2.79) node {$D$};
+\draw [fill=rvwvcq] (-0.86,5.44) circle (2.5pt);
+\draw[color=rvwvcq] (-0.7,5.87) node {$E$};
+\draw [fill=wrwrwr] (-1.6324085228328071,3.201706689309311) circle (2.5pt);
+\draw[color=wrwrwr] (-1.94,3.09) node {$F$};
+\draw [fill=wrwrwr] (0.2146930693069302,3.315960396039605) circle (2.5pt);
+\draw[color=wrwrwr] (0.72,3.23) node {$G$};
+\draw [fill=wrwrwr] (1.2435677753871115,1.2824768967584919) circle (2.5pt);
+\draw[color=wrwrwr] (1.4,1.71) node {$H$};
+\draw [fill=wrwrwr] (-0.7041848091731506,-0.23857731231820778) circle (2.5pt);
+\draw[color=wrwrwr] (-0.66,0.33) node {$I$};
+\draw [fill=wrwrwr] (-2.4264882263411764,0.9006144097996569) circle (2.5pt);
+\draw[color=wrwrwr] (-2.56,1.41) node {$J$};
+\draw [fill=wrwrwr] (-2.028412126023981,3.9025565922831817) circle (2.5pt);
+\draw[color=wrwrwr] (-2.46,4.11) node {$K$};
+\draw [fill=wrwrwr] (0.5247511775934492,4.150655454869824) circle (2.5pt);
+\draw[color=wrwrwr] (0.62,4.67) node {$L$};
+\draw [fill=wrwrwr] (2.643885376931414,1.0817258820511362) circle (2.5pt);
+\draw[color=wrwrwr] (2.8,1.51) node {$M$};
+\draw [fill=wrwrwr] (-0.7830264809539287,-1.914116919497978) circle (2.5pt);
+\draw[color=wrwrwr] (-0.62,-1.49) node {$N$};
+\draw [fill=wrwrwr] (-3.5332353590293155,0.5563400560426999) circle (2.5pt);
+\draw[color=wrwrwr] (-3.38,0.99) node {$O$};
+\end{scriptsize}
+\end{tikzpicture}
+\end{minipage}
+\end{figure*}
+
+\begin{proof}
+反复使用圆内接四边形的对角互补以及对角互补的四边形顶点共圆。
+
+先证明 $ ABMI $ 四点共圆。
+
+由 $ BMHG $ 四点共圆得：$ \angle GHM + \angle GBM = 180 \degree $，从而 $ \angle GBM = \angle CHM = \angle CIM $.
+
+于是在四边形 $ ABMI $ 中，$ \angle AIM + \angle ABM = \angle AIM + \angle CIM = 180\degree $，说明 $ ABMI $ 四点共圆。
+
+同理可证 $ ABIO $ 四点共圆。所以 $ ABMIO $ 五点共圆（都在 $ \triangle ABI $ 的外接圆上）。下一步证明 $ KLMO $ 四点共圆。
+
+由 $ ABMO $ 共圆得：$ \angle AOK + \angle KOM + \angle ABM = 180\degree $.
+
+四边形 $ KLGF $ 中对角互补，可知 $ \angle KLG = 180\degree - \angle KFG = \angle KFA $.
+
+进而 $ \angle KLG = \angle KFA = \angle KOA $.
+
+另一方面，由 $ GLBM $ 共圆，有 $ \angle GLM = \angle GBM $.
+
+所以 $ \angle KOM + \angle KLG + \angle GLM = \angle KMO + \angle KOA + \angle GBM = 180\degree $.
+
+这样就证明了 $ KLMO $ 四点共圆。同理可证 $ LMNK $ 共圆，于是 $ KLMNO $ 五点共圆。
+
+\end{proof}
+
+%------------------------------------------------------------------------------%
+\newpage
+拿破仑三角形: 以三角形 $ ABC $ 的三边向外作等边三角形 $ ABD $, $ BCE $ 和 $ ACF $, 求证这三个等边三角形的中心 $ RST $ 也构成一个等边三角形.
+
+\begin{figure*}[htbp]
+\centering
+\definecolor{wrwrwr}{rgb}{0.3803921568627451,0.3803921568627451,0.3803921568627451}
+\definecolor{rvwvcq}{rgb}{0.08235294117647059,0.396078431372549,0.7529411764705882}
+\begin{minipage}[t]{0.49\linewidth}
+\begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=1cm,y=1cm]
+\clip(-0.40,-0.4) rectangle (7,6.3);
+\coordinate[label=left:$D$] (D) at (0.5367869447766667,5.476580753730952);
+\coordinate[label=above:$B$] (B) at (3.733333333333332,5.166666666666666);
+\coordinate[label=right:$E$] (E) at (6.1130080978318695,5.501717597600967);
+\coordinate[label=left:$A$] (A) at (1.8666666666666654,2.553333333333333);
+\coordinate[label=right:$C$] (C) at (5.213333333333332,3.2733333333333325);
+\coordinate[label=240:$F$] (F) at (4.1635382907247935,0.015034982001410846);
+\coordinate[label=right:$S$] (S) at (5.019891588166178,4.64723919920032);
+\coordinate[label=right:$T$] (T) at (3.7478460969082636,1.9472338828893587);
+\coordinate[label=left:$R$] (R) at (2.0455956482588875,4.398860251243649);
+
+\draw [line width=1pt,color=rvwvcq] (A) -- (B) -- (C) -- (A);
+\draw [line width=1pt,color=rvwvcq] (B) -- (D) -- (A) -- (F) -- (C) -- (E) -- (B);
+\draw [line width=1pt,dotted] (R)-- (S) -- (T) -- (R);
+\foreach \p in {A,B,C,D,E,F,R,S,T}
+	\fill[fill=rvwvcq,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+
+\end{minipage}
+\begin{minipage}[t]{0.49\linewidth}
+\begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=1cm,y=1cm]
+\clip(-0.40,-0.4) rectangle (7,6.3);
+\coordinate[label=left:$D$] (D) at (0.5367869447766667,5.476580753730952);
+\coordinate[label=above:$B$] (B) at (3.733333333333332,5.166666666666666);
+\coordinate[label=right:$E$] (E) at (6.1130080978318695,5.501717597600967);
+\coordinate[label=below left:$A$] (A) at (1.8666666666666654,2.553333333333333);
+\coordinate[label=below right:$C$] (C) at (5.213333333333332,3.2733333333333325);
+\coordinate[label=240:$F$] (F) at (4.1635382907247935,0.015034982001410846);
+\coordinate[label=right:$S$] (S) at (5.019891588166178,4.64723919920032);
+\coordinate[label=right:$T$] (T) at (3.7478460969082636,1.9472338828893587);
+\coordinate[label=left:$R$] (R) at (2.0455956482588875,4.398860251243649);
+
+\coordinate[label=below:$H$] (H) at (3.8373055255305166,3.921617230474919);
+\coordinate[label=below left:$P$] (P) at (intersection of R--S and B--H);
+\coordinate[label=right:$Q$] (Q) at (intersection of T--S and C--H);
+
+\draw [line width=1pt,color=rvwvcq] (A) -- (B) -- (C) -- (A);
+\draw [line width=1pt,color=rvwvcq] (B) -- (D) -- (A) -- (F) -- (C) -- (E) -- (B);
+\draw [line width=1pt,dotted] (R)-- (S) -- (T) -- (R);
+\draw [line width=1pt,color=wrwrwr] (S) circle (1.387457039708632cm);
+\draw [line width=1pt,color=wrwrwr] (R) circle (1.8541804618712767cm);
+\draw [line width=1pt] (H) -- (B);
+\draw [line width=1pt] (R)-- (H) -- (C);
+\draw [line width=1pt] (A)-- (H) -- (S);
+
+\foreach \p in {A,B,C,D,E,F,R,S,T,H,P,Q}
+	\fill[fill=rvwvcq,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+\end{minipage}
+\end{figure*}
+
+\begin{proof}
+过 $ R $ 和 $ S $ 分别作两个正三角形的外接圆, 两个圆的公共交点为 $ B $ 和 $ H $. 
+
+由圆内接四边形对角互补得 $ \angle AHB = \angle BHC = 120 \degree $, 从而 $ \angle AHC = 120\degree $, 再结合 $ \angle AFC + \angle AHC = 180 \degree $, 可知 $ AHCF $ 共圆. 也就是三个正三角形的外接圆相交于点 $ H $.
+
+因为 $ BH $ 是 圆 $ R $ 和 $ S $ 的公共弦, 所以 $ BH \perp RS $, $ \angle HPS = 90\degree $, 同理 $ \angle HQS = 90\degree $, 于是在四边形 $ HPSQ $ 中, 有两个角都是 $ 90\degree $, 所以 $ \angle PSQ = 180\degree-\angle PHQ= 60\degree $.
+
+同理可得 $ \angle SRT $ 和 $ \angle STR $ 也等于 $ 60\degree $. 所以三角形 $ RST $ 是正三角形.
+\end{proof}
+~\\
+\noindent 另一种证法: 令三角形 $ ABC $ 三边长分别为 $ BC = a, AC = b, AB = c $.
+
+三角形 $ ART $ 中, 由余弦定理, 
+\begin{align*} 
+RT^2 &= AR^2 + AT^2 - 2AR\cdot AT\cos(30\degree+\angle BAC+30\degree)\\
+	&= \frac{1}{3}c^2 + \frac{1}{3}b^2 - \frac{2}{3}bc\cdot\cos(\angle BAC + 60\degree)\\
+	&= \frac{1}{3}c^2 + \frac{1}{3}b^2 - \frac{1}{3}bc\cdot\cos(\angle BAC) + \frac{1}{3\sqrt{3}}bc\cdot\sin(\angle BAC).
+\end{align*}
+
+三角形 $ ABC $ 中, 应用余弦定理得: $ a^2 = b^2 + c^2 - 2bc\cdot\cos(\angle BAC) $, 应用面积公式得: $ 2S = bc\cdot\sin(\angle BAC) $. 于是
+\begin{align*} 
+RT^2 &= \frac{1}{3}c^2 + \frac{1}{3}b^2 - \frac{1}{3}\cdot\frac{b^2+c^2-a^2}{2} + \frac{1}{3\sqrt{3}}\cdot 2S\\
+	&= \frac{1}{6}(a^2+b^2+c^2)+\frac{2S}{3\sqrt{3}}.
+\end{align*}
+这个式子是对称的, 对 $ RS $ 和 $ ST $ 也是同样的结果, 所以这三条边相等.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
