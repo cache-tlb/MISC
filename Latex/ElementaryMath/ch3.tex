@@ -648,6 +648,7 @@ f(0) &= AB\cdot CD + AD\cdot BC - AC\cdot BD\\
 \coordinate[label=below left:$C$] (C) at (-1.347,-1.478);
 \coordinate[label=above left:$D$] (D) at (-1.072,1.688);
 \coordinate[label=left:$E$] (E) at (-1.949,-0.447);
+\coordinate[label=below:$F$] (F) at (0.981,-0.45);
 \coordinate[label=below right:$P$] (P) at (3.659,-0.912);
 \draw [line width=1pt] (O) circle (2cm);
 \draw [line width=1pt] (A) -- (B) -- (C) -- (D) -- cycle;
@@ -656,7 +657,7 @@ f(0) &= AB\cdot CD + AD\cdot BC - AC\cdot BD\\
 \draw [dashed,line width=1pt] (A) -- (E) -- (C);
 \draw [dashed,line width=1pt] (A) -- (P) -- (B);
 \draw [dashed,line width=1pt] (D) -- (E) -- (B);
-\foreach \p in {A,B,C,D,E,P}
+\foreach \p in {A,B,C,D,E,F,P}
 	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
 \draw pic["$\alpha$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.35cm] {angle=A--P--B};
 \draw pic["$\alpha$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.35cm] {angle=D--A--E};
@@ -665,9 +666,75 @@ f(0) &= AB\cdot CD + AD\cdot BC - AC\cdot BD\\
 \end{tikzpicture}
 \end{figure*}
 
-过 $A$ 作 $AE$ 平行于 $BC$, 交圆于 $E$ 点, 连接 $BE, CE, DE$, 设 $BC$ 与 $AD$ 交于 $P$ 点, $\angle APB  = \alpha$. 
+过 $A$ 作 $AE$ 平行于 $BC$, 交圆于 $E$ 点, 连接 $BE, CE, DE$, 设 $BC$ 与 $AD$ 交于 $P$ 点, $AC$与$BD$交于 $F$ 点, $\angle APB  = \alpha$. 
 
-四边形 $ABCE$ 为等腰梯形, $AB= EC, AC=EB$.
+四边形 $ABCE$ 为等腰梯形, $AB= EC, AC=EB$. 在 $\triangle ABC$ 中, $BC$ 边上的高为 $AP\cdot\sin\alpha$, 而对于 $\triangle DBC$, $BC$ 边上的高为 $DP\cdot\sin\alpha$, 所以
+\begin{align*}
+\frac{1}{2}\cdot AD\cdot BC\cdot\sin\alpha &= \frac{1}{2}\cdot (DP-AP)\cdot BC\sin\alpha \\
+&= S_{\triangle DCB} - S_{\triangle ACB}\\
+&=S_{\triangle DCB} - S_{\triangle ECB}\\
+& = S_{\triangle DBE} - S_{\triangle DCE}
+\end{align*}
+而 $\angle APB = \angle DAE = \angle DBE = \angle DCE = \alpha$, 所以
+\begin{align*}
+S_{\triangle DBE} &= \frac{1}{2}\cdot BD\cdot BE\cdot\sin\angle DBE = \frac{1}{2}\cdot BD\cdot AC\cdot\sin\alpha\\
+S_{\triangle DCE} &= \frac{1}{2}\cdot CE\cdot CD\cdot\sin\angle DCE = \frac{1}{2}\cdot AB\cdot CD\cdot\sin\alpha
+\end{align*}
+将它们代入前面得式子, 并约去 $\dfrac{1}{2}\sin\alpha$, 得: $AD\cdot BD = AC\cdot BD - AB\cdot BD$.
+
+~
+
+证法15: (西姆松线)
+
+先证明引理(西姆松定理): 过三角形外接圆上异于三角形顶点得任意一点, 作三条边或其延长线的垂线, 则三个垂足共线.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.0]
+\coordinate[] (O) at (0,0);
+\coordinate[label=above left:$A$] (A) at (-0.732,1.865);
+\coordinate[label=left:$B$] (B) at (-1.948,-0.452);
+\coordinate[label=right:$C$] (C) at (1.945,-0.464);
+\coordinate[label=above right:$D$] (D) at (1.214,1.59);
+\coordinate[label=above:$E$] (E) at (-0.413,2.45);
+\coordinate[label=below:$F$] (F) at (1.207,-0.462);
+\coordinate[label=below left:$G$] (G) at (0.513,0.786);
+\draw [line width=1pt] (O) circle (2cm);
+\draw [line width=1pt] (A) -- (B) -- (C) -- (D) -- cycle;
+\draw [line width=1pt] (A) -- (C);
+\draw [line width=1pt] (B) -- (D);
+\draw [dashed,line width=1pt] (D) -- (E) -- (A);
+\draw [dashed,line width=1pt] (D) -- (F);
+\draw [dashed,line width=1pt] (D) -- (G);
+\draw [dashed,line width=1pt] (E) -- (G) -- (F);
+\foreach \p in {A,B,C,D,E,F,G}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\tkzMarkRightAngle[dashed,line width=1pt](D,E,A);
+\tkzMarkRightAngle[dashed,line width=1pt](D,G,C);
+\tkzMarkRightAngle[dashed,line width=1pt](D,F,C);
+\end{tikzpicture}
+\end{figure*}
+
+由四边形包含一组相对的顶角是直角, 可以得到三个顶点共圆的四边形, 分别是 $BFDE$, $AGDE$, 和 $CDGF$.
+
+在四边形 $BFDE$ 中, $\angle FDE = 180\degree - \angle ABC$, 而 在四边形 $ABCD$ 中, $\angle ADC = 180\degree - \angle ABC$, 于是 $\angle FDE = \angle ADC$. 减去重叠的角度, 有 $\angle ADE = \angle CDF$.
+
+再由$C,D,F,G$共圆知: $\angle CDF = \angle CGF$; 由 $A,G,D,E$ 共圆知: $\angle ADE = \angle AGE$. 所以 $\angle AGE = \angle CGF$. 这说明 $GE$ 和 $GF$ 在一条直线上, 故 $E,F,G$三点共线.
+
+回到托勒密定理, 由正弦定理得:
+\begin{align*}
+EG &= AD\cdot\sin\angle GDE\\
+GF &= CD\cdot\sin\angle GCF\\
+EF &= BD\cdot\sin\angle EBF
+\end{align*}
+设四边形 $ABCD$ 的外接圆半径为 $2R$, 那么
+\begin{align*}
+\sin\angle GDE &= \sin\angle GAE = \sin\angle BAC = \frac{BC}{2R}\\
+\sin\angle GCF &= \frac{AB}{2R}\\
+\sin\angle EBF &= \frac{AC}{2R}
+\end{align*}
+代入前面的三个等式, 并根据 $EF = EG + GF$, 得
+\[BD\cdot\frac{AC}{2R} = AD\cdot\frac{BC}{2R} + CD\cdot\frac{AB}{2R} ,\]
+即: $BD\cdot AC = AD\cdot BC + AB\cdot CD$ . 
 
 %------------------------------------------------------------------------------%
 \newpage
