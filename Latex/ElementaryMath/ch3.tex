@@ -736,6 +736,47 @@ EF &= BD\cdot\sin\angle EBF
 \[BD\cdot\frac{AC}{2R} = AD\cdot\frac{BC}{2R} + CD\cdot\frac{AB}{2R} ,\]
 即: $BD\cdot AC = AD\cdot BC + AB\cdot CD$ . 
 
+
+%------------------------------------------------------------------------------%
+\newpage
+康威圆: 任意三角形上, 在每个顶点上将两边延伸出去此顶点对应的那边的长度, 这样得到的六点共圆. 这个圆称为此三角形的康威圆.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.0]
+\coordinate[label=below right:$O$] (O) at (0.204,0.744);
+\coordinate[label=right:$A$] (A) at (0,2);
+\coordinate[label=below right:$B$] (B) at (-1,0);
+\coordinate[label=below left:$C$] (C) at (2,0);
+\coordinate[label=above left:$D$] (D) at (-2.121,4.121);
+\coordinate[label=above:$E$] (E) at (1.342,4.683);
+\coordinate[label=left:$F$] (F) at (-3.828,0);
+\coordinate[label=below left:$G$] (G) at (-2.265,-2.53);
+\coordinate[label=right:$H$] (H) at (4.236,0);
+\coordinate[label=below right:$I$] (I) at (3.581,-1.581);
+%\coordinate[label=left:$J$] (J) at (-0.462,1.077);
+%\coordinate[label=above right:$K$] (K) at (0.73,1.27);
+%\coordinate[label=below right:$L$] (L) at (0.204,0);
+\draw [gray,line width=1pt] (O) circle (4.1cm);
+\draw [red!80,line width=1pt] (A) -- (B);
+\draw [red!80,line width=1pt] (H) --(C) -- (I);
+\draw [green!80,line width=1pt] (B) -- (C);
+\draw [green!80,line width=1pt] (D) -- (A) -- (E);
+\draw [blue!80,line width=1pt] (C) -- (A);
+\draw [blue!80,line width=1pt] (F) -- (B) -- (G);
+\draw [gray,dashed,line width=1pt] (D) -- (O) -- (E);
+\draw [gray,dashed,line width=1pt] (F) -- (O) -- (C);
+\draw [gray,dashed,line width=1pt] (O) -- (A);
+\foreach \p in {A,B,C,D,E,F,G,H,I,O}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+\end{figure*}
+
+如图所示, 设 $\triangle ABC$ 的内心为 $O$. 考虑$\triangle DAO$ 和 $\triangle EAO$, 因为 $\angle BAO = \angle CAO$, $\angle BAD = \angle CAE$, 所以 $\angle DAO = \angle EAO$, 再由 $DA = EA$, 和公共边 $AO$, 得到 $\triangle DAO \cong \triangle EAO$, 所以 $OD = OE$. 同理可得 $OF = OG, OH = OI$.
+
+再考虑$\triangle CDO$ 和 $\triangle CFO$, 因为 $BC = AD, AC = BF$, 所以 $CD = CF$, 再根据 $\angle DCO = \angle FCO$, 和公共边 $CO$, 可得 $\triangle CDO \cong \triangle CFO$, 所以 $OD = OF$. 同理还有 $ OG = OI, OE = OH$.
+
+这就证明了 $O$ 点到 $D,E,F,G,H,I$ 的距离都是相等的.
+
 %------------------------------------------------------------------------------%
 \newpage
 圆幂, 根轴, 根心, 蒙日定理
