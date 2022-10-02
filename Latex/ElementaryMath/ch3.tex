@@ -1165,6 +1165,73 @@ $\triangle ABC$ 中, $\angle BAC = 80\degree$, $\angle ABC=20\degree$, $D$在$AB
 
 %------------------------------------------------------------------------------%
 \newpage
+来自微博: 
+
+已知 $\angle DBA = 48\degree$, $\angle CAB = 24\degree$, $AC=AB=BD$, 求 $\angle BDC$.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.2]
+\coordinate[label=below:$A$] (A) at (1.486,-2.574);
+\coordinate[label=right:$B$] (B) at (1.989,2.209);
+\coordinate[label=above:$C$] (C) at (0,2);
+\coordinate[label=below:$D$] (D) at (-1.902,-0.618);
+%\coordinate[label=above left:$E$] (E) at (-2.405,4.165);
+%\coordinate[label=below:$F$] (F) at (0,0);
+\draw [red,line width=1pt] (C) -- (D);
+\draw [blue,line width=1pt] (A) -- (B) node [midway,sloped] {$\bracevert$};
+\draw [blue,line width=1pt] (A) -- (C) node [midway,sloped] {$\bracevert$};
+\draw [blue,line width=1pt] (B) -- (D) node [midway,sloped] {$\bracevert$};
+\foreach \p in {A,B,C,D}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.0pt);
+\draw pic["$24\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.8cm] {angle=B--A--C};
+\draw pic["$48\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=D--B--A};
+\draw pic["$?$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.8cm] {angle=B--D--C};
+\end{tikzpicture}
+\end{figure*}
+
+解: 如下图, 以 $BD$ 为边作正三角形 $BDE$, 连接 $AE$, 再在 $AE$ 上截取 $EF=EB$, 并连接 $FB, FC, FD, BC$.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.2]
+\coordinate[label=below:$A$] (A) at (1.486,-2.574);
+\coordinate[label=right:$B$] (B) at (1.989,2.209);
+\coordinate[label=above:$C$] (C) at (0,2);
+\coordinate[label=below:$D$] (D) at (-1.902,-0.618);
+\coordinate[label=above left:$E$] (E) at (-2.405,4.165);
+\coordinate[label=below:$F$] (F) at (0,0);
+\draw [red,line width=1pt] (C) -- (D);
+\draw [blue,line width=1pt] (A) -- (B) node [midway,sloped] {$\bracevert$};
+\draw [blue,line width=1pt] (A) -- (C) node [midway,sloped] {$\bracevert$};
+\draw [blue,line width=1pt] (B) -- (D) node [midway,sloped] {$\bracevert$};
+\draw [dashed,blue,line width=1pt] (E) -- (D) node [midway,sloped] {$\bracevert$};
+\draw [dashed,blue,line width=1pt] (E) -- (B) node [midway,sloped] {$\bracevert$};
+\draw [dashed,blue,line width=1pt] (E) -- (F) node [midway,sloped] {$\bracevert$};
+\draw [red,line width=1pt] (C) -- (E);
+\draw [dashed,green,line width=1pt] (F) -- (A) ;
+\draw [dashed,green,line width=1pt] (F) -- (B);
+\draw [dashed,magenta,line width=1pt] (D) -- (F);
+\draw [dashed,magenta,line width=1pt] (C) -- (F);
+\draw [dashed,magenta,line width=1pt] (B) -- (C);
+\foreach \p in {A,B,C,D,E,F}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.0pt);
+\draw pic["$24\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.8cm] {angle=B--A--C};
+\draw pic["$48\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=D--B--A};
+\draw pic["$?$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.8cm] {angle=B--D--C};
+\end{tikzpicture}
+\end{figure*}
+
+在等腰三角形 $\triangle ABC$ 中各角度数分别为: $\angle BAC = 24\degree, \angle ACB = \angle ABC = 78\degree$. 所以 $\angle DBC = \angle ABC - \angle ABD = 30\degree$. 这说明 $BC$ 是等边三角形 $\triangle BDE$ 得对称轴, 所以 $\angle BDC = \angle BEC$.
+
+在等腰三角形 $\triangle ABE$ 中,各角度数分别为: $\angle ABE = 48\degree + 60\degree = 108\degree$, $\angle BAE = \angle BEA = 36\degree$. 于是 $\angle CAF = \angle BAE - \angle BAC = 12\degree$, $\angle DEF = \angle DEB - \angle BEA = 24\degree$. 两个等腰三角形 $\triangle ABC$ 与 $\triangle EDF$ 顶角都是 $24\degree$, 且腰相等, 所以它们全等, 于是 $DF = BC$.
+
+在等腰三角形 $\triangle EFB$ 中,各角度数分别为: $\angle BEF = 36\degree$, $\angle EBF = \angle EFB = 72\degree$, $\angle FBA = \angle EBA - \angle EBF = 36\degree = BAE$, 所以 $AF = BF$.
+
+考虑$\triangle DBF$ 和 $\triangle CAF$, $\angle DBF = \angle ABD - \angle ABF = 12\degree$, $\angle CAF = \angle BAE - \angle BAC = 12\degree$, 根据 $\angle DBF = \angle CAF$, $AC = BD$, $AF=BF$, 推出 $\triangle DBF \cong \triangle CAF$. 故 $DF = CF = BC$, 进而得 $\triangle ECF\cong\triangle ECB$, 所以$EC$ 平分 $\angle BEF$.
+
+最终, $\angle BDC = \angle BEC = \dfrac{1}{2}\angle BEA= 18\degree$.
+
+%------------------------------------------------------------------------------%
+\newpage
 来自微博:
 
 下图中标出了已知角度, 求未知角度.
