@@ -1114,7 +1114,7 @@ $\angle CEF= \angle CEA + \angle DEF = 60\degree + 20\degree = 80\degree = \angl
 
 %------------------------------------------------------------------------------%
 \newpage
-来自微博: 
+\noindent 来自微博: 
 
 $\triangle ABC$ 中, $\angle BAC = 80\degree$, $\angle ABC=20\degree$, $D$在$AB$上, $BD=AC$, 求 $\angle ADC$ 的度数.
 \begin{figure*}[htbp]
@@ -1165,7 +1165,7 @@ $\triangle ABC$ 中, $\angle BAC = 80\degree$, $\angle ABC=20\degree$, $D$在$AB
 
 %------------------------------------------------------------------------------%
 \newpage
-来自微博: 
+\noindent 来自微博: 
 
 已知 $\angle DBA = 48\degree$, $\angle CAB = 24\degree$, $AC=AB=BD$, 求 $\angle BDC$.
 \begin{figure*}[htbp]
@@ -1233,7 +1233,7 @@ $\triangle ABC$ 中, $\angle BAC = 80\degree$, $\angle ABC=20\degree$, $D$在$AB
 
 %------------------------------------------------------------------------------%
 \newpage
-来自微博:
+\noindent 来自微博:
 
 已知 $\angle BCD = 48\degree$, $\angle ADC = 96\degree$, $BC = CD = DA$, 求 $\angle ABC$.
 \begin{figure*}[htbp]
@@ -1306,9 +1306,68 @@ $\triangle ABC$ 中, $\angle BAC = 80\degree$, $\angle ABC=20\degree$, $D$在$AB
 
 综上 $\angle ABC = 360\degree - \angle FBA - \angle FBE - \angle EBC = 162\degree$.
 
+
 %------------------------------------------------------------------------------%
 \newpage
-来自微博:
+\noindent 来自微博:
+
+正方形 $ABCD$ 中, $E$ 在 $BC$ 上, $F$ 在 $CD$ 上, $\angle AFD = 67\degree, \angle EAB = 22\degree$, 求 $\angle AEF$.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[label=below left:$A$] (A) at (0,0);
+\coordinate[label=below right:$B$] (B) at (6,0);
+\coordinate[label=above right:$C$] (C) at (6,6);
+\coordinate[label=above left:$D$] (D) at (0,6);
+\coordinate[label=above:$F$] (F) at (2.547,6);
+\coordinate[label=right:$E$] (E) at (6,2.424);
+%\coordinate[label=below right:$G$] (G) at (1.788,4.212);
+\draw [line width=1pt] (A) -- (B) -- (C) -- (D) -- cycle;
+\draw [line width=1pt] (A) -- (E) -- (F) -- cycle;
+\foreach \p in {A,B,C,D,E,F}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.0pt);
+\draw pic["$22\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.7cm] {angle=B--A--E};
+\draw pic["$67\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=D--F--A};
+\draw pic["$?$",draw,line width=1pt, angle eccentricity=1.6, angle radius=0.4cm] {angle=F--E--A};
+\end{tikzpicture}
+\end{figure*}
+
+解: 连接 $BD$, 与$AF$相交于 $G$. 连接 $CG, GE$.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[label=below left:$A$] (A) at (0,0);
+\coordinate[label=below right:$B$] (B) at (6,0);
+\coordinate[label=above right:$C$] (C) at (6,6);
+\coordinate[label=above left:$D$] (D) at (0,6);
+\coordinate[label=above:$F$] (F) at (2.547,6);
+\coordinate[label=right:$E$] (E) at (6,2.424);
+\coordinate[label=left:$G$] (G) at (1.788,4.212);
+\coordinate[] (L) at (4.273,4.212);
+\coordinate[] (M) at (3,1.212);
+\draw [gray,line width=1pt] (L) circle (2.485558cm);
+\draw [gray,line width=1pt] (M) circle (3.235583cm);
+\draw [line width=1pt] (A) -- (B) -- (C) -- (D) -- cycle;
+\draw [line width=1pt] (A) -- (E) -- (F) -- cycle;
+\draw [dashed,line width=1pt] (B) -- (D);
+\draw [dashed,line width=1pt] (C) -- (G) -- (E);
+\foreach \p in {A,B,C,D,E,F,G}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.0pt);
+\draw pic["$22\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.7cm] {angle=B--A--E};
+\draw pic["$67\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=D--F--A};
+\draw pic["$23\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.75cm] {angle=F--A--D};
+\end{tikzpicture}
+\end{figure*}
+
+$\angle DAF = 90\degree - \angle DFA = 23\degree$, $\angle EAG = 90\degree - \angle DAF - \angle EAB = 45\degree = \angle EBG$, 说明 $ABEG$ 四点共圆, 于是 $\angle AEG = \angle ABD = 45\degree$, 且 $\angle AGE = 180\degree - \angle ABE = 90\degree$. 
+
+从而 $\angle FGE = 90\degree$, 加上 $\angle ECF = 90\degree$, 得 $ECFG$四点共圆, 所以 $\angle GCF = \angle GEF$.
+
+易证 $\triangle DGA \cong \triangle DGC$, 所以 $\angle GCD = \angle GAD = 23\degree$. 所以 $\angle AEF = \angle GEF + \angle AEG = 23\degree + 45\degree = 68\degree$.
+
+%------------------------------------------------------------------------------%
+\newpage
+\noindent 来自微博:
 
 下图中标出了已知角度, 求未知角度.
 \begin{figure*}[htbp]
