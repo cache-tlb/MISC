@@ -1230,6 +1230,82 @@ $\triangle ABC$ 中, $\angle BAC = 80\degree$, $\angle ABC=20\degree$, $D$在$AB
 
 最终, $\angle BDC = \angle BEC = \dfrac{1}{2}\angle BEA= 18\degree$.
 
+
+%------------------------------------------------------------------------------%
+\newpage
+来自微博:
+
+已知 $\angle BCD = 48\degree$, $\angle ADC = 96\degree$, $BC = CD = DA$, 求 $\angle ABC$.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[label=left:$A$] (A) at (0,0);
+\coordinate[label=above left:$B$] (B) at (1.478,2.034);
+\coordinate[label=above:$C$] (C) at (5.523,4.973);
+\coordinate[label=below right:$D$] (D) at (5,0);
+%\coordinate[label=above left:$E$] (E) at (0.955,7.006);
+%\coordinate[label=below:$F$] (F) at (-2.391,3.291);
+%\coordinate[label=below:$G$] (G) at (0.109,-1.04);
+%\coordinate[label=below:$H$] (H) at (2.177,1.257);
+\draw [line width=1pt] (A) -- (B);
+\draw [red,line width=1pt] (A) -- (D) node [midway,sloped] {$\bracevert$};
+\draw [red,line width=1pt] (D) -- (C) node [midway,sloped] {$\bracevert$};
+\draw [red,line width=1pt] (B) -- (C) node [midway,sloped] {$\bracevert$};
+\foreach \p in {A,B,C,D}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.0pt);
+\draw pic["$48\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=B--C--D};
+\draw pic["$96\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.3cm] {angle=C--D--A};
+\draw pic["$?$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.2cm] {angle=A--B--C};
+\end{tikzpicture}
+\end{figure*}
+
+解: 以 $CD$ 为边作正五边形 $DCEFG$, 连接 $FD, GC$ 交于 $H$, 连接 $BE, BF, BH, AF, AG$.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[label=left:$A$] (A) at (0,0);
+\coordinate[label=above left:$B$] (B) at (1.478,2.034);
+\coordinate[label=right:$C$] (C) at (5.523,4.973);
+\coordinate[label=below right:$D$] (D) at (5,0);
+\coordinate[label=above left:$E$] (E) at (0.955,7.006);
+\coordinate[label=left:$F$] (F) at (-2.391,3.291);
+\coordinate[label=below:$G$] (G) at (0.109,-1.04);
+\coordinate[label=below:$H$] (H) at (2.177,1.257);
+\draw [line width=1pt] (A) -- (B);
+\draw [red,line width=1pt] (A) -- (D) node [midway,sloped] {$\bracevert$};
+\draw [red,line width=1pt] (D) -- (C) node [midway,sloped] {$\bracevert$};
+\draw [red,line width=1pt] (B) -- (C) node [midway,sloped] {$\bracevert$};
+\draw [dashed,red,line width=1pt] (C) -- (E) node [midway,sloped] {$\bracevert$};
+\draw [dashed,red,line width=1pt] (E) -- (F) node [midway,sloped] {$\bracevert$};
+\draw [dashed,red,line width=1pt] (F) -- (G) node [midway,sloped] {$\bracevert$};
+\draw [dashed,red,line width=1pt] (G) -- (D) node [midway,sloped] {$\bracevert$};
+\draw [dashed,red,line width=1pt] (C) -- (H)node [midway,sloped] {$\bracevert$};
+\draw [dashed,red,line width=1pt] (E) -- (B);
+\draw [dashed,red,line width=1pt] (F) -- (H)node [midway,sloped] {$\bracevert$};
+\draw [dashed,green,line width=1pt] (F) -- (A);
+\draw [dashed,green,line width=1pt] (F) -- (B);
+\draw [dashed,line width=1pt] (A) -- (G);
+\draw [dashed,line width=1pt] (B) -- (H);
+\draw [dashed,blue,line width=1pt] (G) -- (H);
+\draw [dashed,blue,line width=1pt] (H) -- (D);
+\foreach \p in {A,B,C,D,E,F,G,H}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.0pt);
+\draw pic["$48\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=B--C--D};
+\draw pic["$96\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.3cm] {angle=C--D--A};
+\draw pic["$60\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.35cm] {angle=E--C--B};
+\end{tikzpicture}
+\end{figure*}
+
+在正五边形中, $CE$平行于$FD$, $EF$ 平行于 $CG$, 所以四边形$CEFH$为棱形, $FH = CH = CE = CD = CB = AD = GD = FG$, $\angle CHF \angle CEF = 108\degree$
+
+易知等腰三角形 $\triangle GDC$ 中, 顶角为 $\angle GDC = 108\degree$, 两底角为 $\angle GCD = \angle CGD = 36\degree$, 所以$\angle BCH = \angle BCD - \angle GCD = 12\degree$, $\angle ADG = \angle GDC - \angle ADC = 12\degree$. 于是两个等腰三角形 $\triangle BCH$ 与 $\triangle ADG$ 顶角相等, 腰也相等, 故它们全等, 从而得到 $BH = AG$, 并且底角 $\angle BHC = \angle AGD = 84\degree$,.
+
+再考虑$\triangle AGF$ 与 $\triangle BHF$. 因为 $\angle AGF = \angle DGF - \angle AGD = 24\degree$. 而 $\angle BHF = \angle CHF - \angle CHB = 24\degree$, 加上 $BH = AG, FH = FG$, 所以 $\triangle AGF \cong \triangle BHF$, 从而 $FA = FB$, 且 $\angle HFB = \angle GFA$, 进而 $\angle AFB = \angle CFD = 36\degree$.
+
+等腰三角形 $\triangle FAB$ 中, 顶角为 $36\degree$, 底角为 $\angle FBA = 72\degree$, 等腰三角形 $\triangle BCE$ 中, $\angle BCE = \angle DCE - \angle BCD = 60\degree$, 所以$\triangle BCE$ 为正三角形, $\angle EBC = \angle BEC = 60\degree$, $BE = CE = EF$. 而在等腰三角形 $\triangle FEB$ 中, 顶角 $\angle FEB = \angle CEF - \angle BEC = 48\degree$, 所以底角为 $\angle FBE = 66\degree$.
+
+综上 $\angle ABC = 360\degree - \angle FBA - \angle FBE - \angle EBC = 162\degree$.
+
 %------------------------------------------------------------------------------%
 \newpage
 来自微博:
