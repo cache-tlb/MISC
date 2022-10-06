@@ -1430,6 +1430,58 @@ $\angle DAF = 90\degree - \angle DFA = 23\degree$, $\angle EAG = 90\degree - \an
 
 而 $\angle AHF = \angle ACF = 60\degree$, $\angle EDH = \angle AHF - \angle HAE = 50\degree = \angle GBH$, $\angle GHB = \angle EHD$, 所以 $\triangle EHD \cong \triangle GHB$, 于是 $ED = GB$. 再由$AE = AG$ 得 $AB = AD$. 所以 $\angle ADB = 80\degree$.
 
+
+%------------------------------------------------------------------------------%
+\newpage
+\noindent 来自微博:
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[label=below left:$A$] (A) at (0,0);
+\coordinate[label=above left:$B$] (B) at (0,5);
+\coordinate[label=above right:$C$] (C) at (4.924,4.132);
+\coordinate[label=below right:$D$] (D) at (6.634,1.17);
+%\coordinate[label=above right:$E$] (E) at (1.71,0.302);
+\draw [line width=1pt] (A) --(D) -- (C) -- (B) -- cycle;
+\draw [line width=1pt] (A) -- (C);
+\draw [line width=1pt] (B) -- (D);
+\foreach \p in {A,B,C,D}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\draw pic["$60\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=A--B--D};
+\draw pic["$20\degree$",draw,line width=1pt, angle eccentricity=2.2, angle radius=0.6cm] {angle=D--B--C};
+\draw pic["$30\degree$",draw,line width=1pt, angle eccentricity=2.2, angle radius=0.6cm] {angle=D--A--C};
+\draw pic["$50\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=C--A--B};
+\draw pic["$?$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.5cm] {angle=C--D--B};
+\end{tikzpicture}
+\end{figure*}
+
+解: 在 $AD$ 上取一点 $E$, 使得 $\angle DBE = 40\degree$, 连接 $BE, CE$.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[label=below left:$A$] (A) at (0,0);
+\coordinate[label=above left:$B$] (B) at (0,5);
+\coordinate[label=above right:$C$] (C) at (4.924,4.132);
+\coordinate[label=below right:$D$] (D) at (6.634,1.17);
+\coordinate[label=below:$E$] (E) at (1.71,0.302);
+\draw [line width=1pt] (A) --(D) -- (C) -- (B) -- cycle;
+\draw [line width=1pt] (A) -- (C);
+\draw [line width=1pt] (B) -- (D);
+\draw [dashed,line width=1pt] (B) -- (E) -- (C);
+\foreach \p in {A,B,C,D,E}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\draw pic["$40\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.5cm] {angle=E--B--D};
+\draw pic["$20\degree$",draw,line width=1pt, angle eccentricity=2.2, angle radius=0.6cm] {angle=D--B--C};
+\draw pic["$30\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.5cm] {angle=D--A--C};
+\draw pic["$50\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=C--A--B};
+\draw pic[draw,line width=1pt, angle eccentricity=2.0, angle radius=0.5cm] {angle=C--D--B};
+\end{tikzpicture}
+\end{figure*}
+
+如此, $\angle CBE = 60\degree, \angle ABE = 20\degree, \angle AEB = 80\degree = \angle BAE$, 于是 $AB = BE$. 而 $\angle BCA = 180\degree - \angle ABC - \angle BAC = 50\degree = \angle BAC$, 所以 $AB = BC = BE$, 于是 $\triangle BCE$为等边三角形, 得 $\angle BEC = 60\degree$, $AB = BE = BC = CE$.
+
+$\triangle BED$ 中, $\angle BED = 180\degree - \angle AEB = 100\degree, \angle BDE = 180\degree - \angle BED - \angle DBE = 40\degree = \angle DBE$, 所以 $BE = DE = CE$. 而等腰三角形 $\triangle CDE$ 中, 顶角度数为 $\angle CED = 180\degree - \angle BEA - \angle BEC = 40\degree$, 所以底角 $\angle ADC = 70\degree$. $\angle ADB = 180\degree - \angle BAD - \angle ABD = 40\degree$, 所以 $\angle BDC = \angle ADC - \angle ADB = 30\degree$. 
+
 %------------------------------------------------------------------------------%
 \newpage
 康威圆: 任意三角形上, 在每个顶点上将两边延伸出去此顶点对应的那边的长度, 这样得到的六点共圆. 这个圆称为此三角形的康威圆.
