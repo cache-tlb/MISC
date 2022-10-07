@@ -1306,6 +1306,248 @@ $\triangle ABC$ 中, $\angle BAC = 80\degree$, $\angle ABC=20\degree$, $D$在$AB
 
 综上 $\angle ABC = 360\degree - \angle FBA - \angle FBE - \angle EBC = 162\degree$.
 
+%------------------------------------------------------------------------------%
+\newpage
+\noindent 来自微博
+
+下图中, $AB = BC = CD = DE = EF$, $\angle ABC = 100\degree, \angle BCD = 140\degree, \angle CDE = 110\degree, \angle DEF = 130\degree$, 求 $\angle EFA$. 
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[label=below left:$B$] (B) at (0,0);
+\coordinate[label=below right:$C$] (C) at (4,0);
+\coordinate[label=right:$D$] (D) at (7.064,2.571);
+\coordinate[label=above right:$E$] (E) at (5.696,6.33);
+\coordinate[label=above:$F$] (F) at (1.937,7.698);
+\coordinate[label=left:$A$] (A) at (-0.695,3.939);
+\draw [red,line width=1pt] (A) -- (B) node [midway,sloped] {$\bracevert$};
+\draw [red,line width=1pt] (B) -- (C) node [midway,sloped] {$\bracevert$}; 
+\draw [red,line width=1pt] (C) -- (D) node [midway,sloped] {$\bracevert$}; 
+\draw [red,line width=1pt] (D) -- (E) node [midway,sloped] {$\bracevert$};
+\draw [red,line width=1pt] (E) -- (F) node [midway,sloped] {$\bracevert$};
+\draw [line width=1pt] (F) -- (A);
+\foreach \p in {A,B,C,D,E,F}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.0pt);
+\draw pic["$100\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=C--B--A};
+\draw pic["$140\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=D--C--B};
+\draw pic["$110\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=E--D--C};
+\draw pic["$130\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=F--E--D};
+\draw pic["$?$",draw,line width=1pt, angle eccentricity=1.6, angle radius=0.4cm] {angle=A--F--E};
+\end{tikzpicture}
+\end{figure*}
+
+解法1: 以 $EF$ 为边向内作等边三角形 $\triangle EFP$, 连接 $PA, PB, PC, PD$.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[label=left:$A$] (A) at (-0.695,3.939);
+\coordinate[label=below left:$B$] (B) at (0,0);
+\coordinate[label=below right:$C$] (C) at (4,0);
+\coordinate[label=right:$D$] (D) at (7.064,2.571);
+\coordinate[label=above right:$E$] (E) at (5.696,6.33);
+\coordinate[label=above:$F$] (F) at (1.937,7.698);
+\coordinate[label=above:$P$] (P) at (2.632,3.759);
+\draw [red,line width=1pt] (A) -- (B) node [midway,sloped] {$\bracevert$};
+\draw [red,line width=1pt] (B) -- (C) node [midway,sloped] {$\bracevert$}; 
+\draw [red,line width=1pt] (C) -- (D) node [midway,sloped] {$\bracevert$}; 
+\draw [red,line width=1pt] (D) -- (E) node [midway,sloped] {$\bracevert$};
+\draw [red,line width=1pt] (E) -- (F) node [midway,sloped] {$\bracevert$};
+\draw [line width=1pt] (F) -- (A);
+\draw [red,dashed,line width=1pt] (F) -- (P)node [midway,sloped] {$\bracevert$};
+\draw [red,dashed,line width=1pt] (P) -- (E)node [midway,sloped] {$\bracevert$};
+\draw [dashed,line width=1pt] (D) -- (P);
+\draw [dashed,line width=1pt] (P) -- (C)node [midway,sloped] {$\bracevert$};
+\draw [dashed,line width=1pt] (A) -- (P) -- (B);
+\foreach \p in {A,B,C,D,E,F,P}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.0pt);
+\draw pic["$100\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=C--B--A};
+\draw pic["$110\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=E--D--C};
+\draw pic["$60\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=F--E--P};
+\draw pic["$70\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.35cm] {angle=P--E--D};
+\draw pic[draw,line width=1pt, angle eccentricity=1.6, angle radius=0.4cm] {angle=A--F--E};
+\draw pic[draw,line width=1pt, angle eccentricity=1.6, angle radius=0.4cm] {angle=D--C--P};
+\draw pic[draw,line width=1pt, angle eccentricity=1.6, angle radius=0.4cm] {angle=P--C--B};
+\end{tikzpicture}
+\end{figure*}
+
+则 $\angle PEF = 60\degree, \angle PED = 70\degree$, $PE = DE$, 所以 $\angle EPD = \angle EDP = 55\degree$. 而由 $\angle PED + \angle CDE = 180\degree$ 得 $PE$ 平行于 $CD$, 再根据 $PE = CD = DE$ 知四边形$CDEP$为棱形, 于是 $CD = CP = BC$ , $\angle PCD = \angle PED = 70\degree$, $\angle CPD = 55\degree$.
+
+等腰三角形 $\triangle BCP$ 中, $BC = PC$, 顶角 $\angle BCP = \angle BCD - \angle PCD = 70\degree$, 所以底角为 $\angle BPC = \angle CBP = 55\degree$. 
+
+$\angle ABP = \angle ABC - \angle CBP = 45\degree$, $\angle BPF = 360\degree - \angle FPE - \angle EPD - \angle DPC - \angle CPB = 135\degree$. 可见 $\angle BPF + \angle ABP = 180\degree$, 所以 $AB$ 与 $FP$ 平行, 而且相等, 故四边形 $ABPF$ 为平行四边形, $\angle AFP = \angle ABP = 45\degree$, 于是 $\angle EFA = \angle AFP + \angle EFP = 105\degree$.
+
+~
+
+解法2: 延长 $AB, CD, EF$, 构成一个大三角形, 如下图.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[label=left:$A$] (A) at (-0.695,3.939);
+\coordinate[label=below left:$B$] (B) at (0,0);
+\coordinate[label=below right:$C$] (C) at (4,0);
+\coordinate[label=right:$D$] (D) at (7.064,2.571);
+\coordinate[label=above right:$E$] (E) at (5.696,6.33);
+\coordinate[label=above:$F$] (F) at (1.937,7.698);
+\coordinate[label=left:$L$] (L) at (-1.538,8.979);
+\coordinate[label=right:$M$] (M) at (9.775,4.845);
+\coordinate[label=below:$N$] (N) at (0.516,-2.924);
+\draw [red,line width=1pt] (A) to[edge label'=$a$] (B);
+\draw [red,line width=1pt] (B) to[edge label'=$a$] (C);
+\draw [red,line width=1pt] (C) to[edge label'=$a$] (D);
+\draw [red,line width=1pt] (D) to[edge label'=$a$] (E);
+\draw [red,line width=1pt] (E) to[edge label'=$a$] (F);
+\draw [line width=1pt] (F) to[edge label=$z$] (A);
+\draw [gray,line width=1pt] (F) to[edge label'=$y$]  (L);
+\draw [gray,line width=1pt] (L) to[edge label'=$x$]  (A);
+\draw [gray,line width=1pt] (B) to [edge label'=$\dfrac{2a}{\sqrt{3}}\sin 40\degree$](N);
+\draw [gray,line width=1pt] (C) to [edge label=$\dfrac{2a}{\sqrt{3}}\sin 80\degree$](N);
+\draw [gray,line width=1pt] (D) to [edge label'=$\dfrac{2a}{\sqrt{3}}\sin 50\degree$](M);
+\draw [gray,line width=1pt] (M) to [edge label'=$\dfrac{2a}{\sqrt{3}}\sin 70\degree$](E);
+\foreach \p in {A,B,C,D,E,F,L,M,N}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.0pt);
+\draw pic["$100\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=C--B--A};
+\draw pic["$140\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=D--C--B};
+\draw pic["$110\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=E--D--C};
+\draw pic["$130\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=F--E--D};
+\draw pic["$60\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=C--N--B};
+\draw pic["$60\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=E--M--D};
+\draw pic["$?$",draw,line width=1pt, angle eccentricity=1.6, angle radius=0.4cm] {angle=A--F--E};
+\end{tikzpicture}
+\end{figure*}
+
+可以知道 $\angle BNC = \angle DME = 60\degree$, 所以大三角形为等边三角形. 
+
+由正弦定理, 
+\begin{align*}
+\frac{BN}{\sin 40\degree} &= \frac{CN}{\sin 80\degree} = \frac{a}{\sin 60\degree}\\
+\frac{DM}{\sin 50\degree} &= \frac{EM}{\sin 70\degree} = \frac{a}{\sin 60\degree}
+\end{align*}
+得到
+\begin{align*}
+BN &= \frac{2a}{\sqrt{3}}\sin 40\degree, \qquad CN = \frac{2a}{\sqrt{3}}\sin 80\degree\\
+DM &= \frac{2a}{\sqrt{3}}\sin 50\degree, \qquad EM = \frac{2a}{\sqrt{3}}\sin 70\degree
+\end{align*}
+根据大等边三角形得边长, 可以求出 $AL, FL$ 的长度分别为:
+\begin{align*}
+x = AL &= \frac{2a}{\sqrt{3}}(\sin 80\degree + \sin 50\degree - \sin 40\degree) \\
+& = \frac{2a}{\sqrt{3}}(\sin 50\degree + \sin 20\degree) = \frac{4a}{\sqrt{3}}\sin 35\degree\cos 15\degree\\
+y = FL &= \frac{2a}{\sqrt{3}}(\sin 80\degree + \sin 50\degree - \sin 70\degree) \\
+& = \frac{2a}{\sqrt{3}}(\sin 80\degree - \sin10\degree) = \frac{4a}{\sqrt{3}}\sin 35\degree\cos 45\degree  .
+\end{align*}
+由余弦定理:
+\begin{align*}
+z^2 &= AF^2 = x^2+y^2-2xy\cos 60\degree\\
+&= \frac{16a^2}{3}\sin^2 35\degree(\cos^2 15\degree+\cos^2 45\degree - \cos 15\degree\cos 45\degree) \\
+&= \frac{16a^2}{3}\sin^2 35\degree(\frac{1}{2}(\cos 30\degree + 1) + \frac{1}{2}(\cos 90\degree + 1) - \frac{1}{2}(\cos 60\degree + \cos 30\degree)) \\
+&= 4a^2\sin^2 35\degree
+\end{align*}
+故 $z = 2a\sin 35\degree$. 由正弦定理: $\dfrac{z}{\sin 60\degree} = \dfrac{x}{\sin\angle AFL}$, 所以 
+\[
+\sin \angle AFL = \frac{x\sin 60\degree}{z} = \frac{2}{\sqrt{3}}\sin 60\degree\cos 15\degree =  \sin 75\degree ,
+\]
+于是 $\angle AFE = 180\degree - \angle AFL = 105\degree$.
+
+~
+
+解法3: 以 $AF, EF$ 为边作平行四边形 $APEF$, 连接 $BP, DP$. 延长 $BA, EF$, 交于 $Q$.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[label=left:$A$] (A) at (-0.695,3.939);
+\coordinate[label=below left:$B$] (B) at (0,0);
+\coordinate[label=below right:$C$] (C) at (4,0);
+\coordinate[label=right:$D$] (D) at (7.064,2.571);
+\coordinate[label=above right:$E$] (E) at (5.696,6.33);
+\coordinate[label=above:$F$] (F) at (1.937,7.698);
+\coordinate[label=above:$P$] (P) at (3.064,2.571);
+\coordinate[label=left:$Q$] (Q) at (-1.538,8.979);
+\draw [red,line width=1pt] (A) -- (B) node [midway,sloped] {$\bracevert$};
+\draw [red,line width=1pt] (B) -- (C) node [midway,sloped] {$\bracevert$};
+\draw [red,line width=1pt] (C) -- (D) node [midway,sloped] {$\bracevert$};
+\draw [red,line width=1pt] (D) -- (E) node [midway,sloped] {$\bracevert$};
+\draw [red,line width=1pt] (E) -- (F) node [midway,sloped] {$\bracevert$};
+\draw [line width=1pt] (F) -- (A);
+\draw [dashed,line width=1pt] (F) -- (Q) -- (A);
+\draw [dashed,line width=1pt] (P) -- (E);
+\draw [red,dashed,line width=1pt] (P) -- (A) node [midway,sloped] {$\bracevert$};
+\draw [red,dashed,line width=1pt] (P) -- (D);
+\draw [red,dashed,line width=1pt] (B) -- (P);
+\foreach \p in {A,B,C,D,E,F,P,Q}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.0pt);
+\draw pic["$100\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=C--B--A};
+\draw pic["$140\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=D--C--B};
+\draw pic["$110\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=E--D--C};
+\draw pic["$130\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=F--E--D};
+\draw pic["$?$",draw,line width=1pt, angle eccentricity=1.6, angle radius=0.4cm] {angle=A--F--E};
+\draw pic["$60\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=A--Q--F};
+\draw pic[draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=B--A--P};
+\end{tikzpicture}
+\end{figure*}
+
+考虑五边形$BCDEQ$, 由内角和等于 $540\degree$, 可得 $\angle AQF = 60\degree$, 所以 $\angle BAP = \angle AQF = 60\degree$. 又因为 $AB = EF = AP$, 所以 $\triangle ABP$ 为等边三角形, $PB = AB$, $\angle APB = \angle ABP = 60\degree, \angle PBC = \angle ABC - \angle ABP = 40\degree$.
+
+由 $\angle PBC + \angle BCD = 180\degree$ 可得 $BP$ 平行于 $CD$, 又因为 $BP = AB = CD = BC$, 于是四边形 $BCDP$ 是棱形, 得 $PD = CD$, $\angle BPD = \angle BCD = 140\degree, \angle PDC = \angle PBC = 40\degree$. 
+
+$\triangle PDE$ 中, $PD = CD = DE$, $\angle PDE = \angle CDE - \angle PDC = 70\degree$, 所以底角为 $\angle PED = \angle DPE = 55\degree$, 于是 $\angle PEF = \angle DEF - \angle PED = 75\degree$. 平行四边形 $APEF$中, $\angle AFE = 180\degree - \angle PEF = 105\degree$.
+
+~
+
+解法4: 矢量法, 因为 $\vec{AB}+\vec{BC}+\vec{CD}+\vec{DE}+\vec{EF}+\vec{FA} = \vec{0}$, 并注意到向量 $\vec{AB},\vec{CD},\vec{EF}$ 等长且夹角都是 $120\degree$, 所以 $\vec{AB}+\vec{CD}+\vec{EF} = \vec{0}$, 这意味着 $\vec{BC}+\vec{DE}+\vec{FA} = \vec{0}$, 如下图所示.
+\begin{figure*}[htbp]
+\centering
+\begin{minipage}[t]{0.45\linewidth}
+\centering
+\begin{tikzpicture}[scale=0.7]
+\coordinate[label=below left:$B$] (B) at (0,0);
+\coordinate[label=below right:$C$] (C) at (4,0);
+\coordinate[label=right:$D$] (D) at (7.064,2.571);
+\coordinate[label=above right:$E$] (E) at (5.696,6.33);
+\coordinate[label=above:$F$] (F) at (1.937,7.698);
+\coordinate[label=left:$A$] (A) at (-0.695,3.939);
+\draw [red,line width=1pt] (A) -- (B) node [midway,sloped] {$\bracevert$};
+\draw [cyan,line width=1pt] (B) -- (C) node [midway,sloped] {$\bracevert$}; 
+\draw [green,line width=1pt] (C) -- (D) node [midway,sloped] {$\bracevert$}; 
+\draw [blue,line width=1pt] (D) -- (E) node [midway,sloped] {$\bracevert$};
+\draw [magenta,line width=1pt] (E) -- (F) node [midway,sloped] {$\bracevert$};
+\draw [line width=1pt] (F) -- (A);
+\foreach \p in {A,B,C,D,E,F}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.0pt);
+\draw pic["$100\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=C--B--A};
+\draw pic["$140\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=D--C--B};
+\draw pic["$110\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=E--D--C};
+\draw pic["$130\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=F--E--D};
+\draw pic["$?$",draw,line width=1pt, angle eccentricity=1.6, angle radius=0.4cm] {angle=A--F--E};
+\end{tikzpicture}
+\end{minipage}
+\begin{minipage}[t]{0.45\linewidth}
+\centering
+\begin{tikzpicture}[scale=0.75,>=stealth]
+\coordinate[label=above left:$O$] (O) at (0,0);
+\coordinate[label=below:$P$] (P) at (0.695,-3.939);
+\coordinate[label=right:$Q$] (Q) at (3.759,-1.368);
+\coordinate[label=above:$M$] (M) at (2.632,3.759);
+\coordinate[label=right:$N$] (N) at (4,0);
+\coordinate[] (NX) at (-4,0);
+\coordinate[] (MM) at (-2.632,-3.759);
+\draw [->,red,line width=1pt] (O) to[edge label'=$\vec{AB}$] (P);
+\draw [->,green,line width=1pt] (P) to[edge label'=$\vec{CD}$] (Q);
+\draw [->,magenta,line width=1pt] (Q) to[edge label=$\vec{EF}$] (O);
+\draw [->,cyan,line width=1pt] (O) to[edge label=$\vec{BC}$] (N);
+\draw [->,blue,line width=1pt] (N) to[edge label'=$\vec{DE}$] (M);
+\draw [->,line width=1pt] (M) to[edge label'=$\vec{FA}$] (O);
+\draw [dashed,line width=1pt] (NX) -- (O);
+\draw [dashed,line width=1pt] (MM) -- (O);
+\foreach \p in {P,Q,M,N,O}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.0pt);
+\draw pic["$70\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=M--N--O};
+\draw pic[draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=MM--O--Q};
+%\draw pic["$?$",draw,line width=1pt, angle eccentricity=1.6, angle radius=0.4cm] {angle=A--F--E};
+\end{tikzpicture}
+\end{minipage}
+\end{figure*}
+
+而$\vec{BC}$ 与 $\vec{DE}$ 长度相等, 夹角为 $110\degree$, 于是 $\angle MON = 55\degree$, $\vec{BC}$ 与 $\vec{EF}$ 的夹角为 $160\degree$, 所以 $\angle NOQ = 20\degree$, 所求角度为 $180\degree - 55\degree - 20\degree = 105\degree$.
+
 
 %------------------------------------------------------------------------------%
 \newpage
