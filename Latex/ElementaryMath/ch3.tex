@@ -1787,6 +1787,73 @@ $\triangle BED$ 中, $\angle BED = 180\degree - \angle AEB = 100\degree, \angle 
 
 %------------------------------------------------------------------------------%
 \newpage
+\noindent 来自微博: 
+
+下图中, $\angle ABP = 30\degree, \angle PBC = 40\degree, \angle PCB = 20\degree, \angle ACP = 50\degree$. 求 $\angle PAC$.
+\begin{figure*}[htbp]
+\begin{minipage}[t]{0.45\linewidth}
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[label=above:$A$] (A) at (2,5.495);
+\coordinate[label=below left:$B$] (B) at (0,0);
+\coordinate[label=below right:$C$] (C) at (4,0);
+\coordinate[label=below:$P$] (P) at (1.21,1.015);
+%\coordinate[label=below:$D$] (D) at (2.79,1.015);
+%\coordinate[label=below:$E$] (E) at (-0.274,1.556);
+\draw [line width=1pt] (A) -- (B) -- (C) -- cycle;
+\draw [line width=1pt] (A) -- (P) -- (B);
+\draw [line width=1pt] (P) -- (C);
+\foreach \p in {A,B,C,P}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\draw pic["$30\degree$",draw,line width=1pt, angle eccentricity=2.1, angle radius=0.55cm] {angle=P--B--A};
+\draw pic["$40\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.45cm] {angle=C--B--P};
+\draw pic["$20\degree$",draw,line width=1pt, angle eccentricity=2.2, angle radius=0.6cm] {angle=P--C--B};
+\draw pic["$50\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=A--C--P};
+\draw pic["$?$",draw,line width=1pt, angle eccentricity=1.6, angle radius=0.5cm] {angle=P--A--C};
+\end{tikzpicture}
+\end{minipage}
+\begin{minipage}[t]{0.45\linewidth}
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[label=above:$A$] (A) at (2,5.495);
+\coordinate[label=below left:$B$] (B) at (0,0);
+\coordinate[label=below right:$C$] (C) at (4,0);
+\coordinate[label=below:$P$] (P) at (1.21,1.015);
+\coordinate[label=below:$D$] (D) at (2.79,1.015);
+\coordinate[label=left:$E$] (E) at (-0.274,1.556);
+\draw [line width=1pt] (A) -- (B) -- (C) -- cycle;
+\draw [line width=1pt] (A) -- (P) -- (B);
+\draw [line width=1pt] (P) -- (C);
+\draw [dashed,line width=1pt] (A) --(D) -- (C);
+\draw [dashed,line width=1pt] (P) -- (D);
+\draw [dashed,line width=1pt] (B) --(E) -- (P);
+\draw [dashed,line width=1pt] (A) -- (E);
+\foreach \p in {A,B,C,P,D,E}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\draw pic["$30\degree$",draw,line width=1pt, angle eccentricity=2.1, angle radius=0.55cm] {angle=P--B--A};
+\draw pic["$40\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.45cm] {angle=C--B--P};
+\draw pic["$20\degree$",draw,line width=1pt, angle eccentricity=2.2, angle radius=0.6cm] {angle=P--C--B};
+\draw pic[draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=A--C--P};
+\end{tikzpicture}
+\end{minipage}
+\end{figure*}
+
+解: 过 $P$ 作 $BC$ 的平行线 $PD$, 满足 $\angle ACD = 30\degree$, 在 $CP$ 的延长线上取一点 $E$, 使得 $PB = PE$. 连接 $AE, BE, AD$.
+
+$\angle PCD = 20\degree = DPC$, 故 $DP = DC$. 容易证明 $P$ 和 $D$ 关于 $BC$ 的中垂线对称, 所以 $BP = CD$.
+
+而 $\angle PCB + \angle ABC = 90\degree$, 所以 $CP\perp AB$, 从而 $\angle BPE = 90\degree - \angle ABP = 60\degree$, 又因为 $PB = PE$, 所以 $\triangle BEP$ 为等边三角形, 故有 $BP = PE = BE = DP = CD$.
+
+由 $\angle ABE = \angle ACD = 30\degree$, $BE = CD$, $AB = AC$, 得到 $\triangle ABE\cong\triangle ACD$, 故 $AD = AE$, $\angle CAD = \angle BAE$.
+
+再由 $\angle ABE = \angle ABP = 30\degree$, $BE = BP$, 公共边 $AB$, 得到 $\triangle ABE \cong \triangle ABP$, 所以 $AP = AE$, $\angle BAE = \angle BAP$.
+
+整理上面的结论有 $AD = AE = AP$, 并令 $x = \angle BAE = \angle BAP = \angle CAD$. 由 $PE = PD, AE = AD, AP = AP$ 得 $\triangle APE \cong \triangle APD$, 所以 $\angle PAD = \angle PAE = 2x$.
+
+$\triangle ABC$ 中, $\angle BAC = 40\degree = \angle PAD + \angle CAD + \angle BAP = 4x$, 解得 $x=10\degree$, 所以 $\angle PAC = \angle PAD + \angle CAD = 3x = 30\degree$.
+
+%------------------------------------------------------------------------------%
+\newpage
 康威圆: 任意三角形上, 在每个顶点上将两边延伸出去此顶点对应的那边的长度, 这样得到的六点共圆. 这个圆称为此三角形的康威圆.
 \begin{figure*}[htbp]
 \centering
