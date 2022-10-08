@@ -1114,6 +1114,65 @@ $\angle CEF= \angle CEA + \angle DEF = 60\degree + 20\degree = 80\degree = \angl
 
 %------------------------------------------------------------------------------%
 \newpage
+\noindent 来自微博:
+
+下图中, $AB = CD$, $\angle ABC = 24\degree, \angle BAC = 30\degree$. 求 $\angle ADC$.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[label=above:$A$] (A) at (4.517,2.011);
+\coordinate[label=below left:$B$] (B) at (0,0);
+\coordinate[label=below left:$C$] (C) at (3.056,0);
+\coordinate[label=below right:$D$] (D) at (8,0);
+%\coordinate[label=below:$E$] (E) at (4,-2.906);
+\draw [line width=1pt] (B) --(C) -- (A)-- (D);
+\draw [red,line width=1pt] (A) -- (B)node [midway,sloped] {$\bracevert$};
+\draw [red,line width=1pt] (C) -- (D)node [midway,sloped] {$\bracevert$};
+\foreach \p in {A,B,C,D}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\draw pic["$24\degree$",draw,line width=1pt, angle eccentricity=2.2, angle radius=0.55cm] {angle=C--B--A};
+\draw pic["$30\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.5cm] {angle=B--A--C};
+\draw pic["$?$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.5cm] {angle=A--D--C};
+\end{tikzpicture}
+\end{figure*}
+
+解: 以 $AB$ 为边, $AC$ 为对称轴作等边三角形 $\triangle ABE$, 并在 $BD$ 上截取 $BF = AB$. 连接 $CE, DE, AF, EF$.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[label=above:$A$] (A) at (4.517,2.011);
+\coordinate[label=below left:$B$] (B) at (0,0);
+\coordinate[label=below left:$C$] (C) at (3.056,0);
+\coordinate[label=below right:$D$] (D) at (8,0);
+\coordinate[label=below:$E$] (E) at (4,-2.906);
+\coordinate[label=below right:$F$] (F) at (4.944,0);
+\draw [line width=1pt] (B) --(C) -- (A)-- (D);
+\draw [red,line width=1pt] (A) -- (B)node [midway,sloped] {$\bracevert$};
+\draw [red,line width=1pt] (C) -- (D)node [midway,sloped] {$\bracevert$};
+\draw [red,dashed,line width=1pt] (B) -- (E);
+\draw [red,dashed,line width=1pt] (A) -- (E);
+\draw [blue,dashed,line width=1pt] (C) -- (E) -- (F);
+\draw [dashed,line width=1pt] (D) -- (E);
+\draw [dashed,line width=1pt] (A) -- (F);
+\foreach \p in {A,B,C,D,E,F}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\draw pic["$24\degree$",draw,line width=1pt, angle eccentricity=2.2, angle radius=0.6cm] {angle=C--B--A};
+\draw pic["$30\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.5cm] {angle=B--A--C};
+\draw pic["$36\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.5cm] {angle=E--B--C};
+\draw pic["$30\degree$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.65cm] {angle=C--A--E};
+\draw pic["$36\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.5cm] {angle=C--E--B};
+\draw pic[draw,line width=1pt, angle eccentricity=2.0, angle radius=0.35cm] {angle=C--F--E};
+\draw pic[draw,line width=1pt, angle eccentricity=2.0, angle radius=0.35cm] {angle=E--C--F};
+\draw pic["$?$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.5cm] {angle=A--D--C};
+\end{tikzpicture}
+\end{figure*}
+
+$\triangle BEF$ 中, $BE = BF$, $\angle EBF = 60\degree - \angle ABC = 36\degree$, $\angle BFE = \angle BEF = 72\degree$. $\angle BEC = \angle CBE = 36\degree, \angle ECF = \angle EBF + \angle BEC = 72\degree = \angle BFE$, 所以 $EC = EF$.
+
+$BF = AB = CD$, 所以 $BC = BF - CF = CD - CF = DF$. 再加上 $\angle BCE = \angle DFE$, 得到 $\triangle BCE\cong\triangle DFE$, 于是 $DE = BE = AE$, 说明 $E$ 是 $\triangle ABD$ 的外心, 所以由圆周角与圆心角的关系得 $\angle ADB = \dfrac{1}{2}\angle AED = 30\degree$.
+
+%------------------------------------------------------------------------------%
+\newpage
 \noindent 来自微博: 
 
 $\triangle ABC$ 中, $\angle BAC = 80\degree$, $\angle ABC=20\degree$, $D$在$AB$上, $BD=AC$, 求 $\angle ADC$ 的度数.
