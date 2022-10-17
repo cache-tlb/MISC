@@ -429,6 +429,24 @@ L = \int_0^1 \frac{32}{9\pi}r\cdot 4r^3 \mathrm{d}r = \frac{128}{45\pi}.
 令凸多面体逐步逼近到球形, 此时不管朝向什么角度, 投影面积都是恒定的, $\bar{S} = \pi r^2$, $S=4\pi r^2$, 所以立刻得到 $c=\dfrac{1}{2}$. 回到原问题, 立方体的平均投影面积就是 $3/2$.
 
 
+%------------------------------------------------------------------------------%
+\newpage
+
+设 $X_1, X_2, \cdots, X_n$ 是$(0,1)$ 上的均匀分布, 且两两之间独立, 求它们最大值和最小值之差的期望.
+
+解: 直接根据定义求
+
+\begin{align*}
+\int_{[0,1]^n} {\max_{1\le i,j\le N}|x_i-x_j| \mathrm{d}V} &= n!\int_{1\ge x_n > x_{n-1}>\cdots >x_1\ge 0} {\max_{1\le i,j\le n}|x_i-x_j|} \mathrm{d}V\\
+&= n!\int_0^1 \int_0^{x_n} \cdots \int_0^{x_2}{(x_n-x_1)}\ \mathrm{d}x_1\cdots\mathrm{d}x_{n-1}\mathrm{d}x_n\\
+&= n!\int_0^1 \int_0^{x_n} \cdots \int_0^{x_3}{\left(x_n\cdot x_2-\frac{x_2^2}{2}\right)}\ \mathrm{d}x_2\cdots\mathrm{d}x_{n-1}\mathrm{d}x_n\\
+&= n!\int_0^1 \int_0^{x_n} \cdots \int_0^{x_4}{\left(x_n\cdot\frac{x_3^2}{2}-\frac{x_3^3}{3!}\right)}\ \mathrm{d}x_3\cdots\mathrm{d}x_{n-1}\mathrm{d}x_n\\
+&=\cdots\\
+&=n!\int_0^1 \int_0^{x_n} {\left(x_n\cdot\frac{x_{n-1}^{n-2}}{(n-2)!}-\frac{x_{n-1}^{n-1}}{(n-1)!}\right)}\  \mathrm{d}x_{n-1}\mathrm{d}x_n\\
+&=n!\int_0^1{\left(\frac{x_n^n}{(n-1)!} - \frac{x_n^n}{n!}\right)}\ \mathrm{d}x_n\\
+&=(n-1)\int_0^1{x_n^n}\ \mathrm{d}x_n\\
+&=\frac{n-1}{n+1}
+\end{align*}
 
 
 
