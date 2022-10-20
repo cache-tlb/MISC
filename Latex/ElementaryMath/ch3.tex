@@ -2312,14 +2312,14 @@ S_{\triangle BOC} &= S_{\triangle COP} + S_{\triangle BOP} - S_{\triangle BCP} \
 \begin{figure*}[htbp]
 \centering
 \begin{tikzpicture}[scale=1]
-\coordinate[label=below left:$A$] (A) at (0,0);
-\coordinate[label=below right:$B$] (B) at (7.2,0);
-\coordinate[label=above right:$C$] (C) at (10,4);
-\coordinate[label=above left:$D$] (D) at (2.8,4);
+\coordinate[label=below left:$B$] (B) at (0,0);
+\coordinate[label=below right:$C$] (C) at (7.2,0);
+\coordinate[label=above right:$D$] (D) at (10,4);
+\coordinate[label=above left:$A$] (A) at (2.8,4);
 \coordinate[label=below:$E$] (E) at (1.6,0);
 \coordinate[label=right:$F$] (F) at (8.6,2);
 \draw [line width=1pt] (A) -- (B) -- (C) -- (D) -- cycle;
-\draw [line width=1pt] (D) -- (E)-- (F) -- cycle;
+\draw [line width=1pt] (A) -- (E)-- (F) -- cycle;
 \foreach \p in {A,B,C,D,E,F}
 	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
 \node at (1.2,1) {$4$};
@@ -2330,25 +2330,25 @@ S_{\triangle BOC} &= S_{\triangle COP} + S_{\triangle BOP} - S_{\triangle BCP} \
  
 ~
 
-解: 为方便起见, 将 $CD$ 沿横轴平移, 把平行四边形拉成矩形, 各部分面积保持不变. 过 $E,F$ 作矩形各边的平行线, 将矩形分成 4 块, 四块的面积分别为 $a,b,c,d$, 如下图所示.
+解: 为方便起见, 将 $AD$ 沿横轴平移, 把平行四边形拉成矩形, 各部分面积保持不变. 过 $E,F$ 作矩形各边的平行线, 将矩形分成 4 块, 四块的面积分别为 $a,b,c,d$, 如下图所示.
 \begin{figure*}[htbp]
 \centering
 \begin{tikzpicture}[scale=1]
-\coordinate[label=below left:$A$] (A) at (0,0);
-\coordinate[label=below right:$B$] (B) at (7.2,0);
-\coordinate[label=above right:$C$] (C) at (7.2,4);
-\coordinate[label=above left:$D$] (D) at (0,4);
+\coordinate[label=below left:$B$] (B) at (0,0);
+\coordinate[label=below right:$C$] (C) at (7.2,0);
+\coordinate[label=above right:$D$] (D) at (7.2,4);
+\coordinate[label=above left:$A$] (A) at (0,4);
 \coordinate[label=below:$E$] (E) at (1.6,0);
 \coordinate[label=right:$F$] (F) at (7.2,2);
 \coordinate[] (G) at (1.6,4);
 \coordinate[] (H) at (0,2);
 \coordinate[] (I) at (1.6,2);
-\fill [fill=red!20] (A)--(E)--(I)--(H)--cycle;
-\fill [fill=cyan!20] (B)--(F)--(I)--(E)--cycle;
-\fill [fill=blue!20] (D)--(G)--(I)--(H)--cycle;
-\fill [fill=orange!20] (C)--(F)--(I)--(G)--cycle;
+\fill [fill=red!20] (B)--(E)--(I)--(H)--cycle;
+\fill [fill=cyan!20] (C)--(F)--(I)--(E)--cycle;
+\fill [fill=blue!20] (A)--(G)--(I)--(H)--cycle;
+\fill [fill=orange!20] (D)--(F)--(I)--(G)--cycle;
 \draw [line width=1pt] (A) -- (B) -- (C) -- (D) -- cycle;
-\draw [line width=1pt] (D) -- (E)-- (F) -- cycle;
+\draw [line width=1pt] (A) -- (E)-- (F) -- cycle;
 \draw [dashed,line width=1pt] (E) -- (G);
 \draw [dashed,line width=1pt] (F) -- (H);
 \foreach \p in {A,B,C,D,E,F,G,H}
@@ -2356,21 +2356,21 @@ S_{\triangle BOC} &= S_{\triangle COP} + S_{\triangle BOP} - S_{\triangle BCP} \
 \node at (0.4,0.5) {$4$};
 \node at (6.5,0.5) {$7$};
 \node at (6,3.2) {$9$};
-\draw[red] (0.8,1) node {$c$};
-\draw[cyan] (4.4,1) node {$d$};
+\draw[red] (0.8,1) node {$b$};
+\draw[cyan] (4.4,1) node {$c$};
 \draw[blue] (0.8,3) node {$a$};
-\draw[orange] (4.4,3) node {$b$};
+\draw[orange] (4.4,3) node {$d$};
 \end{tikzpicture}
 \end{figure*}
 
 由已知条件得 
 \begin{align*}
-a + b &= 18,\\
-a + c &= 8,\\
-d &= 14.
+a + b &= 8,\\
+a + d &= 18,\\
+c &= 14.
 \end{align*}
-再由边长比例关系得 $\dfrac{a}{b} = \dfrac{c}{d}$, 可以解出 
-\[ a = c = 4, \qquad b = d = 14 .\]
+再由边长比例关系得 $\dfrac{a}{b} = \dfrac{d}{c}$, 可以解出 
+\[ a = b = 4, \qquad c = d = 14 .\]
 所以四边形 $ABCD$ 总面积为 $a+b+c+d = 36$, $\triangle AEF$ 的面积为 $36 - 4 - 7 - 9 = 16$.
 
 %------------------------------------------------------------------------------%
