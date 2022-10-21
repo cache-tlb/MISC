@@ -1116,6 +1116,71 @@ $\angle CEF= \angle CEA + \angle DEF = 60\degree + 20\degree = 80\degree = \angl
 \newpage
 \noindent 来自微博:
 
+下图 $\triangle ABC$ 中, $D$ 在 $AC$ 上, $E$ 在 $BC$ 上, $\angle BAC = \angle ABC = \angle ADB = 70\degree$, $CD = BE$, 求 $\angle BDE$.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=0.8]
+\coordinate[label=below left:$A$] (A) at (0,0);
+\coordinate[label=below right:$B$] (B) at (6,0);
+\coordinate[label=above:$C$] (C) at (3,8.242);
+\coordinate[label=left:$D$] (D) at (1.404,3.857);
+\coordinate[label=right:$E$] (E) at (4.404,4.386);
+\draw [line width=1pt] (C) --(E) -- (D)-- (A);
+\draw [blue,line width=1pt] (D) -- (B)-- (A);
+\draw [red,line width=1pt] (B) -- (E)node [midway,sloped] {$\bracevert$};
+\draw [red,line width=1pt] (C) -- (D)node [midway,sloped] {$\bracevert$};
+\foreach \p in {A,B,C,D,E}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\draw pic["$70\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.35cm] {angle=A--D--B};
+\draw pic["$70\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.35cm] {angle=B--A--D};
+\draw pic["$40\degree$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.55cm] {angle=A--C--B};
+\draw pic["$40\degree$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.55cm] {angle=D--B--A};
+\draw pic["$30\degree$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.65cm] {angle=C--B--D};
+\draw pic["$?$",draw,line width=1pt, angle eccentricity=1.6, angle radius=0.5cm] {angle=B--D--E};
+\end{tikzpicture}
+\end{figure*}
+
+解: 易知 $AB = BD$, $AC = BC$, $AD = AC - CD = BC - BE = EC$. 
+作$AD$的中垂线 $BF$, 满足 $BF = AB$, 连接 $DF, EF, AF$. 下面证明 $DFBE$ 四点共圆. 
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=0.8]
+\coordinate[label=below left:$A$] (A) at (0,0);
+\coordinate[label=below right:$B$] (B) at (6,0);
+\coordinate[label=above:$C$] (C) at (3,8.242);
+\coordinate[label=left:$D$] (D) at (1.404,3.857);
+\coordinate[label=right:$E$] (E) at (4.404,4.386);
+\coordinate[label=left:$F$] (F) at (0.362,2.052);
+\coordinate[label=right:$G$] (G) at (7.042,5.909);
+\coordinate[] (H) at (3.362,1.523);
+\draw [gray,line width=1pt] (H) circle (3.0463cm);
+\draw [line width=1pt] (C) --(E) -- (D)-- (A);
+\draw [red,line width=1pt] (B) -- (E)node [midway,sloped] {$\bracevert$};
+\draw [red,line width=1pt] (C) -- (D)node [midway,sloped] {$\bracevert$};
+\draw [blue,line width=1pt] (D) -- (B)-- (A);
+\draw [dashed,blue,line width=1pt] (D) -- (G)-- (B) -- (F);
+\draw [dashed,red,line width=1pt] (C) -- (G);
+\draw [dashed,red,line width=1pt] (E) -- (F);
+\draw [dashed,line width=1pt] (D) -- (F) -- (A);
+\foreach \p in {A,B,C,D,E,F,G}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+%\draw pic["$24\degree$",draw,line width=1pt, angle eccentricity=2.2, angle radius=0.55cm] {angle=C--B--A};
+%\draw pic["$30\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.5cm] {angle=B--A--C};
+%\draw pic["$?$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.5cm] {angle=A--D--C};
+\end{tikzpicture}
+\end{figure*}
+
+作 $D$ 点关于 $BC$ 对称的点 $G$, 连接 $BG, DG, CG$, 则 $\triangle BDG$ 为等边三角形, $BD = DG = BG = BF = AB$, $CD = CG = EB$, $\angle DCG = 80\degree$, $\angle CGD = \angle CDG = 50\degree$.
+
+等腰三角形 $\triangle BDF$ 中, 顶角 $\angle DBF = 20\degree$, $\angle BDF = \angle BFD = 80\degree$. 
+
+由 $\angle EBF = 20\degree + 30\degree = \angle CGD$, $CG = EB$, $DG = FB$ 得 $\triangle CDG \cong \triangle EFB$, 于是 $\angle FEB = \angle DCG = 80\degree = \angle FDB$, 说明 $DFBE$ 四点共圆, 从而 $\angle BDE = \angle BFE = GDC = 50\degree$.
+
+
+%------------------------------------------------------------------------------%
+\newpage
+\noindent 来自微博:
+
 下图中, $AB = CD$, $\angle ABC = 24\degree, \angle BAC = 30\degree$. 求 $\angle ADC$.
 \begin{figure*}[htbp]
 \centering
