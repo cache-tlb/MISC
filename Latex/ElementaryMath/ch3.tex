@@ -1164,9 +1164,13 @@ $\angle CEF= \angle CEA + \angle DEF = 60\degree + 20\degree = 80\degree = \angl
 \draw [dashed,line width=1pt] (D) -- (F) -- (A);
 \foreach \p in {A,B,C,D,E,F,G}
 	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
-%\draw pic["$24\degree$",draw,line width=1pt, angle eccentricity=2.2, angle radius=0.55cm] {angle=C--B--A};
-%\draw pic["$30\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.5cm] {angle=B--A--C};
-%\draw pic["$?$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.5cm] {angle=A--D--C};
+\draw pic["$40\degree$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.55cm] {angle=A--C--B};
+\draw pic["$40\degree$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.65cm] {angle=B--C--G};
+\draw pic["$50\degree$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.5cm] {angle=C--G--D};
+\draw pic["$30\degree$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.65cm] {angle=C--B--D};
+\draw pic["$30\degree$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.75cm] {angle=G--B--C};
+\draw pic["$20\degree$",draw,line width=1pt, angle eccentricity=1.8, angle radius=1.0cm] {angle=D--B--F};
+\draw pic["$20\degree$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.9cm] {angle=F--B--A};
 \end{tikzpicture}
 \end{figure*}
 
@@ -1174,7 +1178,9 @@ $\angle CEF= \angle CEA + \angle DEF = 60\degree + 20\degree = 80\degree = \angl
 
 等腰三角形 $\triangle BDF$ 中, 顶角 $\angle DBF = 20\degree$, $\angle BDF = \angle BFD = 80\degree$. 
 
-由 $\angle EBF = 20\degree + 30\degree = \angle CGD$, $CG = EB$, $DG = FB$ 得 $\triangle CDG \cong \triangle EFB$, 于是 $\angle FEB = \angle DCG = 80\degree = \angle FDB$, 说明 $DFBE$ 四点共圆, 从而 $\angle BDE = \angle BFE = GDC = 50\degree$.
+由 $\angle EBF = 20\degree + 30\degree = \angle CGD$, $CG = EB$, $DG = FB$ 得 $\triangle CDG \cong \triangle EFB$, 于是 $\angle FEB = \angle DCG = 80\degree = \angle FDB$, 说明 $DFBE$ 四点共圆. 
+
+从而 $\angle BDE = \angle BFE = GDC = 50\degree$.
 
 
 %------------------------------------------------------------------------------%
