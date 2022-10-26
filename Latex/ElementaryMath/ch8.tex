@@ -417,11 +417,112 @@ A Cone in 3D
 \end{tikzpicture}
 \end{figure*}
 
+\begin{figure*}[htbp]
+\begin{tikzpicture}[scale=3,
+                    cube/.style={very thick,black},
+                    grid/.style={very thin,gray},
+                    axis/.style={->,blue,ultra thick},
+                    rotated axis/.style={->,purple,ultra thick}]
+
+    %draw a grid in the x-y plane
+    \foreach \x in {-0.5,0,...,2.5}
+        \foreach \y in {-0.5,0,...,2.5}
+        {
+            \draw[grid] (\x,-0.5) -- (\x,2.5);
+            \draw[grid] (-0.5,\y) -- (2.5,\y);
+        }
+
+    %draw the main coordinate frame axes
+    \draw[axis] (0,0,0) -- (3.5,0,0) node[anchor=west]{$x$};
+    \draw[axis] (0,0,0) -- (0,3.5,0) node[anchor=north west]{$y$};
+    \draw[axis] (0,0,0) -- (0,0,3.5) node[anchor=west]{$z$};
 
 
+    %draw the rotated coordinate frame axes
+    \draw[rotated axis] (0,0,0) -- (3,0,0) node[anchor=west]{$x'$};
+    \draw[rotated axis] (0,0,0) -- (0,3,0) node[anchor=south west]{$y'$};
+    \draw[rotated axis] (0,0,0) -- (0,0,3) node[anchor=west]{$z'$};
+
+    %draw the top and bottom of the cube
+    \draw[cube,fill=blue!5] (0,0,0) -- (0,2,0) -- (2,2,0) -- (2,0,0) -- cycle;
+
+    %draw the top and bottom of the cube
+    \draw[cube,fill=red!5] (0,0,0) -- (0,2,0) -- (0,2,2) -- (0,0,2) -- cycle;
+
+    %draw the top and bottom of the cube
+    \draw[cube,fill=green!5] (0,0,0) -- (2,0,0) -- (2,0,2) -- (0,0,2) -- cycle;
+
+\foreach \x in {0,1,2}
+   \foreach \y in {0,1,2}
+      \foreach \z in {0,1,2}{
+           %#####################################################
+           \ifthenelse{  \lengthtest{\x pt < 2pt}  }
+           {
+             % True
+                \draw [black]   (\x,\y,\z) -- (\x+1,\y,\z);
+           }
+           {% False
+           }
+           %#####################################################
+           \ifthenelse{  \lengthtest{\y pt < 2pt}  }
+           {
+             % True
+                \draw [black]   (\x,\y,\z) -- (\x,\y+1,\z);
+           }
+           {% False
+           }
+           %#####################################################
+           \ifthenelse{  \lengthtest{\z pt < 2pt}  }
+           {
+             % True
+                \draw [black]   (\x,\y,\z) -- (\x,\y,\z+1);
+           }
+           {% False
+           }
+           \shade[rotated axis,ball color = purple!80] (\x,\y,\z) circle (0.06cm);          
+}
+
+\end{tikzpicture}
+\end{figure*}
 
 
+\begin{figure*}[htbp]
+\begin{tikzpicture}
+\def\tilt{45}
+\def\azimuth{30}
+\begin{axis}[axis equal,width=14cm,height=14cm,hide axis,enlargelimits=0.3,view/h=\tilt,view/v=\azimuth,scale uniformly strategy=units only,colormap={bluewhite}{color=(blue) color=(white)}]
+\coordinate (X) at (axis cs: 1,0,0);
+\coordinate (-X) at (axis cs: -1,0,0);
+\coordinate (Y) at (axis cs: 0,1,0);
+\coordinate (-Y) at (axis cs: 0,-1,0);
+\coordinate (Z) at (axis cs: 0,0,1);
+\coordinate (-Z) at (axis cs: 0,0,-1);
+\filldraw[ball color=white] (axis cs: 0,0,0) circle (2.47cm);
+    \pgfplotsinvokeforeach {-80,-60,...,80}{
+        \pgfplotsextra{ 
+            \pgfmathsetmacro\sinVis{sin(#1)/cos(#1)*sin(\azimuth)/cos(\azimuth)}
+            % angle of "visibility"
+            \pgfmathsetmacro\angVis{asin(min(1,max(\sinVis,-1)))}
+            \coordinate (X) at (axis cs: {cos(#1)},0,{sin(#1)});
+            \draw [densely dashed] (X) arc (0:360:{100*cos(#1)});
+        } }
+    %\pgfplotsinvokeforeach {-80,-60,...,80}{
+    %\pgfplotsextra{ 
+    %    \pgfmathsetmacro\sinVis{sin(#1)/cos(#1)*sin(\azimuth)/cos(\azimuth)}
+         % angle of "visibility"
+    %    \pgfmathsetmacro\angVis{asin(min(1,max(\sinVis,-1)))}
+    %    \coordinate (X) at (axis cs: {cos(#1)},0,{sin(#1)});
+    %    \draw (X) arc (0:\tilt+\angVis:{100*cos(#1)}) (X) arc (0:-180+\tilt-\angVis:{100*cos(#1)});
+    %} }
 
+\foreach \a in {0,20,...,359}
+{ \pgfmathsetmacro{\Bound}{-60*cos(\a+45)}
+    \addplot3[domain=\Bound:90, samples=45,samples y=0] ({cos(\a)*cos(x)},{sin(\a)*cos(x)},{sin(x)});
+    \addplot3[domain=-90:\Bound, samples=45,samples y=0, densely dashed] ({cos(\a)*cos(x)},{sin(\a)*cos(x)},{sin(x)});
+}
+\end{axis}  
+\end{tikzpicture}  
+\end{figure*}
 
 
 
