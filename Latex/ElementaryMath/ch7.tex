@@ -64,6 +64,9 @@ u &= \frac{V_1}{V_2}\ln{(L+V_2t)} + C
 \draw[dashed,line width=1pt] (O)--(-1,0,0);
 \fill[fill=black,draw=black,thick,fill opacity=1] (-1,0,0) circle (0.6pt);
 \fill[fill=black,draw=black,thick,fill opacity=1] (0,0,0) circle (0.6pt);
+\fill[fill=black,draw=black,thick,fill opacity=1] (0,0,1) circle (0.6pt);
+\fill[fill=black,draw=black,thick,fill opacity=1] (0,1,0) circle (0.6pt);
+\fill[fill=black,draw=black,thick,fill opacity=1] (1,0,0) circle (0.6pt);
 \coordinate (P) at (-1,0.9,0.1);
 \coordinate (Q) at (-0.6,0.9,0.1);
 \coordinate (R) at (-0.7236,0.6512,0.0723);
@@ -80,10 +83,10 @@ $P$处的面积微元为 $\mathrm{d}A = \mathrm{d}x\cdot\mathrm{d}y$, 法线方�
 $P$点到原点的距离为 $R = |OP| = \sqrt{x^2+y^2+1}$, $\vec{PO}$ 方向的单位向量为 $\vec{p} = \dfrac{(x,y,1)}{R}$, 
 $\mathrm{d}A$ 在 $\vec{PO}$ 方向上的投影面积为 $\mathrm{d}A\cdot\cos\angle(\vec{n},\vec{p})$, 该投影面积对应的球半径为 $R$, 所以对于 $x\in[x_1,x_2], y\in[y_1,y_2]$的一块矩形区域对应立体角为:
 \[
-sr_{[x_1,x_2]\times[y_1,y_2]} = \int_A\frac{(\vec{n}\cdot\vec{p})}{R^2} \ \mathrm{d}A = \int_A\frac{1}{R^3} \ \mathrm{d}A = \int_{y_1}^{y_2}{\int_{x_1}^{x_2}\frac{1}{(x^2+y^2+1)^{\frac{3}{2}}}\ \mathrm{d}x}\ \mathrm{d}y \ .
+\Omega_{[x_1,x_2]\times[y_1,y_2]} = \int_A\frac{(\vec{n}\cdot\vec{p})}{R^2} \ \mathrm{d}A = \int_A\frac{1}{R^3} \ \mathrm{d}A = \int_{y_1}^{y_2}{\int_{x_1}^{x_2}\frac{1}{(x^2+y^2+1)^{\frac{3}{2}}}\ \mathrm{d}x}\ \mathrm{d}y \ .
 \]
 先计算 
-\[f(s,t) = sr_{[0,s]\times[0,t]} = \int_0^t{\int_0^s\frac{1}{(x^2+y^2+1)^{\frac{3}{2}}}\ \mathrm{d}x}\ \mathrm{d}y\ , \]
+\[f(s,t) = \Omega_{[0,s]\times[0,t]} = \int_0^t{\int_0^s\frac{1}{(x^2+y^2+1)^{\frac{3}{2}}}\ \mathrm{d}x}\ \mathrm{d}y\ , \]
 令 $u = \dfrac{x}{\sqrt{x^2+y^2+1}}$, 则积分上下限分别是 $u(x=0) = 0$, $u(x=s)=\dfrac{s}{\sqrt{s^2+y^2+1}}$, 
 \[\dfrac{\mathrm{d}u}{\mathrm{d}x} = \dfrac{y^2+1}{(x^2+y^2+1)^\frac{3}{2}} ,\] 
 积分换元得:
@@ -103,12 +106,12 @@ f(s,t) &= \int_0^\frac{t}{\sqrt{s^2+t^2+1}} {\frac{s(1-v^2)}{v^2s^2+1}\cdot\frac
 &= \arctan(\frac{st}{\sqrt{s^2+t^2+1}}) .
 \end{align*}
 
-得到 $f(s,t)$ 的表达式之后, 可以用下面的方法计算其他范围的立体角:
-\[sr_{[x_1,x_2]\times[y_1,y_2]} = f(x_2,y_2) - f(x_1,y_2) - f(x_2,y_1) + f(x_1,y_1) .\]
+得到 $f(s,t)$ 的表达式之后, 可以用下面的方法计算其他(任意矩形)范围的立体角:
+\[\Omega_{[x_1,x_2]\times[y_1,y_2]} = f(x_2,y_2) - f(x_1,y_2) - f(x_2,y_1) + f(x_1,y_1) .\]
 
 作为验证, 考虑 cubemap 的一个面, 占据了 $\dfrac{1}{6}$ 个球面, 对应的立体角应该是 $\dfrac{2\pi}{3}$. 而
 \begin{align*}
-sr_{[-1,1]\times[-1,1]} &= f(1,1) - f(-1,1) - f(1,-1) + f(1,1) \\
+\Omega_{[-1,1]\times[-1,1]} &= f(1,1) - f(-1,1) - f(1,-1) + f(1,1) \\
 & = 4\times f(1,1) \\
 &= 4\times \arctan(\dfrac{1}{\sqrt{3}}) \\
 & = \dfrac{2\pi}{3} .
