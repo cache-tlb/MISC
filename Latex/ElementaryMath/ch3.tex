@@ -736,6 +736,61 @@ EF &= BD\cdot\sin\angle EBF
 \[BD\cdot\frac{AC}{2R} = AD\cdot\frac{BC}{2R} + CD\cdot\frac{AB}{2R} ,\]
 即: $BD\cdot AC = AD\cdot BC + AB\cdot CD$ . 
 
+
+%------------------------------------------------------------------------------%
+\newpage
+\noindent 托勒密定理的应用
+
+下图中, 证明: $x\sin\beta + y\sin\alpha = z\sin(\alpha+\beta)$ .
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[] (O) at (0,0);
+\coordinate[] (A) at (-1.985,2.25);
+\coordinate[] (B) at (-1.429,-2.638);
+\coordinate[] (C) at (0.677,-2.923);
+\coordinate[] (D) at (2.807,1.06);
+\draw [line width=1pt] (O) circle (3cm);
+\draw [line width=1pt] (A) to[edge label'=$x$] (B);
+\draw [line width=1pt] (A) to[edge label=$z$] (C);
+\draw [line width=1pt] (A) to[edge label=$y$] (D);
+\foreach \p in {A,B,C,D}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\draw pic["$\alpha$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.6cm] {angle=B--A--C};
+\draw pic["$\beta$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.35cm] {angle=C--A--D};
+\end{tikzpicture}
+\end{figure*}
+
+证明: 由托勒密定理, 有 $xb + ya = zc$, 设圆半径为 $r$, 由正弦定理得 
+\begin{align*}
+a &= 2r\sin\alpha \\
+b &= 2r\sin\beta \\
+c &= 2r\sin(\alpha+\beta)
+\end{align*}
+立刻得到 $x\sin\beta + y\sin\alpha = z\sin(\alpha+\beta)$ .
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[] (O) at (0,0);
+\coordinate[] (A) at (-1.985,2.25);
+\coordinate[] (B) at (-1.429,-2.638);
+\coordinate[] (C) at (0.677,-2.923);
+\coordinate[] (D) at (2.807,1.06);
+\draw [line width=1pt] (O) circle (3cm);
+\draw [line width=1pt] (A) to[edge label'=$x$] (B);
+\draw [line width=1pt] (A) to[edge label=$z$] (C);
+\draw [line width=1pt] (A) to[edge label=$y$] (D);
+\draw [line width=1pt] (C) to[edge label'=$a$] (B);
+\draw [line width=1pt] (C) to[edge label'=$b$] (D);
+\draw [line width=1pt] (B) to[edge label=$c$] (D);
+\foreach \p in {A,B,C,D}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\draw pic["$\alpha$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.6cm] {angle=B--A--C};
+\draw pic["$\beta$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.35cm] {angle=C--A--D};
+\end{tikzpicture}
+\end{figure*}
+
+
 %------------------------------------------------------------------------------%
 \newpage
 圆幂, 根轴, 根心, 蒙日定理
