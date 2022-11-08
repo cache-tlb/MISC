@@ -2257,6 +2257,74 @@ MS\cdot MT &= (MC+r)\cdot(MC-r) = MC^2-r^2 \\
 
 \section{面积问题}
 
+正方形内取一点, 将它与各边中点相连, 得到四个小四边形, 已知其中三个的面积, 求第四个小四边形的面积.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[]
+\coordinate[] (A) at (0,0);
+\coordinate[] (B) at (6,0);
+\coordinate[] (C) at (6,6);
+\coordinate[] (D) at (0,6);
+\coordinate[] (E) at (3,0);
+\coordinate[] (F) at (6,3);
+\coordinate[] (G) at (3,6);
+\coordinate[] (H) at (0,3);
+\coordinate[] (P) at (2.5,1.5);
+%\draw [line width=1pt] (A) -- (B) -- (C) -- (D) -- cycle;
+\draw [line width=1pt] (A) -- (E) node [midway,sloped] {$\bracevert$};
+\draw [line width=1pt] (E) -- (B) node [midway,sloped] {$\bracevert$};
+\draw [line width=1pt] (B) -- (F) node [midway,sloped] {$\bracevert$};
+\draw [line width=1pt] (F) -- (C) node [midway,sloped] {$\bracevert$};
+\draw [line width=1pt] (C) -- (G) node [midway,sloped] {$\bracevert$};
+\draw [line width=1pt] (G) -- (D) node [midway,sloped] {$\bracevert$};
+\draw [line width=1pt] (D) -- (H) node [midway,sloped] {$\bracevert$};
+\draw [line width=1pt] (H) -- (A) node [midway,sloped] {$\bracevert$};
+\draw [line width=1pt] (E) -- (P) -- (F);
+\draw [line width=1pt] (G) -- (P) -- (H);
+\end{tikzpicture}
+\end{figure*}
+
+解: 如下图, 每个三角形内包含红色和蓝色两个三角形, 底和高都相等, 所以红色区域面积等于蓝色区域面积, 都等于正方形面积的一半.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[]
+\coordinate[] (A) at (0,0);
+\coordinate[] (B) at (6,0);
+\coordinate[] (C) at (6,6);
+\coordinate[] (D) at (0,6);
+\coordinate[] (E) at (3,0);
+\coordinate[] (F) at (6,3);
+\coordinate[] (G) at (3,6);
+\coordinate[] (H) at (0,3);
+\coordinate[] (P) at (2.5,1.5);
+\fill[red!20] (A) -- (P) -- (E) -- cycle;
+\fill[red!20] (A) -- (P) -- (H) -- cycle;
+\fill[red!20] (C) -- (P) -- (G) -- cycle;
+\fill[red!20] (C) -- (P) -- (F) -- cycle;
+\fill[blue!20] (D) -- (P) -- (H) -- cycle;
+\fill[blue!20] (B) -- (P) -- (E) -- cycle;
+\fill[blue!20] (D) -- (P) -- (G) -- cycle;
+\fill[blue!20] (B) -- (P) -- (F) -- cycle;
+%\draw [line width=1pt] (A) -- (B) -- (C) -- (D) -- cycle;
+\draw [line width=1pt] (A) -- (E) node [midway,sloped] {$\bracevert$};
+\draw [line width=1pt] (E) -- (B) node [midway,sloped] {$\bracevert$};
+\draw [line width=1pt] (B) -- (F) node [midway,sloped] {$\bracevert$};
+\draw [line width=1pt] (F) -- (C) node [midway,sloped] {$\bracevert$};
+\draw [line width=1pt] (C) -- (G) node [midway,sloped] {$\bracevert$};
+\draw [line width=1pt] (G) -- (D) node [midway,sloped] {$\bracevert$};
+\draw [line width=1pt] (D) -- (H) node [midway,sloped] {$\bracevert$};
+\draw [line width=1pt] (H) -- (A) node [midway,sloped] {$\bracevert$};
+\draw [line width=1pt] (E) -- (P) -- (F);
+\draw [line width=1pt] (G) -- (P) -- (H);
+\draw [line width=1pt] (A) -- (P) -- (C);
+\draw [line width=1pt] (B) -- (P) -- (D);
+\end{tikzpicture}
+\end{figure*}
+
+
+%------------------------------------------------------------------------------%
+\newpage
+
 下图中的正六边形内任取一点, 连接它与其他各顶点, 求涂色部分的占比.
 
 \begin{figure*}[htbp]
