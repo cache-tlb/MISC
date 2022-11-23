@@ -274,6 +274,40 @@ b_1&=a_t=b_{m}\otimes b_m=b_1^{2^m}.
 \newpage
 %------------------------------------------------------------------------------%
 
+\noindent 来自网络
+
+求和
+\[ 
+S = \sum_{a_1=0}^{\infty}\sum_{a_2=0}^{\infty}\cdots\sum_{a_7=0}^{\infty}{\frac{a_1+a_2+\cdots+a_7}{3^{a_1+a_2+\cdots+a_7}}}
+\]
+
+解: 将求和号合并, 再由对称性, 可得
+\begin{align*}
+S &= \sum_{a_1,\cdots,a_7} {\frac{a_1}{3^{a_1+a_2+\cdots+a_7}} + \frac{a_2}{3^{a_1+a_2+\cdots+a_7}} + \cdots + \frac{a_7}{3^{a_1+a_2+\cdots+a_7}}} \\
+ &= 7\cdot\sum_{a_1,\cdots,a_7} {\frac{a_1}{3^{a_1+a_2+\cdots+a_7}}}
+\end{align*}
+再将求和号拆开, 得到:
+\begin{align*}
+S &= 7\cdot \sum_{a_1=0}^{\infty}\sum_{a_2=0}^{\infty}\cdots\sum_{a_7=0}^{\infty}{\frac{a_1}{3^{a_1+a_2+\cdots+a_7}}} \\
+&=  7\cdot \sum_{a_1=0}^{\infty}\frac{a_1}{3^{a_1}}\cdot\left(\sum_{a_2=0}^{\infty}\cdots\sum_{a_7=0}^{\infty}{\frac{1}{3^{a_2}}\cdots\frac{1}{3^{a_7}}}\right)\\
+&= 7\cdot \sum_{a_1=0}^{\infty}\frac{a_1}{3^{a_1}}\cdot\left(\sum_{a_2=0}^{\infty}{\frac{1}{3^{a_2}}}\right)^6
+\end{align*}
+两部分分别求和, 其中易求得
+\[
+S_1 = \sum_{a_1=0}^{\infty}\frac{a_1}{3^{a_1}} = \frac{3}{4}
+\]
+以及 
+\[ S_2 = \sum_{a_2=0}^{\infty}\frac{1}{3^{a_2}} = \frac{3}{2}
+\]
+所以 
+\[
+S = 7\cdot\frac{3}{4}(\frac{3}{2})^6 = \frac{7\cdot 3^7}{2^8}
+\]
+
+
+\newpage
+%------------------------------------------------------------------------------%
+
 \noindent 堆垒求和方法
 \[ S(n,k) = \sum_{i=1}^{n}{i^k} \]
 
