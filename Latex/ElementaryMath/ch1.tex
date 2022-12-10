@@ -52,63 +52,6 @@ Area=\frac{1}{2} hc=\sqrt{\frac{1}{4} h^2 c^2 }=\sqrt{s(s-a)(s-b)(s-c)}
 
 \end{proof}
 
-\newpage
-%------------------------------------------------------------------------------%
-\section{悬链线方程}
-质量均匀的绳子自由悬挂，只考虑自身重量，求形成的曲线形状。
-
-
-\begin{figure*}[htbp]
-\centering
-\begin{tikzpicture}[scale=1.5,domain=0:5]
-\coordinate (O) at (0,0);
-\coordinate[label=above left:$T_0$] (A) at (-1.5,0);
-\coordinate (B) at (3.2117777777777774,1.5914986998664422);
-\coordinate (C) at (3.4855555555555555,1.944112448982997);
-\coordinate (D) at (3.73,2.305416047938065);
-\coordinate (E) at (4.67,1.944112448982997);
-\draw
-    pic["$\theta$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.5cm] {angle=E--C--D};
-
-\draw[->,line width=1pt] (0.0,0) -- (6.2,0) node[right] {$x$};
-\draw[->,line width=1pt] (0,-1.0) -- (0,5.2) node[above] {$y$};
-\draw[color=orange,line width=1pt] plot (\x,{0.5*(exp(0.5*\x) + exp(-0.5*\x))-1}) ;
-
-\draw [-latex,line width=1pt] (B) -- (2.27311111111111,0.4668888888889078) node[anchor=north west] {$T_2$};
-\draw [-latex,line width=1pt] (D) -- (4.424222222222222,3.3708888888889077) node[anchor=north west] {$T_1$};
-\draw [-latex,line width=1pt] (C) to [edge label=$\rho g \Delta s$] (3.505111111111111,0.39844444444446325);
-\draw [line width=1pt,dash pattern=on 3pt off 3pt] (C) -- (E);
-\draw [-latex,line width=1pt] (O) -- (A);
-\foreach \p in {O,B,C,D}
-	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
-\end{tikzpicture}
-\end{figure*}
-
-上图画出了一半的绳子, 另一半也是对称的. 假设绳子单位长度质量为 $ \rho $, 取其中长度为 $ \Delta s $ 的一小段绳子分析受力. 它受到重力和两端的拉力, 拉力并不是完全相反的, 假设小段绳子底部与水平方向夹角为 $ \theta $, 上端与水平方向夹角为 $ \theta + \Delta\theta $, 水平和竖直方向受力平衡分别有:
-\begin{align*}
-T_1\cos(\theta+\Delta\theta) &= T_2\cos\theta =\ldots=T_0,\\
-T_1\sin(\theta+\Delta\theta) &= T_2\sin\theta + \rho g \Delta s .
-\end{align*}
-这里 $ T_0 $ 是整个绳子在最低的水平点的张力. 第二个式子中用 $ T_0 $ 替换 $ T_1, T_2 $, 并用等价无穷小, 可以得到:
-\begin{align*}
-\frac{\rho g}{T_0 } \Delta s &= \tan(\theta + \Delta \theta) - \tan \theta \\
- &= \tan(\Delta\theta)(1+\tan(\theta+\Delta\theta)\tan\theta) \\
- &= \Delta\theta (1 + \tan^2\theta)\\
- &= \Delta\theta \frac{1}{\cos^2\theta}%\\
-%\frac{\rho g}{T_0 } \Delta s \cos\theta &= \Delta\theta \frac{1}{\cos\theta}
-\end{align*}
-令 $ a = \dfrac{\rho g}{T_0 } $, 并注意到 $ \Delta s \cos\theta = \Delta x $, 继续化简得到: $ a\Delta x = \dfrac{1}{\cos\theta} \Delta\theta $. 两边积分: 
-\[ ax = \ln | \sec\theta + \tan\theta | + C. \]
-由初值条件 $ x = 0, \theta = 0 $ 得到 $ C = 0 $, 再考虑到 $ \theta\in[0,\pi/2) $, 于是
-\[ e^{ax} = \sec\theta + \tan\theta = \sqrt{1+\tan^2\theta} + \tan\theta. \]
-而 $ \tan\theta = y' $, 所以
-\begin{align*}
-\sqrt{1+(y')^2} &= e^{ax}-y' \\
-1+(y')^2 &= e^{2ax} - 2y'e^{ax} + (y')^2 \\
-y' &= \frac{e^{ax}-e^{-ax}}{2} = \sinh(ax) \\
-y &= \cosh(ax).
-\end{align*}
-
 
 \newpage
 %------------------------------------------------------------------------------%
