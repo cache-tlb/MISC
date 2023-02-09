@@ -142,6 +142,58 @@ E(X) = (M-1)\left(1-(1-\frac{1}{N})^K\right)
 
 %------------------------------------------------------------------------------%
 \newpage
+\noindent 来自 Paul Nahin (Ballot Theorem)
+
+两人 $P$ 和 $Q$ 竞选某个职位, 最终的得票数分别为 $p$ 和 $q$, 且 $p>q$. 于是 $P$ 胜出. 在唱票过程中 $P$ 的得票数可能领先或落后于 $Q$, 取决于唱票时选票的排列顺序. 
+
+求唱票过程中 $P$ 的票数自始至终都领先于 $Q$ 的概率.
+
+~
+
+解: 以横轴为唱票进度, 纵轴为 $P$ 累积领先的票数, 画出唱票结果.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate (O) at (0,0);
+\coordinate (A) at (1,1);
+\coordinate (AA) at (1,-1);
+\coordinate (B) at (2,2);
+\coordinate (BB) at (2,-2);
+\coordinate (C) at (3,1);
+\coordinate (CC) at (3,-1);
+\coordinate (D) at (4,2);
+\coordinate (DD) at (4,-2);
+\coordinate (E) at (5,3);
+\coordinate (EE) at (5,-3);
+\coordinate (F) at (6,2);
+\coordinate (FF) at (6,-2);
+\coordinate (G) at (7,1);
+\coordinate (GG) at (7,-1);
+\coordinate (H) at (8,0);
+\coordinate (I) at (9,-1);
+\coordinate (J) at (10,0);
+\coordinate (K) at (11,1);
+\draw[->,line width=1pt] (-1,0) -- (12,0) node[right] {$x$};
+\draw[->,line width=1pt] (0,-4) -- (0,4) node[above] {$y$};
+\draw[line width=1pt,red] (O)--(A)--(B)--(C)--(D)--(E)--(F)--(G)--(H);
+\draw[line width=1pt] (H)--(I)--(J)--(K);
+\draw[line width=1pt,blue,dashed] (O)--(AA)--(BB)--(CC)--(DD)--(EE)--(FF)--(GG)--(H);
+\foreach \p in {O,A,B,C,D,E,F,G,H,I,J,K,AA,BB,CC,DD,EE,FF,GG}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+\end{figure*}
+
+每次$x$ 增加1, $y$要么增加1, 要么减少1. $P$ 一直领先于 $Q$ 意味着从原点出发后, 折线图一直在 $x$ 轴上方, 也不会与 $x$ 轴相交. 不管唱票顺序如何, 最终 $P$ 净领先的票数是固定的. 即不管折线图怎么拐, 终点的位置都是固定的. 如果折线某时刻到达了 $x$ 轴上或 $x$ 轴下方, 后面必然会经过 $x$ 轴重新回到上方.
+
+考虑唱票序列的第一张票, 若是投给 $Q$ 的, 则此时已经不能满足 $P$ 一直领先于 $Q$ 的条件, 发生的概率为$\dfrac{q}{p+q}$. 若第一张是投给 $P$ 的, 后面仍然可能出现票数持平或者被 $Q$ 反超的情况. 找到第一次持平的时刻, 并将此前的投票结果依次取反, 将得到一个新的序列. 例如上图的序列$\color{red}{PPQPPQQQ}\color{black}{QPP}$, 以 $P$ 开头, 但是中间落后于 $Q$. 构造的新序列为 $\color{blue}{QQPQQPPP}\color{black}{QPP}$, 两个序列的最终得票结果是一样的, 但新序列总是以 $Q$ 开头. 
+
+任意一个以 $P$ 开头的并中途达到过平手状态的序列都与一个以 $Q$ 开头的序列一一对应. 满足条件 A: $P$ 不是一直领先于 $Q$ 的序列数量是满足条件 B: 第一张票是 $Q$ 的序列数量的两倍. 因此 $P$ 一直领先于 $Q$ 的概率为:
+\[1 - \frac{2q}{p+q} = \frac{p-q}{p+q} .\]
+
+
+
+%------------------------------------------------------------------------------%
+\newpage
 \noindent By Mr.Why
 
 不超过 90 的正整数中随机选出 5 个不同的数, 求选出的数中最大数的期望.
