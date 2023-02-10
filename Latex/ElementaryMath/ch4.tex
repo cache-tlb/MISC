@@ -191,6 +191,24 @@ E(X) = (M-1)\left(1-(1-\frac{1}{N})^K\right)
 \[1 - \frac{2q}{p+q} = \frac{p-q}{p+q} .\]
 
 
+%------------------------------------------------------------------------------%
+\newpage 来自 Paul Nahin 
+
+有一个圆形的葡萄干布丁, 上面有 $n$ 个葡萄干, 它们在布丁上的位置的独立的均匀分布. 求离圆心最远的葡萄干到圆心距离的期望值.
+
+~
+
+解: 设布丁的半径为 $R$, 葡萄干到圆心的距离为随机变量 $x_i$, 则$x_i$的 pdf 为
+\[p(x_i=r) = \frac{2\pi r\cdot\mathrm{d}r}{\pi R^2} = \frac{2r\cdot\mathrm{d}r}{R^2}.\]
+则 $\max\{x_i\}$ 的 cdf 为:
+\[p(\max\{x_i\} \le x) = \left( \int_0^x{\frac{2r}{R^2} \mathrm{d}r}\right)^n = \left(\frac{x}{R}\right)^{2n}\]
+对应的 pdf 为: 
+\[p(\max\{x_i\} = r) = \frac{2n\cdot r^{2n-1}}{R^{2n}} .\]
+期望值为:
+\[\int_0^R{\frac{2n\cdot r^{2n-1}}{R^{2n}}\cdot r}\ \mathrm{d}r = \frac{2n}{2n+1}\cdot \frac{r^{2n+1}}{R^{2n}}\bigg|_0^R = \frac{2n}{2n+1}\cdot R\]
+
+
+
 
 %------------------------------------------------------------------------------%
 \newpage
