@@ -3178,6 +3178,44 @@ $PA + PB + PC = QK + QL + QM < QA + QB + QC$
 另外因为 $QK < QA, QL < QB, QM < QC $, 所以 $PA+PB+PC = QK+QL+QM < QA+QB+QC$. 说明到 $A,B,C$ 点的距离之和最小的点就是 $P$ 点.
 
 
+%------------------------------------------------------------------------------%
+\newpage
+
+\noindent 来自微博
+
+对于空间四边形, 若其四条边都和一个球体相切, 求证: 四个切点位于同一个平面内.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=0.8]
+\coordinate[label=above:$D$] (D) at (3,3);
+\coordinate[label=left:$A$] (A) at  (0,0);
+\coordinate[label=below:$B$] (B) at (2,-3);
+\coordinate[label=right:$C$] (C) at (6,-1);
+\draw [line width=1pt] (D) -- (A)--(B)--(C)--(D);
+\draw[densely dashed,line width=1pt] (A)--(C);
+\draw[densely dashed,line width=1pt] (D)--(B);
+\foreach \p in {A,B,C,D}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+\end{figure*}
+
+证明: 设空间四边形为 $ABCD$, 每边都是一根轻质的杆子. $AD$ 和 $AB$ 与球各有一个切点, $A$ 到这两个切点的距离相等, 设为 $a$, 并设$AD$ 和 $AB$ 两根杆子在 $A$ 点处都有一个质量为 $\dfrac{1}{a}$ 的质点. 对另外三个点也如此处理. 
+
+于是, $AB, BC, CD, DA$ 每根杆子两端都有一个质点, 每个杆子的质心正好在切点上. 假设杆子 $AB$ 与 $CD$ 作为一个整体的质心为 $P$, $P$ 落在 $AB$上的切点与$CD$上的切点的连线上, 另一方面, $P$ 是 $A,B,C,D$ 四个质点的质心, 从而 $P$ 也是 $AD + BC$ 系统的质心, 于是 $P$ 也落在 $AD$上的切点与 $BC$ 上的切点的连线上. 这说明两组对边上的切点的连线相交于 $P$ 点, 所以四个切点共面.
+
+~
+
+\noindent 延申问题: 
+
+空间四边形对边两组对边中点的连线, 以及两条对角线中点的连线交于一点, 且交点平分这三条连线. 
+
+证明思路: 只要将四边形每个顶点赋予单位质量即可, 四个点的总质心是每组对边的质心, 也是对角线的质心.
+
+
+%------------------------------------------------------------------------------%
+\newpage
+
+
 
 
 
