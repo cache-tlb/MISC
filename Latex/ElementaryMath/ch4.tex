@@ -211,6 +211,61 @@ E(X) = (M-1)\left(1-(1-\frac{1}{N})^K\right)
 
 
 
+%------------------------------------------------------------------------------%
+\newpage
+
+\noindent 来自 Paul Nahin
+
+有 $n$ 个独立同分布的随机变量 $X_1, X_2, \cdots, X_n$, 都是 $(0,1)$ 上的均匀分布, 求他们中的最大值除以最小值的商大于 $k$ 的概率, 其中 $k \ge 1$.
+
+~
+
+解: 令 $U = \min\{X_i\}, V = \max\{X_i\}$, 先计算 $U,V$ 的联合分布的累计密度函数 
+$$F_{U,V}(u,v) = \mathrm{Prob}(U\le u, V\le v) ,$$ 
+再计算联合分布的概率密度函数 
+$$f_{U,V}(u,v) = \frac{\partial^2}{\partial u\partial v}F_{U,V}(u,v). $$
+
+分两部分计算 $F_{U,V}(u,v)$. 当 $u\ge v$ 时, 条件A: $\min\{x_i\}\le u$ 被条件B: $\max\{x_i\}\le v$所包含了, 所以 
+$$F_{U,V}(u,v) = \mathrm{Prob}(U\le u, V\le v) = \mathrm{Prob}(V\le v) = v^N,\ \ u\ge v , $$ 
+表达式与$u$无关, 从而
+$$f_{U,V}(u,v) = 0,\ \ u\ge v .$$
+
+另一方面, 当 $u < v$ 时, $U\le u$ 且 $V\le v$ 意味着所有 $X_i \le v$, 且至少有一个 $X_i \le u$. 只要计算所有 $X_i \le v$的概率, 并减去所有 $X_i$ 都在 $(u,v)$ 范围内的概率, 于是:
+\begin{align*}
+F_{U,V}(u,v) &= \mathrm{Prob}(U\le u, V\le v) \\
+&= \mathrm{Prob}(V\le v) - \mathrm{Prob}(u\le X_1,X_2\cdots,X_N\le v) \\
+&= v^N - (v-u)^N,\ \ u < v.\\
+f_{U,V}(u,v) &= N(N-1)(v-u)^{N-2}, \ \ u < v.
+\end{align*}
+
+要求的事件为最大值除以最小值的商大于 $k$, 即 $V > kU$, 全部位于 $u<v$ 一侧, 所以所求概率为:
+\[
+\mathrm{Prob}(V > kU) = \int_0^1\int_0^{v/k}{N(N-1)(v-u)^{N-2}}\ \mathrm{d}u\mathrm{d}v
+\]
+
+~
+
+注: 可以求出$V$的 CDF 为:
+\begin{align*}
+F_V(v) &= \mathrm{Prob}(\max\{X_i\} \le v)\\
+&= \mathrm{Prob}(X_1\le v, X_2\le v, \cdots, X_n\le v) \\
+&= v^N .
+\end{align*}
+
+类似的求出 $U$ 的CDF 为:
+\begin{align*}
+F_U(u) &= \mathrm{Prob}(\min\{X_i\} \le u) = 1- \mathrm{Prob}(\min\{X_i\} > u)\\
+ &= 1 - \mathrm{Prob}(X_1 > u, X_2 > u, \cdots, X_n > u)\\ 
+ &= 1 - (1-u)^N.
+\end{align*}
+
+进而可以计算 $U,V$ 的 PDF:
+\begin{align*}
+f_U(u) &= \frac{\mathrm{d}}{\mathrm{d}u}F_U(u) = N(1-u)^{N-1} \\
+f_V(v) &= \frac{\mathrm{d}}{\mathrm{d}v}F_V(v) = Nv^{N-1} .
+\end{align*}
+
+但是 $U,V$ 不独立, 所以$f_{U,V}(u,v) \neq f_U(u)\cdot f_V(v)$.
 
 %------------------------------------------------------------------------------%
 \newpage
