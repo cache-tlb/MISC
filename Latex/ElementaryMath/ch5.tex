@@ -900,6 +900,55 @@ r_2 &= \min(r_2, r_3, r_4).
 
 \newpage
 %------------------------------------------------------------------------------%
+有一堆硬币, 共 1000 枚. 将它分成两堆, 分别有 $x$ 和 $y$ 枚, 并计算乘积 $xy$. 然后对这两堆分别再分成两堆, 计算两个乘积, 例如第一堆分成$x_1+x_2$两小堆, 第二堆分成$y_1+y_2$ 两小堆, 乘积分别是 $x_1x_2, y_1y_2$. 以此类推, 直到所有堆都只有一枚硬币. 将期间得到的所有乘积加起来求和. 
+
+求最终的和是多少? 是否与每次分堆的方式有关?
+
+~
+
+解: 考虑 $n$ 个变量 $a_1, a_2, \cdots, a_n$, 每个变量都赋值为 1, 被划分成$k+(n-k)$ 的两堆, 得到的乘积为:
+\begin{align*}
+k\cdot(n-k) &=(a_1+\cdots+a_k)(a_{k+1}+\cdots+a_n) \\
+& = (a_1a_{k+1}+\cdots a_1a_n)+\cdots+(a_ka_{k+1}+\cdots+a_ka_n)
+\end{align*}
+展开后的项为第一堆的每一项和第二堆的每一项组合, 但两堆各自内部的变量之间没有组合. 任意一对变量$a_i, a_j$, 最初是在一堆, 并且最终要分开, 因此总会在某次划分过程中分开而得到 $a_ia_j$ 项, 并且只会得到一次.
+
+于是最终乘积之和就是 $i\neq j$的组合个数, 为 $\dfrac{n(n-1)}{2}$. 
+
+严格证明可以用归纳法. 归纳假设是对于一堆 $n$ 枚硬币, 通过题述方式划分得到的乘积之和为 $\dfrac{n(n-1)}{2}$, 并且与每次划分的方式无关. 证明过程略.
+
+~
+
+拓展问题: 有一根长度为 $L$ 的木棍, 将它分成两段, 长度分别是 $x,y$. 将两段长度相乘得到乘积 $xy$. 然后对每一段继续细分, 得到新的乘积. 重复这个过程, 直到细分到无限小, 得到的乘积也趋于无穷小. 求这个过程中所有乘积之和.
+
+解: 在下面的直角坐标系取 $(0,L)$ 和 $(L,0)$ 两点, 构造等腰直角三角形. 斜边上取一点$(x,y)$, 满足$L=x+y$, 由这个点作到两坐标轴的垂线, 将大三角形划分成两个小等腰直角三角形和一个矩形. 矩形两边长为 $x,y$, 面积为 $xy$. 两个小三角形可以继续递归地划分下去. 随着划分过程, 剩余的三角形面积越来越小, 累加的矩形面积趋近于最初三角形的面积 $\dfrac{L^2}{2}$.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[] (A) at  (0,0);
+\coordinate[] (B) at (0,5);
+\coordinate[] (C) at (5,0);
+\coordinate[] (D) at (2,3);
+\coordinate[] (E) at (2,0);
+\coordinate[] (F) at (0,3);
+\draw [line width=1pt] (A)--(B)--(C)-- cycle;
+\draw[densely dashed,line width=1pt] (D) to [edge label = $x$](E);
+\draw[densely dashed,line width=1pt] (D) to [edge label = $y$](F);
+\draw[] (B) node [above left] {$(0,L)$};
+\draw[] (C) node [below right] {$(L,0)$};
+\draw[] (E) node [below] {$(x,0)$};
+\draw[] (F) node [left] {$(0,y)$};
+\draw[] (D) node [right] {$(x,y)$};
+\draw[] (A) node [below left] {$(0,0)$};
+%\foreach \p in {A,B,C,D}
+%	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+\end{figure*}
+
+
+
+\newpage
+%------------------------------------------------------------------------------%
 \noindent 来自微博
 
 有四个棋子位于一个正方形的四个顶点上, 旋转任意两枚棋子$A,B$, 可以执行如下的"跳棋"操作: $A$ 以 $B$ 点为中心进行中心对称变换, 即 $B$ 在 $A$ 的新旧位置的中点.
