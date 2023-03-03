@@ -1051,10 +1051,44 @@ s\oplus a_i &= a_0\oplus\cdots a_{i-1}\oplus (a_i\oplus a_i) \oplus a_{i+1}\oplu
 所以第 $j$ 个人回答的结果正好等于其背后的数字.
 
 
+\newpage
+%------------------------------------------------------------------------------%
+两人各自在 $1,2,\cdots,N$ 内选一个数, 秘密地写在纸上, 然后一起亮出来比较. 如果两数相差1, 则较小者获胜, 如果相等则是平局, 其他情况都是较大者获胜. 
 
+问最好的策略是什么.
 
+~
 
+解: 若 $N=3$, 则跟石头剪刀布等价, 对应决策收益矩阵的如下, 其中行表示 $A$ 的决策, 列表示 $B$ 的决策, 矩阵内容表示 $A$ 的收益.
+\begin{figure*}[htbp]
+\centering
+\setlength\extrarowheight{3pt}
+\begin{tabular}{|c|c|c|c|}
+\hline
+\diagbox[]{A}{B}  & 1(石头)    & 2(剪刀)    & 3(布)    \\ \hline
+1(石头) & 平    & 胜 & 负 \\ \hline
+2(剪刀) & 负 & 平    & 胜   \\ \hline
+3(布)  & 胜  & 负 & 平    \\ \hline
+\end{tabular}
+\end{figure*}
 
+考虑 $N = 4$ 的情况,  从下表可以看出, 不管 $B$ 怎么选, 对于 $A$ 而言, 选 4 的结果都不比选 1 差, 所以 $A$ 不会选 1. 同理对 $B$ 也是这样.
+\begin{figure*}[htbp]
+\centering
+\setlength\extrarowheight{3pt}
+\begin{tabular}{|c|c|c|c|c|}
+\hline
+\diagbox[]{A}{B}  & 1    & 2   & 3 & 4    \\ \hline
+1 & 平    & 胜 & 负 & 负 \\ \hline
+4  & 胜  & 胜 & 负 & 平    \\ \hline
+\end{tabular}
+\end{figure*}
+
+于是这又回到了在三个数之间选择的问题. 
+
+对于 $N=5$ 的情况也是一样, 选 5 总是不比选 1 和 2 差, 最后实际上也是只能在三个数之间选. 
+
+所以最好的策略就是在 $N-2, N-1, N$ 三个数之间随机选.
 
 
 
