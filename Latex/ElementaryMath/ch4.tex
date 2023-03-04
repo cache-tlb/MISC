@@ -159,6 +159,20 @@ P(I_i=1) = 1 - (1-\frac{1}{N})^K
 E(X) = (M-1)\left(1-(1-\frac{1}{N})^K\right)
 \]
 
+~
+
+\noindent 类似问题
+
+有一个公平的 $N$ 面骰子, 独立地掷出 $K$ 次, 问掷出的不同点数的个数期望是多少.
+
+解: 令 $X_i$ 表示 $K$ 次掷骰子是否至少出现一次 $i$ 点, 等于 1 表示出现过, 否则等于 0. 那么所求期望为:
+\[E = E(X_1)+E(X_2)+\cdots+E(X_N) = N\cdot E(X_1) .\]
+并且
+\[
+E(X_1) = 1\cdot\mathrm{Prob}(X_1=1)+0\cdot\mathrm{Prob}(X_1=0) = \mathrm{Prob}(X_1=1) = 1-(1-\frac{1}{N})^K ,
+\]
+所以最终期望为:
+\[E = K\left(1-(1-\frac{1}{N})^K \right) .\]
 
 %------------------------------------------------------------------------------%
 \newpage
@@ -286,6 +300,65 @@ f_V(v) &= \frac{\mathrm{d}}{\mathrm{d}v}F_V(v) = Nv^{N-1} .
 \end{align*}
 
 但是 $U,V$ 不独立, 所以$f_{U,V}(u,v) \neq f_U(u)\cdot f_V(v)$.
+
+
+%------------------------------------------------------------------------------%
+\newpage
+一根木棍上独立地取两个随机点, 将木棍分成三段, 每个随机点都是均匀分布. 求三段可以构成三角形的概率.
+
+~
+
+\noindent 直接解法: 
+
+设木棍长度为1, 能构成三角形当且仅当分成的三段长度都小于$\dfrac{1}{2}$. 木棍两个端点记作 $A,B$. 下面计算存在长度超过 $\dfrac{1}{2}$ 的一段的概率.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[]
+\coordinate[label=below left:$A$] (A) at (0,0);
+\coordinate[label=below right:$B$] (B) at (6,0);
+\coordinate[label=below:$C$] (C) at (2,0);
+\coordinate[label=above:$D$] (D) at (5,0);
+\draw [line width=1pt] (A) -- (B) node [midway,sloped] {$\bracevert$};
+\draw[] (1,0) node[anchor=south] {$x$};
+\foreach \p in {A,B,C,D}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+\end{figure*}
+
+考虑所选两个随机点 $C,D$ 的位置, 设 $AC$ 的长度为 $x$. 当 $x\in[0,\dfrac{1}{2})$ 时, 如果 $D$ 落在 $AC$ 上, 则 $CB$ 一定是超过 $\dfrac{1}{2}$ 的, 概率为 $x$, 且其他段不会超过 $\dfrac{1}{2}$; 如果 $D$ 落在 $CB$ 上, 则可能是 $CD$ 或者 $DB$ 长度超过 $\dfrac{1}{2}$, 概率都是 $\dfrac{1}{2} - x$. 三种情况合起来概率为 $1 - x$. 对 $x$ 积分, 得
+\[\int_0^{\frac{1}{2}}{(1-x)}\ \mathrm{d}x = \frac{3}{8}.\]
+而当 $x\in[\dfrac{1}{2},1]$ 时, 是对称的情况, 存在一段长度超过 $\dfrac{1}{2}$ 的概率也是 $\dfrac{3}{8}$. 所以三段不能构成三角形的概率为 $\dfrac{3}{4}$, 可以构成三角形的概率为 $\dfrac{1}{4}$.
+
+~
+
+\noindent 图形解法
+
+考虑一个高为 1 的等边三角形 $ABC$, 三角形内一点 $P$ 到各边的距离分别为 $x,y,z$, 则 $x + y + z = 1$, 如下图.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[]
+\coordinate[label=below left:$A$] (A) at (-3,0);
+\coordinate[label=below right:$B$] (B) at (3,0);
+\coordinate[label=above:$C$] (C) at (0,5.196);
+\coordinate[] (D) at (0,0);
+\coordinate[] (E) at (-1.5,2.598);
+\coordinate[] (F) at (1.5,2.598);
+\coordinate[] (P) at (0.484,2.963);
+\coordinate[] (G) at (0.484,0);
+\coordinate[] (H) at (-0.846,3.73);
+\coordinate[] (I) at (1.088,3.312);
+\draw [line width=1pt] (A) -- (B) -- (C) -- cycle;
+\fill[gray!50] (D) -- (E) -- (F) -- cycle;
+\draw [line width=1pt] (D) -- (E) -- (F) -- cycle;
+\draw [dashed,red,line width=1pt] (P) to[edge label'=$z$] (G);
+\draw [dashed,red,line width=1pt] (P) to[edge label=$y$] (H);
+\draw [dashed,red,line width=1pt] (P) to[edge label'=$x$] (I);
+\foreach \p in {A,B,C,G,H,I,P}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+\end{figure*}
+
+每个 $P$ 的位置对应了一个将木棍分成三段的方式. 而只有当 $P$ 落在中间小三角形内部时, 才满足 $x,y,z$ 都小于 $\dfrac{1}{2}$, 所以能构成三角形的概率为小三角形与大三角形面积之比, 等于 $\dfrac{1}{4}$.
 
 %------------------------------------------------------------------------------%
 \newpage
