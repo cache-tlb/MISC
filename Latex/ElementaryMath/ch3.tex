@@ -2037,6 +2037,54 @@ $\angle PCD = 20\degree = DPC$, 故 $DP = DC$. 容易证明 $P$ 和 $D$ 关于 $
 
 $\triangle ABC$ 中, $\angle BAC = 40\degree = \angle PAD + \angle CAD + \angle BAP = 4x$, 解得 $x=10\degree$, 所以 $\angle PAC = \angle PAD + \angle CAD = 3x = 30\degree$.
 
+
+%------------------------------------------------------------------------------%
+\newpage
+
+下图等边 $\triangle ABC$ 中, $\angle DBC = 42\degree, \angle DCB = 54\degree$. 求 $\angle BAD$.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.0]
+\coordinate[label=above:$A$] (A) at (0,5.196);
+\coordinate[label=below left:$B$] (B) at (-3,0);
+\coordinate[label=below right:$C$] (C) at (3,0);
+\coordinate[label=left:$D$] (D) at (0.627,3.266);
+\draw [line width=1pt] (A) -- (B) -- (C) -- cycle;
+\draw [line width=1pt] (A) -- (D) -- (B);
+\draw [line width=1pt] (C) -- (D);
+\draw pic["$42\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=C--B--D};
+\draw pic["$54\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=D--C--B};
+\foreach \p in {A,B,C,D}
+	\fill[fill=black,draw=black,thick] (\p) circle (1pt);
+\end{tikzpicture}
+\end{figure*}
+
+解: 作 $\angle CDE = 54\degree$, $DE$ 交 $BC$ 于 $E$. 作 $OE // AC$ 交 $AB$ 于 $O$. 连接 $OD$. 在 $\angle DEC$ 的平分线上取一点 $F$, 使得 $EF = OE$. 连接 $DF$.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.0]
+\coordinate[label=above:$A$] (A) at (0,5.196);
+\coordinate[label=below left:$B$] (B) at (-3,0);
+\coordinate[label=below right:$C$] (C) at (3,0);
+\coordinate[label=left:$D$] (D) at (0.627,3.266);
+\coordinate[label=below:$E$] (E) at (-0.434,0);
+\coordinate[label=left:$O$] (O) at (-1.717,2.222);
+\coordinate[label=below:$F$] (F) at (1.642, 1.508);
+\draw [line width=1pt] (A) -- (B) -- (C) -- cycle;
+\draw [line width=1pt] (A) -- (D) -- (B);
+\draw [line width=1pt] (C) -- (D);
+\draw [red,dashed,line width=1pt] (D) -- (O) -- (E) -- (F) -- (D) -- (E);
+\foreach \p in {A,B,C,D,E,F,O}
+	\fill[fill=black,draw=black,thick] (\p) circle (1pt);
+\end{tikzpicture}
+\end{figure*}
+
+由 $OE//AC$ 易知 $\triangle BOE$ 为等边三角形. 而 $\angle BDE = 180\degree - \angle DCB - \angle DBC - \angle CDE = 30\degree$, 所以 $O$ 是 $\triangle BDE$ 的外心. 从而 $OD = OE, \angle DOE = 2\angle DBE = 84\degree$, $\angle DEO = \angle DEB - \angle BEO = 48\degree$.
+
+$\angle DEC = 72\degree$, 所以 $\angle DEF = 36\degree$, $\angle OEF = \angle DEO + \angle DEF = 84\degree = \angle DOE$. 又因为 $OD = OE = EF$, 可知四边形 $OEFD$ 为等腰梯形, 所以 $\angle FDE = \angle DEO = 48\degree$.
+
+又易知 $AO = CE = DE$, $\angle AOD = 2\angle ABD = 36\degree = \angle DEF$, $OD = EF$, 所以 $\triangle AOD \cong \triangle DEF$, 得 $\angle BAD = \angle EDF = 48\degree$.
+
 %------------------------------------------------------------------------------%
 \newpage
 康威圆: 任意三角形上, 在每个顶点上将两边延伸出去此顶点对应的那边的长度, 这样得到的六点共圆. 这个圆称为此三角形的康威圆.
