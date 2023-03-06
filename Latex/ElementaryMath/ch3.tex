@@ -2085,6 +2085,68 @@ $\angle DEC = 72\degree$, 所以 $\angle DEF = 36\degree$, $\angle OEF = \angle 
 
 又易知 $AO = CE = DE$, $\angle AOD = 2\angle ABD = 36\degree = \angle DEF$, $OD = EF$, 所以 $\triangle AOD \cong \triangle DEF$, 得 $\angle BAD = \angle EDF = 48\degree$.
 
+
+%------------------------------------------------------------------------------%
+\newpage
+
+$\triangle ABC$ 中, $\angle ACD = \alpha, \angle DCB = 30\degree, \angle ABD = 30\degree - \alpha, \angle DBC = 60\degree - \alpha$, 求 $\angle CAD$.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.0]
+\coordinate[label=above:$A$] (A) at (3.358,4.978);
+\coordinate[label=below left:$B$] (B) at (0,0);
+\coordinate[label=below right:$C$] (C) at (8,0);
+\coordinate[label=left:$D$] (D) at (3.059,2.853);
+\draw [line width=1pt] (A) -- (B) -- (C) -- cycle;
+\draw [line width=1pt] (A) -- (D) -- (B);
+\draw [line width=1pt] (C) -- (D);
+\draw pic["$60\degree - \alpha$",draw,anchor=west,line width=1pt, angle eccentricity=1.0, angle radius=0.5cm] {angle=C--B--D};
+\draw pic["",draw,line width=1pt, angle eccentricity=2.0, angle radius=1.0cm] {angle=D--B--A};
+\node [rotate=50,anchor=west] at (1.2,1.3) {$30\degree-\alpha$};
+\draw pic["$30\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.6cm] {angle=D--C--B};
+\draw pic["$\alpha$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.8cm] {angle=A--C--D};
+\draw pic["$?$",draw,line width=1pt, angle eccentricity=1.6, angle radius=0.5cm] {angle=D--A--C};
+
+\foreach \p in {A,B,C,D}
+	\fill[fill=black,draw=black,thick] (\p) circle (1pt);
+\end{tikzpicture}
+\end{figure*}
+
+解: 分别作 $\triangle BCD$ 和 $\triangle BCA$ 的外接圆$O, O'$. 再连接 $BO, CO, DO, CO', DO', OO', AO', BO'$. 
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.0]
+\coordinate[label=above:$A$] (A) at (3.358,4.978);
+\coordinate[label=below left:$B$] (B) at (0,0);
+\coordinate[label=below right:$C$] (C) at (8,0);
+\coordinate[label=left:$D$] (D) at (3.059,2.853);
+\coordinate[label=above right:$O'$] (P) at (4,0.923);
+\coordinate[label=below:$O$] (O) at (4,-1.223);
+\draw [line width=1pt] (A) -- (B) -- (C) -- cycle;
+\draw [line width=1pt] (A) -- (D) -- (B);
+\draw [line width=1pt] (C) -- (D);
+\draw [red,line width=1pt] (B) -- (O) -- (D);
+\draw [red,line width=1pt] (C) -- (P) -- (D);
+\draw [red,line width=1pt] (O) -- (P) -- (A);
+\draw [red,line width=1pt] (B) -- (P);
+\draw [red,line width=1pt] (C) -- (O);
+\foreach \p in {A,B,C,D,O,P}
+	\fill[fill=black,draw=black,thick] (\p) circle (1pt);
+\end{tikzpicture}
+\end{figure*}
+
+由 $\angle BCD = 30\degree$, 得 $\angle BOD = 2\angle BCD = 60\degree$, 所以 $\triangle BOD$ 为等边三角形.
+
+$\angle BO'C = 2\angle BAC = 120\degree + 2\alpha$, $\angle CBO' = \angle BCO' = 30\degree - \alpha$. 可得 $\angle DCO' = \angle BCD - \angle BCO' = \alpha$, 以及 $\angle DBO' = \angle CBD - \angle CBO' = 30\degree$, 进而有 $\angle OBO' = 30\degree$, 以及 $\angle CBO = \angle OBO' - \angle CBO' = \alpha$. 
+
+根据 $\angle DCO' = \alpha = \angle ACD$, 以及 $AO'=CO'$ 得 $\angle CAO' = \angle ACO' = 2\alpha$.
+
+由等边$\triangle BOD$ 及 $\angle DBO'=30\degree$ 得 $BO'$ 垂直平分 $DO$, 于是 $\angle BDO' = \angle BOO'$. 再由 $OO'$ 垂直平分 $BC$ 得 $\angle BDO' = \angle BOO' = 90\degree - \angle CBO = 90\degree - \alpha$. 
+
+$\angle CDO' = \angle BDC - \angle BDO' = (90\degree + \alpha) - (90\degree - \alpha) = 2\alpha = \angle CAO'$. 这样可得 $ACDO'$ 四点共圆. 所以$\angle DAO' = \angle DCO' = \alpha$, $\angle CAD = \angle CAO' + \angle DAO' = 3\alpha$.
+
+
+
 %------------------------------------------------------------------------------%
 \newpage
 康威圆: 任意三角形上, 在每个顶点上将两边延伸出去此顶点对应的那边的长度, 这样得到的六点共圆. 这个圆称为此三角形的康威圆.
