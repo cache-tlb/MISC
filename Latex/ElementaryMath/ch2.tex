@@ -781,6 +781,45 @@ w^2 &= 2 + u
 
 \newpage
 %------------------------------------------------------------------------------%
+\noindent 来自每日数学打卡
+
+已知 $A = ax + bz + cy = 2, B = ay + bx + cz = 3, C = az + by + cx = 4$. 求值:
+\[(a^3+b^3+c^3-3abc)(x^3+y^3+z^3-3xyz) .\]
+
+~
+
+解: 构造下面的矩阵:
+\[
+D = \begin{bmatrix}
+a & b & c \\
+c & a & b \\
+b & c & a
+\end{bmatrix}, 
+E = \begin{bmatrix}
+x & y & z \\
+z & x & y \\
+y & z & x
+\end{bmatrix}
+\]
+矩阵相乘得:
+\[
+DE = \begin{bmatrix}
+ax+bz+cy & ay+bx+cz & az+by+cx \\
+az+by+cx & ax+bz+cy & ay+bx+cz \\
+ay+bx+cz & az+by+cx & ax+bz+cy 
+\end{bmatrix} = 
+\begin{bmatrix}
+A & B & C\\
+C & A & B\\
+B & C & A 
+\end{bmatrix}
+\]
+分别求行列式, 有 $\mathrm{det}(D) = a^3 + b^3 + c^3 - 3abc, \mathrm{det}(E) = x^3+y^3+z^3-3xyz$, 所求表达式就是 
+\[ \mathrm{det}(D)\cdot\mathrm{det}(E) = \mathrm{det}(DE) = A^3+B^3+C^3-3ABC = 27 . \]
+
+
+\newpage
+%------------------------------------------------------------------------------%
 
 令 $S$ 为下面求和 :
 \[S = \sum_{i=1}^{2022}{\frac{1}{\sqrt{i}}} .\]
