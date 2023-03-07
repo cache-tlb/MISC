@@ -376,6 +376,25 @@ h'(x) &= \sum_{n=1}^{\infty}{\frac{n^3\cdot x^{n-1}}{2^n}} = \frac{(4+4x)(2-x)+3
 令 $x=1$, 代入 $h'(x)$, 得到
 \[h'(1) = \sum_{n=1}^{\infty}{\frac{n^3}{2^n}} = 26 .\]
 
+
+\newpage
+%------------------------------------------------------------------------------%
+对 $|x| < 1$, 计算:
+\[S = \sum_{n=0}^{\infty}\frac{4n^2+4n+3}{2n+1}x^{2n}\]
+
+~
+
+解: 将 $4n^2 + 4n + 3$ 拆成 $(2n+1)^2 + 2$, 于是
+\begin{align*}
+S &= \sum_{n=0}^{\infty}(2n+1)x^{2n} + 2\cdot\sum_{n=0}^{\infty}\frac{1}{2n+1}x^{2n}\\
+&= \sum_{n=0}^{\infty}\left(x^{2n+1}\right)' + \frac{2}{x}\cdot\sum_{n=0}^{\infty}\frac{1}{2n+1}x^{2n+1}\\
+&= \left(\sum_{n=0}^{\infty}x^{2n+1}\right)' + \frac{2}{x}\cdot\int_0^x\sum_{n=0}^\infty y^{2n}\ \mathrm{d}y \\
+&= \left(\frac{x}{1-x^2}\right)' + \frac{2}{x}\cdot\int_0^x\frac{1}{1-y^2}\ \mathrm{d}y\\
+&= \frac{1+x^2}{(1-x^2)^2} + \frac{1}{x}\ln\frac{1+x}{1-x} .
+\end{align*}
+
+
+
 \newpage
 %------------------------------------------------------------------------------%
 
