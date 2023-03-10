@@ -108,7 +108,7 @@ E(N)  &= 1\cdot P(N=1) + 2\cdot P(N=2) + 3\cdot P(N=3) + \cdots \\
 
 在 $x_1 < t$ 的情况下, 例如 $x_1 = u < t$, 则需要重复这个操作直到后面所取数之和超过 $t - u$, 于是所取数之和的期望为 
 \[
-E(A_N \ | x_1 < t, A_{N-1} < t, A_N >= t) = \int_0^t{u + f(t - u)}\ \mathrm{d}u = \frac{t^2}{2} + \int_0^t f(x)\ \mathrm{d}x .
+E(A_N \ | x_1 < t, A_{N-1} < t, A_N \ge t) = \int_0^t{u + f(t - u)}\ \mathrm{d}u = \frac{t^2}{2} + \int_0^t f(x)\ \mathrm{d}x .
 \]
 
 两部分合起来得:
