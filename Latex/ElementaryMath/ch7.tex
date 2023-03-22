@@ -1,6 +1,24 @@
 \chapter{微积分}
 
-%\section{悬链线方程}
+\noindent 一些定积分计算
+
+1. 计算
+\[ I = \int_0^1\frac{t^\alpha - 1}{\ln t}\ \mathrm{d}t .\]
+
+解: 设被积函数为 $f(t) = \dfrac{t^\alpha - 1}{\ln t}$, 求极限: $\displaystyle \lim_{t \to +0} f(t) = 0$, 并由洛必达法则可得 $\displaystyle \lim_{t \to 1} f(t) = \alpha$, 所以积分是存在的.
+
+将整个积分式定义为 $\alpha$ 的函数, 设 $\displaystyle F(\alpha) = \int_0^1\frac{t^\alpha - 1}{\ln t}\ \mathrm{d}t$, 对 $\alpha$ 求导得:
+\[F'(\alpha) = \int_0^1\left(\frac{e^{\alpha\ln t} - 1}{\ln t}\right)'\mathrm{d}t = \int_0^1\frac{\ln t\cdot e^{\alpha\ln t}}{\ln t}\mathrm{d}t = \int_0^1 t^\alpha\mathrm{d}t = \frac{1}{\alpha+1} .\]
+所以 $F(\alpha) = \ln(\alpha+1)+C$, 由 $F(0) = 0$ 得 $C = 0$, 于是 $F(\alpha) = \ln(\alpha+1).$
+
+另一种方法(Frullani 积分), 做变量代换 $x = -\ln t$, 则 $t = e^{-x}, \mathrm{d}t = -e^{-x}\mathrm{d}x$. 
+\[ I = \int_0^1\frac{t^\alpha - 1}{\ln t}\ \mathrm{d}t = \int_{\infty}^0\frac{e^{-\alpha x} - 1}{-x}(-e^{-x})\mathrm{d}x = \int_0^{+\infty}\frac{e^{-x}-e^{-(\alpha+1)x}}{x}\mathrm{d}x\]
+这里令 $f(x) = e^{-x}$, 原积分式化为
+\[ I = \int_0^{+\infty}\frac{f(1\cdot x) - f((1+\alpha)x)}{x}\mathrm{d}x .\]
+由 Frullani 积分可以直接得 $I = \ln(\alpha+1)$.
+
+\newpage
+%------------------------------------------------------------------------------%
 \noindent 悬链线方程推导
 
 质量均匀的绳子自由悬挂，只考虑自身重量，求形成的曲线形状。
