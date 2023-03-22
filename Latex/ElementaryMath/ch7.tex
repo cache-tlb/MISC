@@ -1,5 +1,75 @@
 \chapter{微积分}
 
+\noindent Frullani 积分
+
+设 $f(x)$ 在 $[0,+\infty)$ 连续, $a>0, b>0$, 证明:
+
+1. 若 $\displaystyle \lim_{x \to +\infty} f(x) = k$, 则 $\displaystyle \int_0^{+\infty}\frac{f(ax)-f(bx)}{x}\mathrm{d}x = \left(f(0) - k\right)\ln\frac{b}{a}$ ;
+
+2. 若 $\displaystyle \int_0^{+\infty}\frac{f(x)}{x}\mathrm{d}x$ 收敛, 则 $\displaystyle \int_0^{+\infty}\frac{f(ax)-f(bx)}{x}\mathrm{d}x = f(0)\ln\frac{b}{a}$ ;
+
+3. 若 $\displaystyle \lim_{x \to +\infty} f(x) = k$, 且 $\displaystyle \int_0^{+\infty}\frac{f(x)}{x}\mathrm{d}x$ 收敛, 则 $\displaystyle \int_0^{+\infty}\frac{f(ax)-f(bx)}{x}\mathrm{d}x = -k\ln\frac{b}{a}$.
+
+~
+
+\noindent 证明需要用到推广的积分第一中值定理:
+
+若 $f$ 与 $g$ 都在 $[a,b]$ 上连续, 且 $g(x)$ 在 $[a,b]$ 上不变号, 则至少存在一点 $\xi\in[a,b]$, 使得
+\[\int_a^b f(x)g(x)\ \ \mathrm{d}x = f(\xi)\int_a^b g(x)\ \mathrm{d}x .\]
+
+~
+
+\noindent 下面证明 Frullani 积分: 
+
+先证第一条. 被积函数在 $0$ 和 $+\infty$ 处有奇点, 因此将积分上下限分别取极限来计算. 根据定义
+\[\int_0^{+\infty}\frac{f(ax)-f(bx)}{x}\mathrm{d}x = \lim_{\substack{M\to 0^+ \\ N\to +\infty}}\int_M^N\frac{f(ax)-f(bx)}{x}\mathrm{d}x .\]
+
+令 $ax = t, bx = u$, 积分换元有:
+\begin{align*}
+\int_M^N\frac{f(ax)}{x}\mathrm{d}x &= \int_{aM}^{aN}\frac{f(t)}{t}\mathrm{d}t \\
+\int_M^N\frac{f(bx)}{x}\mathrm{d}x &= \int_{bM}^{bN}\frac{f(u)}{u}\mathrm{d}u
+\end{align*}
+于是
+\begin{align*}
+\int_M^N\frac{f(ax) - f(bx)}{x}\mathrm{d}x &= \int_{aM}^{bM}\frac{f(x)}{x}\mathrm{d}x + \int_{bM}^{aN}\frac{f(x)}{x}\mathrm{d}x - \int_{bM}^{aN}\frac{f(x)}{x}\mathrm{d}x - \int_{aN}^{bN}\frac{f(x)}{x}\mathrm{d}x \\
+&= \int_{aM}^{bM}\frac{f(x)}{x}\mathrm{d}x - \int_{aN}^{bN}\frac{f(x)}{x}\mathrm{d}x
+\end{align*}
+由推广的积分第一中值定理, $g(x) = \dfrac{1}{x}$ 在 $(0,+\infty)$ 都是不变号的, 所以
+\begin{align*}
+\int_{aM}^{bM}\frac{f(x)}{x}\mathrm{d}x &= f(\xi_1)\int_{aM}^{bM}\frac{\mathrm{d}x}{x} = f(\xi_1)\ln\frac{b}{a}, \ \ (\xi_1\in[aM, bM]) ,\\
+\int_{aN}^{bN}\frac{f(x)}{x}\mathrm{d}x &= f(\xi_2)\int_{aN}^{bN}\frac{\mathrm{d}x}{x} = f(\xi_2)\ln\frac{b}{a}, \ \ (\xi_2\in[aN, bN]) .
+\end{align*}
+当 $M\to 0^+, N\to+\infty$ 时, $\xi_1\to 0^+, \xi_2\to+\infty$, 于是
+\begin{align*}
+\int_M^N\frac{f(ax) - f(bx)}{x}\mathrm{d}x &= \lim_{\substack{M\to 0^+ \\ N\to +\infty}}\left(\int_{aM}^{bM}\frac{f(x)}{x}\mathrm{d}x  - \int_{aN}^{bN}\frac{f(x)}{x}\mathrm{d}x \right)\\
+&= \lim_{\substack{\xi_1\to 0^+ \\ \xi_2\to +\infty}}(f(\xi_1) - f(\xi_2))\ln\frac{b}{a}\\
+&= (f(0) - k)\ln\frac{b}{a}.
+\end{align*}
+
+后面两条同理, 但只能对一边用积分第一中值定理. 对于第二条, 
+\begin{align*}
+\int_M^N\frac{f(ax) - f(bx)}{x}\mathrm{d}x &= \int_{aM}^{bM}\frac{f(x)}{x}\mathrm{d}x - \int_{aN}^{bN}\frac{f(x)}{x}\mathrm{d}x \\
+&= f(\xi_1)\ln\frac{b}{a} - \int_{aN}^{bN}\frac{f(x)}{x}\mathrm{d}x, \ \ (\xi_1\in[aM,bM]).
+\end{align*}
+由于 $\displaystyle \int_{a}^{+\infty}\frac{f(x)}{x}\mathrm{d}x$ 收敛, 故 $\displaystyle \lim_{N\to+\infty}\int_{aN}^{bN}\frac{f(x)}{x}\mathrm{d}x = 0$, 于是
+\begin{align*}
+\int_0^{+\infty}\frac{f(ax) - f(bx)}{x}\mathrm{d}x &= \lim_{M\to0^+}\int_{aM}^{bM}\frac{f(x)}{x}\mathrm{d}x\\
+&= \lim_{\xi_1\to0^+}f(\xi_1)\ln\frac{b}{a} = f(0)\ln\frac{b}{a}.
+\end{align*}
+
+对于第三条, 
+\begin{align*}
+\int_M^N\frac{f(ax) - f(bx)}{x}\mathrm{d}x &= \int_{aM}^{bM}\frac{f(x)}{x}\mathrm{d}x - \int_{aN}^{bN}\frac{f(x)}{x}\mathrm{d}x \\
+&= \int_{aM}^{bM}\frac{f(x)}{x}\mathrm{d}x - f(\xi_2)\ln\frac{b}{a}, \ \ (\xi_2\in[aN,bN]).
+\end{align*}
+由于 $\displaystyle \int_0^a\frac{f(x)}{x}\mathrm{d}x$ 收敛, 故 $\displaystyle \lim_{M\to0^+}\int_{aM}^{bM}\frac{f(x)}{x}\mathrm{d}x = 0$, 于是
+\begin{align*}
+\int_0^{+\infty}\frac{f(ax) - f(bx)}{x}\mathrm{d}x &= \lim_{N\to+\infty}-\int_{aN}^{bN}\frac{f(x)}{x}\mathrm{d}x \\
+&= \lim_{\xi_2\to+\infty}-f(\xi_2)\ln\frac{b}{a} = -k\ln\frac{b}{a} .
+\end{align*}
+
+\newpage
+%------------------------------------------------------------------------------%
 \noindent 一些定积分计算
 
 1. 计算
