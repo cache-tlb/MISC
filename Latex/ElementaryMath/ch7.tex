@@ -87,6 +87,32 @@
 \[ I = \int_0^{+\infty}\frac{f(1\cdot x) - f((1+\alpha)x)}{x}\mathrm{d}x .\]
 由 Frullani 积分可以直接得 $I = \ln(\alpha+1)$.
 
+~
+
+2. 证明
+\[ I = \int_0^1\left(\frac{1}{1-x}+\frac{1}{\ln x}\right)\mathrm{d}x = \gamma .\]
+这里 $\gamma$ 是欧拉常数: $\displaystyle \gamma = \lim_{n\to\infty}\left[(1+\frac{1}{2}+\cdots + \frac{1}{n}) - \ln n\right]$.
+
+解: 设被积函数 $f(x) = \dfrac{1}{1-x} + \dfrac{1}{\ln x} = \dfrac{\ln x + (1 - x)}{(1-x)\ln x}$. 则 $\displaystyle \lim_{x\to0}f(x) = 1$, 并且由洛必达法则 $\displaystyle \lim_{x\to0}f(x) = \frac{1}{2}$, 所以 $f(x)$ 在 $(0,1)$ 上是可积的.
+
+将被积函数乘以 $1-x^n$, 并令 $n\to\infty$, 得
+\begin{align*}
+I &= \lim_{n\to\infty}\left(\int_0^1\frac{1-x^n}{1-x} + \frac{1-x^n}{\ln x}\ \mathrm{d}x \right)\\
+&= \lim_{n\to\infty}\left(\int_0^1\frac{1-x^n}{1-x}\mathrm{d}x + \int_0^1\frac{1-x^n}{\ln x}\mathrm{d}x\right) 
+\end{align*}
+第一项为
+\[\int_0^1 = \frac{1-x^n}{1-x}\mathrm{d}x = \int_0^1(1+x+x^2+\cdots+x^{n-1})\ \mathrm{d}x = \sum_{k=1}^{n}\frac{1}{k} .\]
+第二项由上一题得 
+\[ \int_0^1\frac{1-x^n}{\ln x}\mathrm{d}x = -\ln(1+n) .\]
+所以 
+\begin{align*}
+I &= \lim_{n\to\infty}\left(\sum_{k=1}^{n}\frac{1}{k} - \ln(1+n)\right) \\
+&= \lim_{n\to\infty}\left(\sum_{k=1}^{n}\frac{1}{k} - \ln n + \ln n - \ln(1+n)\right) \\
+&= \gamma + \lim_{n\to\infty}(\ln\frac{n}{n+1})\\
+&= \gamma
+\end{align*}
+
+
 \newpage
 %------------------------------------------------------------------------------%
 \noindent 悬链线方程推导
