@@ -112,6 +112,49 @@ I &= \lim_{n\to\infty}\left(\sum_{k=1}^{n}\frac{1}{k} - \ln(1+n)\right) \\
 &= \gamma
 \end{align*}
 
+~
+
+3. 证明:
+\[ I = \int_0^\infty e^{-x}\ln x\ \mathrm{d}x = -\gamma. \]
+这里 $\gamma$ 是欧拉常数.
+
+~
+
+解: 如果直接用分部积分, 会遇到奇点. 
+\[
+\int_0^\infty e^{-x}\ln x\ \mathrm{d}x = -\int_0^\infty\ln x\ \mathrm{d}(e^{-x}) 
+= -e^{-x}\ln x\ \bigg|_{0}^{\infty} + \int_0^\infty \frac{e^{-x}}{x}\ \mathrm{d}x 
+\]
+第一部分在 $x=0$ 时, $e^{-x}\ln x$ 是趋于负无穷, 而第二部分在 $x$ 趋于 $0$ 时, 也是相当于对 $\dfrac{1}{x}$ 从 $0$ 开始积分, 也是不收敛的.
+
+因此借助极限, 令积分下限趋于 $0$. 
+\begin{align*} 
+I &= \lim_{\epsilon\to 0}\int_\epsilon^\infty{e^{-x}\ln x}\ \mathrm{d}x \\
+&= \lim_{\epsilon\to 0}\left(-e^{-x}\ln x\bigg|_{\epsilon}^{\infty} + \int_\epsilon^\infty \frac{e^{-x}}{x}\ \mathrm{d}x\right) \\
+&= \lim_{\epsilon\to 0}\left(e^{-\epsilon}\ln\epsilon + \int_\epsilon^\infty \frac{e^{-x}}{x}\ \mathrm{d}x\right)
+\end{align*}
+
+因为 $\displaystyle \lim_{\epsilon\to 0}\frac{1-e^{-\epsilon}}{\epsilon} = 1$, 所以
+\[\lim_{\epsilon\to 0}\left[\ln\epsilon-\ln(1-e^{-\epsilon})\right] = 0 .\]
+$\epsilon\to 0$ 时, $e^{-\epsilon}-1$ 与 $\epsilon$ 是等价无穷小, 故
+\[\lim_{\epsilon\to 0} (e^{-\epsilon} - 1)\ln\epsilon = \lim_{\epsilon\to 0}\frac{\ln\epsilon}{1/\epsilon} = 0 ,\]
+于是可得
+\[\lim_{\epsilon\to 0} \left[e^{-\epsilon}\ln\epsilon - \ln(1-e^{-\epsilon}) \right] = \lim_{\epsilon\to 0}\left[ (e^{-\epsilon}-1)\ln\epsilon + \ln\epsilon - \ln(1-e^{-\epsilon}) \right] = 0\]
+这表明$\epsilon\to 0$ 时可以用$\ln(1-e^{-\epsilon})$ 替换 $e^{-\epsilon}\ln\epsilon$, 而 $\ln(1-e^{-\epsilon})$ 是下面积分的结果:
+\begin{align*}
+\ln(1-e^{-\epsilon}) &= -\ln(1-e^{-x})\bigg|_\epsilon^\infty \\
+&= \int_\epsilon^\infty(-\ln(1-e^{-x}))'\ \mathrm{d}x \\
+&=  \int_\epsilon^\infty -\frac{e^{-x}}{1-e^{-x}}\ \mathrm{d}x 
+\end{align*}
+代入上面的结果:
+\begin{align*}
+I &= \lim_{\epsilon\to 0}\left(e^{-\epsilon}\ln\epsilon + \int_\epsilon^\infty \frac{e^{-x}}{x}\ \mathrm{d}x\right)\\
+&= \lim_{\epsilon\to 0}\left(\int_\epsilon^\infty -\frac{e^{-x}}{1-e^{-x}}\ \mathrm{d}x  + \int_\epsilon^\infty \frac{e^{-x}}{x}\ \mathrm{d}x\right) \\
+&= \int_0^\infty \left(\frac{e^{-x}}{x} - \frac{e^{-x}}{1-e^{-x}}\right)\ \mathrm{d}x
+\end{align*}
+令 $t = e^{-x}$, 则 $x = -\ln t$, $\mathrm{d}x = -\dfrac{1}{t}\mathrm{d}t$, 
+\[ I = \int_1^0 \left( \frac{t}{-\ln t} - \frac{t}{1-t} \right)(-\frac{1}{t})\mathrm{d}t = -\int_0^1\left(\frac{1}{\ln t}+\frac{1}{1-t}\right)\mathrm{d}t .\]
+由上一题的结论得 $I = -\gamma$.
 
 \newpage
 %------------------------------------------------------------------------------%
