@@ -1071,6 +1071,37 @@ B & C & A
 所以 $S$ 的整数部分是 88.
 
 
+\newpage
+%------------------------------------------------------------------------------%
+设 $a_1, a_2, \cdots, a_n$ 是 $n$ 个实数, 都落在 $(-1,1)$ 区间内. 证明:
+\[\prod_{1\le i,j\le n}\frac{1+a_ia_j}{1-a_ia_j} \ge 1 ,\]
+并找到上面不等式中等号成立得充分必要条件,
+
+~
+
+解: 根据 $\ln(1+x)$ 的泰勒展开:
+\[\ln(1+x) = \sum_{k=1}^\infty (-1)^{k+1}\frac{x^k}{k} ,\]
+对不等式左边连乘取对数得
+\begin{align*}
+\ln\left(\prod_{1\le i,j\le n}\frac{1+a_ia_j}{1-a_ia_j}\right) &= \sum_{1\le i,j\le n}\left(\ln(1+a_ia_j) - \ln(1-a_ia_j)\right)\\
+&= \sum_{1\le i,j\le n} \sum_{k=1}^\infty\left( (-1)^{k+1}\frac{(a_ia_j)^k}{k} -  (-1)^{k+1}\frac{(-a_ia_j)^k}{k} \right) \\
+&=  \sum_{1\le i,j\le n} \sum_{k=1}^\infty\left( (-1)^{2k}\frac{(a_ia_j)^{2k-1}}{2k-1} -  (-1)^{2k}\frac{(-a_ia_j)^{2k-1}}{2k-1} \right)\\
+&= \sum_{1\le i,j\le n} \sum_{k=1}^\infty \frac{2(a_ia_j)^{2k-1}}{2k-1}\\
+&= \sum_{k=1}^\infty\sum_{1\le i,j\le n} \frac{2(a_ia_j)^{2k-1}}{2k-1}\\
+&= \sum_{k=1}^\infty\frac{2}{2k-1}\sum_{1\le i,j\le n}a_i^{2k-1}a_j^{2k-1}\\
+&= \sum_{k=1}^\infty\frac{2}{2k-1}\left(\sum_{i = 1}^n a_i^{2k-1}\right)^2 \\
+&\ge 0
+\end{align*}
+第二行到第三行是内层求和的偶数项前后抵消了, 只留下奇数项. 所以
+\[\prod_{1\le i,j\le n}\frac{1+a_ia_j}{1-a_ia_j} \ge 1 .\]
+
+等号成立当且仅当
+\[\sum_{i = 1}^n a_i^{2k-1} = 0\]
+对所有的 $k \ge 1$都成立, 也就是 $\{a_i\}$ 的任意奇数次幂之和都等于 $0$. 令 $M = \max\{ |a_i| \}$, 则
+\[\sum_{i=1}^n\left(\frac{a_i}{M}\right)^{2k-1} = 0\]
+当 $k\to\infty$ 时, $\dfrac{a_i}{M}$ 要么趋于 $0$, 要么等于 $\pm 1$, 取决于 $|a_i|$ 是否等于 $M$, 所以等于 $1$ 和 $-1$ 必定成对出现. 除开绝对值最大的这些数, 对剩下数也是同理. 
+
+所以等号成立的充分必要条件是若 $x\in\{a_i\}$, 则 $-x\in\{a_i\}$.
 
 \newpage
 %------------------------------------------------------------------------------%
