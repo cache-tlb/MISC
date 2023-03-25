@@ -552,6 +552,40 @@ $ y=1 $ 时，$ x=2 $；$ y=2 $ 时，$ x=1 $；这两个解都满足。
 \[b_{n+1} - b_n = a_{n+1} - (n+1)a_{n+1} + na_n = n(a_n - a_{n+1}) < 0 .\]
 所以存在唯一的正整数 $n$ 使得 $b_n > 0$ 而 $b{n+1} \le 0$.
 
+
+\newpage
+%------------------------------------------------------------------------------%
+\noindent IMO 2013 第一题
+
+证明: 对于任意一对正整数 $k$ 和 $n$, 都存在 $k$ 个(不必不相同的)正整数 $m_1, m_2, \cdots, m_k$, 使得
+\[1 + \frac{2^k-1}{n} = \left(1+\frac{1}{m_1}\right)\left(1+\frac{1}{m_2}\right)\cdots\left(1+\frac{1}{m_k}\right)\]
+
+~
+
+解: 对 $k$ 用归纳法. 当 $k=1$ 时, 
+\[1 + \frac{2^1 - 1}{n} = 1+\frac{1}{n}\]
+显然是成立的.
+
+若命题对于 $k=p$ 成立, 考虑 $k=p+1$ 的情况, 若 $n$ 为偶数,
+\begin{align*}
+1 + \frac{2^{p+1}-1}{n} &= \frac{n+2^{p+1}-1}{n} \\
+&= \frac{n+2^{p+1}-2}{n}\cdot\frac{n+2^{p+1}-1}{n+2^{p+1}-2}\\
+&= \left(1+\frac{2^p-1}{\dfrac{n}{2}}\right)\cdot\left(1+\frac{1}{n+2^{p+1}-2}\right)
+\end{align*}
+若 $n$ 为奇数, 
+\begin{align*}
+1 + \frac{2^{p+1}-1}{n}  &= \frac{n+2^{p+1}-1}{n} \\
+&= \frac{n+2^{p+1}-1}{n+1}\cdot\frac{n+1}{n}\\
+&= \left(1+\frac{2^p-1}{(\dfrac{n+1}{2})}\right)\cdot\left(1+\frac{1}{n}\right)
+\end{align*}
+所以对于所有的整数 $n$, 都有
+\[1+\frac{2^{p+1}-1}{n} = \left(1+\frac{2^p-1}{c}\right)\left(1+\frac{1}{m_{p+1}}\right) .\]
+这里 $c, m_{p+1}$ 是正整数. 由归纳假设, 存在正整数 $m_1,m_2,\cdots,m_p$ 使得
+\[1+\frac{2^p-1}{c} = \left(1+\frac{1}{m_1}\right)\left(1+\frac{1}{m_2}\right)\cdots\left(1+\frac{1}{m_p}\right) ,\]
+因此
+\[1+\frac{2^{p+1}-1}{n} = \left(1+\frac{1}{m_1}\right)\left(1+\frac{1}{m_2}\right)\cdots\left(1+\frac{1}{m_p}\right)\left(1+\frac{1}{m_{p+1}}\right) .\]
+说明归纳假设对 $k=p+1$ 也成立.
+
 \newpage
 %------------------------------------------------------------------------------%
 \noindent Beatty定理
