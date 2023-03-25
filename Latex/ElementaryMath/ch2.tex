@@ -500,6 +500,52 @@ f(x) = x^{10}\cdot\sum_{n=0}^{10}{(-1)^nC_{10}^nx^{6n}} \cdot \sum_{n=0}^{\infty
 
 \newpage
 %------------------------------------------------------------------------------%
+\noindent IMO 1979 第六题
+
+令 $A,E$ 是正八边形两个相对的顶点. 一只青蛙从 $A$ 出发, 每次可以从左右两个相邻顶点选择一个跳过去, 当它达到 $E$ 时停止. $设 a_n$ 为恰好经过 $n$ 步以后达到 $E$ 点所有可能路径的个数. 求证:
+\[a_{2n-1} = 0, a_{2n} = \frac{(2+\sqrt{2})^{n-1}}{\sqrt{2}} - \frac{(2-\sqrt{2})^{n-1}}{\sqrt{2}} .\]
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=0.5]
+\coordinate[label=below left:$A$] (A) at (0,0);
+\coordinate[label=below right:$B$] (B) at (3,0);
+\coordinate[label=right:$C$] (C) at (5.121,2.121);
+\coordinate[label=right:$D$] (D) at (5.121,5.121);
+\coordinate[label=above right:$E$] (E) at (3,7.243);
+\coordinate[label=above left:$F$] (F) at (0,7.243);
+\coordinate[label=left:$G$] (G) at (-2.121,5.121);
+\coordinate[label=left:$H$] (H) at (-2.121,2.121);
+\draw [line width=1pt] (A) --(B)--(C)--(D)--(E)--(F)--(G)--(H)--cycle;
+\foreach \p in {A,B,C,D,E,F,G,H}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+\end{figure*}
+
+解: 显然只能经过偶数步才能到达 $E$ 点, 所以 $a_{2n-1} = 0$. 设 $X(Y)$ 表示经过$Y$ 步达到 $X$ 点的路径个数(中途不经过 $E$ 点), 则:
+\begin{align*}
+E(2n) &= D(2n-1) + F(2n-1) = C(2n-2) + G(2n-2) \\
+&= B(2n-3) + H(2n-3) + D(2n-3) + F(2n-3) \\
+&= A(2n-4) + C(2n-4) + A(2n-4) + G(2n-4) + C(2n-4) + G(2n-4)\\
+&= 2(A(2n-4) + C(2n-4) + G(2n-4)) \\
+&= 2(B(2n-5)+H(2n-5) + B(2n-5) + H(2n-5) + D(2n-5) + F(2n-5) ) \\
+&= 4(B(2n-5) + H(2n-5) + D(2n-5) + F(2n-5) ) - 2(D(2n-5) + F(2n-5))\\
+&= 4E(2n-2) - 2E(2n-4)
+\end{align*}
+即 $a_{2n} = 4a_{2n-2}-2a_{2n-4}$.  设 $b_n = a_{2n}$, 则 
+$$b_n = 4b_{n-1} - 2b_{n-2}. $$
+对应的特征方程为
+$$x^2 - 4x + 2 = 0 .$$
+解得 $x_1 = 2+\sqrt{2}, x_2 = 2-\sqrt{2}$. 设通项公式为 $b_n = c_1x_1^{n-1} + c_2x_2^{n-1}$, 由
+$b_1 = a_2 = 0, b_2 = a_4 = 2$ 得
+\begin{align*}
+c_1 + c_2 &= 0 \\
+c_1(2+\sqrt{2}) + c_2(2-\sqrt{2}) = 2
+\end{align*}
+解得 $c_1 = \dfrac{1}{\sqrt{2}}, c_2 = -\dfrac{1}{\sqrt{2}}$. 所以
+\[a_{2n} = \frac{(2+\sqrt{2})^{n-1}}{\sqrt{2}} - \frac{(2-\sqrt{2})^{n-1}}{\sqrt{2}} .\]
+
+\newpage
+%------------------------------------------------------------------------------%
 求正整数 $ x $，$ y $ 和素数 $ p $，满足 $ x^3+y^3=p^2 $。
 
 解：由 
