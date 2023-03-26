@@ -863,7 +863,7 @@ Z &= v_p(c) - v_p(a) + k
 \end{align*} 
 由 $k$ 的定义知 $X,Y,Z$ 都大于等于 0, 且不能都大于 0, 不然就可以找一个更小的 $k$. 不妨设 $X = 0$. 下面说明$Y,Z$中至少还有一个数是 0. 因为 $\dfrac{a}{b}+\dfrac{b}{c}+\dfrac{c}{a} = N$ 是整数, 所以 
 \[ p^kQ\frac{a}{b} = (N - \frac{b}{c} - \frac{c}{a})p^kQ = Np^kQ - \frac{b}{c}p^kQ - \frac{c}{a}p^kQ .\]
-如果 $Y,Z > 0$, 则 $p$ 整除 $\frac{b}{c}p^kQ$ 和 $\frac{c}{a}p^kQ$, 并且 $k > 0$, 所以 $p$ 也整除 $Np^kQ$, 这样 $p$ 就要整除 $p^kQ\frac{a}{b}$, 说明 $X > 0$, 矛盾.
+如果 $Y,Z > 0$, 则 $p$ 整除 $\dfrac{b}{c}p^kQ$ 和 $\dfrac{c}{a}p^kQ$, 并且 $k > 0$, 所以 $p$ 也整除 $Np^kQ$, 这样 $p$ 就要整除 $p^kQ\dfrac{a}{b}$, 说明 $X > 0$, 矛盾.
 
 不妨设 $X = Y = 0$, 则 
 \begin{align*}
@@ -871,6 +871,34 @@ v_p(a) + k &= v_p(b) \\
 v_p(c) - k &= v_p(b) 
 \end{align*}
 于是 $v_p(a) + v_p(b) + v_p(c) = 3v_p(b)$, 是 $3$ 的倍数. 从而命题得证.
+
+
+\newpage
+%------------------------------------------------------------------------------%
+\noindent Hermite 恒等式
+
+对任意的 $x\in\mathbb{R}, m\in\mathbb{Z}^+$, 恒有
+\[ [x]+[x+\frac{1}{m}]+[x+\frac{2}{m}]+\cdots+[x+\frac{m-1}{m}]=[mx], \]
+其中 $[\cdot]$ 为向下取整符号.
+
+~
+
+证明: 设 $[x] = n, x - [x] = a$, 则 $0 \le a < 1$. 不妨假设 $\dfrac{k}{m}\le a <\dfrac{k+1}{m}$, 其中$0\le k < m$, 则 
+\begin{align*}
+[a + \dfrac{i}{m}] &= 0, \ \ \forall\ 0\le i\le m - k - 1\\
+[a + \dfrac{j}{m}] &= 1, \ \ \forall\ m - k \le j \le m - 1
+\end{align*}
+所以
+\[\sum_{i=0}^{m-1} [a+\frac{i}{m}] = k .\]
+原命题等号左边化为
+\[\sum_{i=0}^{m-1}[x + \frac{i}{m}] = m[x] + \sum_{i=0}^{m-1}[a + \frac{i}{m}] = mn + k .\]
+
+另一方面, 由 $\dfrac{k}{m}\le a <\dfrac{k+1}{m}$, 得 $ k \le ma < k + 1$, 所以 
+\[[mx] = m[x] + [ma] = mn + k .\]
+
+于是
+\[ \sum_{i=0}^{m-1}[x + \frac{i}{m}] = [mx] .\]
+命题得证.
 
 \newpage
 %------------------------------------------------------------------------------%
