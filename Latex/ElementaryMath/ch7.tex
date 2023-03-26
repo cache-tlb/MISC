@@ -159,14 +159,14 @@ I &= \lim_{\epsilon\to 0}\left(e^{-\epsilon}\ln\epsilon + \int_\epsilon^\infty \
 
 \newpage
 %------------------------------------------------------------------------------%
-\noindent 费曼积分法
-
-计算:
-\[\int_0^\infty \frac{\sin x}{x}\mathrm{d}x .\]
+证明:
+\[\int_0^\infty \frac{\sin x}{x}\mathrm{d}x = \frac{\pi}{2}.\]
 
 ~
 
-解: 将被积函数乘以 $e^{-ax}$, 积分结果视为 $a$ 的函数,  
+\noindent 费曼积分法 
+
+将被积函数乘以 $e^{-ax}$, 积分结果视为 $a$ 的函数,  
 \[ I(a) = \int_0^\infty \frac{\sin x}{x}\cdot e^{-ax}\ \mathrm{d}x ,\]
 其中 $a\ge 0$. 最后只要令 $a = 0$ 即可得到原积分结果. 
 
@@ -201,6 +201,43 @@ I_2 &= \int e^{-ax}\mathrm{d}(\sin x) \\
 于是 $I(a) = -\arctan(a) + C$. 
 
 当 $a\to+\infty$ 时, $\dfrac{\sin x}{x}e^{-xa}\to 0$, 所以 $\displaystyle \lim_{a\to+\infty}I(a) = 0$, 可求出常数项 $C = \dfrac{\pi}{2}$. 故原积分的值为 $I(0) = \dfrac{\pi}{2}$. 
+
+~
+
+\noindent 另一种解法
+
+令 $F_n = \dfrac{1}{2} + \cos 2x + \cos 4x + \cdots + \cos 2nx$, 则不断运用积化和差得: 
+\begin{align*}
+F_n\sin x &= \frac{1}{2}\sin x+\cos 2x\cdot\sin x + \cdots + \cos 2nx\cdot\sin x\\
+&= \frac{1}{2}\sin x + \frac{1}{2}\sin 3x - \frac{1}{2}\sin x + \cdots + \frac{1}{2}\sin (2n+1)x - \frac{1}{2}\sin (2n-1)x\\
+&= \frac{1}{2}\sin (2n+1)x\\
+2F_n &= \frac{\sin(2n+1)x}{\sin x} \\
+&= \left(\frac{1}{\sin x} - \frac{1}{x}\right)\cdot\sin (2n+1)x + \left(\frac{1}{x}\right)\cdot\sin(2n+1)x
+\end{align*}
+对 $2F_n$ 从 $0$ 到 $\frac{\pi}{2}$ 积分, 
+\[\int_0^{\pi/2} 2F_n\ \mathrm{d}x = 2\cdot\int_0^{\pi/2}\left(\frac{1}{2}+\cos 2x + \cos 4x + \cdots + \cos 2nx\right)\mathrm{d}x = 2\cdot\frac{\pi}{4} = \frac{\pi}{2} .\]
+另一方面, 
+\begin{align*}
+\frac{\pi}{2} &= \int_0^{\pi/2} 2F_n\ \mathrm{d}x \\
+&= \int_0^{\pi/2}\left(\frac{1}{\sin x} - \frac{1}{x}\right)\cdot\sin (2n+1)x\ \mathrm{d}x + \int_0^{\pi/2} \frac{1}{x}\cdot\sin(2n+1)x\ \mathrm{d}x\\
+&= I_1 + I_2 .
+\end{align*}
+考虑 $n\to\infty$ 的情况. 对于后半部分, 令 $u = (2n+1)x$, $\mathrm{d}u = (2n+1)\mathrm{d}x$, 
+\[I_2 = \int_0^{\pi/2} \frac{1}{x}\cdot\sin(2n+1)x\ \mathrm{d}x = \int_0^{(n+\frac{1}{2})\pi} \frac{\sin u}{u}\mathrm{d}u \]
+对于前半部分, 下面说明 $n\to\infty$ 时, $I_1\to 0$. 事实上, 由分部积分:
+\begin{align*}
+I_1 &= \int_0^{\pi/2}\left(\frac{1}{\sin x} - \frac{1}{x}\right)\cdot\sin (2n+1)x\ \mathrm{d}x \\
+&= \int_0^{\pi/2}\left(\frac{1}{\sin x} - \frac{1}{x}\right)\frac{1}{2n+1}\mathrm{d}(-\cos(2n+1)x)\\
+&= \left(\frac{1}{\sin x} - \frac{1}{x}\right)\frac{-\cos(2n+1)x}{2n+1}\bigg|_0^{\pi/2} - \int_0^{\pi/2}\frac{-\cos(2n+1)x}{2n+1}\left(\frac{-\cos x}{\sin^2 x}+\frac{1}{x^2}\right)\mathrm{d}x
+\end{align*}
+两部分的分母都有 $2n+1$, 只要证明其余部分是有限值. 对于第一项, 
+\[\lim_{x\to 0}\left(\frac{1}{\sin x} - \frac{1}{x}\right) = \lim_{x\to 0}\frac{x - \sin x}{x\sin x} = \lim_{x\to 0}\frac{1-\cos x}{\sin x + x\cos x} = 0\]
+对于第二项, 
+\[\lim_{x\to 0}\left(\frac{-\cos x}{\sin^2 x}+\frac{1}{x^2}\right) = \lim_{x\to 0}\frac{\sin^2 x-x^2\cos x}{x^2\sin^2 x} = \frac{1}{6} .\]
+而 $|\cos(2n+1)x| \le 1$, 所以$\dfrac{1}{\sin x} - \dfrac{1}{x}$, $\dfrac{-\cos x}{\sin^2 x}+\dfrac{1}{x^2}$, 和$\cos(2n+1)x$ 的绝对值都在与 $n$ 无关的常数界限范围内. 当 $n\to\infty$ 时, $I_1$ 趋于 $0$.
+
+综合以上, 
+\[\frac{\pi}{2} = \lim_{n\to\infty} I_1 + I_2 = \lim_{n\to\infty} I_2 = \int_0^\infty\frac{\sin x}{x}\mathrm{d}x.\]
 
 \newpage
 %------------------------------------------------------------------------------%
