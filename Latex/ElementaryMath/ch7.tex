@@ -156,6 +156,52 @@ I &= \lim_{\epsilon\to 0}\left(e^{-\epsilon}\ln\epsilon + \int_\epsilon^\infty \
 \[ I = \int_1^0 \left( \frac{t}{-\ln t} - \frac{t}{1-t} \right)(-\frac{1}{t})\mathrm{d}t = -\int_0^1\left(\frac{1}{\ln t}+\frac{1}{1-t}\right)\mathrm{d}t .\]
 由上一题的结论得 $I = -\gamma$.
 
+
+\newpage
+%------------------------------------------------------------------------------%
+\noindent 费曼积分法
+
+计算:
+\[\int_0^\infty \frac{\sin x}{x}\mathrm{d}x .\]
+
+~
+
+解: 将被积函数乘以 $e^{-ax}$, 积分结果视为 $a$ 的函数,  
+\[ I(a) = \int_0^\infty \frac{\sin x}{x}\cdot e^{-ax}\ \mathrm{d}x ,\]
+其中 $a\ge 0$. 最后只要令 $a = 0$ 即可得到原积分结果. 
+
+为了求 $I(a)$, 先对 $a$ 求导:
+\begin{align*}
+I'(a) &= \int_0^\infty \frac{\partial}{\partial a}\left(\frac{\sin x}{x}\cdot e^{-ax}\right) \mathrm{d}x \\
+&= \int_0^\infty \frac{\sin x}{x}\cdot e^{-ax}\cdot(-x)\ \mathrm{d}x \\
+&= -\int_0^\infty e^{-ax}\sin x\ \mathrm{d}x
+\end{align*}
+
+下面计算 
+\[I_1 = \int e^{-ax}\sin x\ \mathrm{d}x ,\]
+用分部积分
+\begin{align*}
+I_1 &= \int e^{-ax}\mathrm{d}(-\cos x) \\
+&= e^{-ax}(-\cos x) - \int(-\cos x)e^{-ax}\cdot(-a)\ \mathrm{d}x\\
+&= -e^{-ax}\cos x - a\cdot\int e^{-ax}\cos x\ \mathrm{d}x
+\end{align*}
+设
+\[I_2 = \int e^{-ax}\cos x\ \mathrm{d}x ,\]
+同样用分部积分:
+\begin{align*}
+I_2 &= \int e^{-ax}\mathrm{d}(\sin x) \\
+&= e^{-ax}\sin x - \int\sin x\cdot e^{-ax}\cdot(-a)\ \mathrm{d}x\\
+&= e^{-ax}\sin x + a\cdot\int e^{-ax}\sin x\ \mathrm{d}x\\
+&= e^{-ax}\sin x + a\cdot I_1
+\end{align*}
+这样可以解出 
+\[I_1 = -\frac{e^{-ax}(a\sin x + \cos x)}{1+a^2} .\]
+代入上面 $I'(a)$ 的表达式得
+\[I'(a) = \frac{e^{-ax}(a\sin x + \cos x)}{1+a^2} \bigg|_{x=0}^\infty = -\frac{1}{1+a^2} .\]
+于是 $I(a) = -\arctan(a) + C$. 
+
+当 $a\to+\infty$ 时, $\dfrac{\sin x}{x}e^{-xa}\to 0$, 所以 $\displaystyle \lim_{a\to+\infty}I(a) = 0$, 可求出常数项 $C = \dfrac{\pi}{2}$. 故原积分的值为 $I(0) = \dfrac{\pi}{2}$. 
+
 \newpage
 %------------------------------------------------------------------------------%
 \noindent 悬链线方程推导
