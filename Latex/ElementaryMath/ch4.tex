@@ -329,6 +329,76 @@ f_V(v) &= \frac{\mathrm{d}}{\mathrm{d}v}F_V(v) = Nv^{N-1} .
 
 %------------------------------------------------------------------------------%
 \newpage
+
+\noindent 2016 丘成桐数学竞赛
+
+单位圆周上随机取 $n$ 个点, 将圆周分成了 $n$ 段圆弧, 求包含 $(1,0)$ 点的那段圆弧长度的期望和方差.
+
+~
+
+\begin{wrapfigure}{o}{5cm}
+\begin{tikzpicture}[scale=0.8]
+\coordinate[label=left:$O$] (O) at (0,0);
+\coordinate[] (A) at (3,0);
+\coordinate[label=above right:$\alpha$] (B) at (2.221, 2.017);
+\coordinate[label=below right:$\beta$] (C) at (2.657, -1.394);
+\coordinate[] (D) at (-2.038, 2.201);
+\coordinate[] (E) at (-2.922, 0.68);
+\draw [line width=1pt] (O) circle (3cm);
+\draw [line width=1pt] (B) -- (O) -- (C);
+\draw [line width=1pt, dashed] (O) -- (A);
+\foreach \p in {A,B,C,D,E,O}
+	\fill[red] (\p) circle (1.5pt);
+\draw pic["$\alpha$",draw,line width=1pt, angle eccentricity=1.6, angle radius=0.5cm] {angle=A--O--B};
+\draw pic["$2\pi - \beta$",draw,line width=1pt, angle eccentricity=2, angle radius=0.8cm] {angle=C--O--A};
+\end{tikzpicture}
+\end{wrapfigure}
+解: 设随机的 $n$ 个点对应的辐角为 $\theta_1, \theta_2, \cdots, \theta_n$, $\theta_i\in[0,2\pi)$, 令 $\alpha = \min\{\theta_i\}, \beta = \max\{\theta_i\}$, 则包含 $(1,0)$ 点的那段圆弧就是从 $\alpha$ 顺时针到 $\beta$ 的那一段, 弧长为 $l = 2\pi - \beta + \alpha$. 设 $\gamma = 2\pi - \beta$, 
+于是 $l$ 的期望为 
+\[E(l) = E(\alpha) + E(2\pi - \beta) = E(\alpha) + E(\gamma).\]
+然后求 $\beta$ 的 pdf, 先求 cdf. 
+\[
+P(\beta < x) = P(\max\{\theta_i\} < x) = P(\theta_i < x)^n = \left(\frac{x}{2\pi}\right)^n 
+\]
+对 cdf 求导得 pdf:
+\[ f_\beta(x) = \frac{nx^{n-1}}{(2\pi)^n} \]
+对于 $\alpha$ 和 $\gamma$ 也是类似的.
+\begin{align*}
+P(\alpha < x) &= 1 - P(\alpha > x) = 1 - P(\theta_i > x)^n = 1 - \left(\frac{2\pi - x}{2\pi}\right)^n \\
+P(\gamma < x) &= P(\beta > 2\pi - x) = 1 - P(\theta_i < 2\pi - x)^n = 1 - \left(\frac{2\pi - x}{2\pi}\right)^n \\
+f_\alpha(x) &= f_\gamma(x) = \frac{n(2\pi-x)^{n-1}}{(2\pi)^n}
+\end{align*}
+可见 $\alpha$ 和 $\gamma$ 的 pdf 相同, 所以
+\begin{align*}
+E(l) &= E(\alpha) + E(\gamma) = 2E(\alpha) \\
+&=2\cdot \int_0^{2\pi} x\cdot f_\alpha(x)\ \mathrm{d}x = 2\cdot \int_0^{2\pi} \frac{nx(2\pi - x)^{n-1}}{(2\pi)^n}\ \mathrm{d}x \\
+&= \frac{4\pi}{n+1}
+\end{align*}
+
+对于方差, 由 
+\begin{align*}
+D(l) &= E(l^2) - E(l)^2 \\
+&= E(\alpha^2 + \gamma^2 + 2\alpha\gamma) - E(l)^2 \\
+&= 2E(\alpha^2) + 2E(\alpha(2\pi-\beta)) - E(l)^2 \\
+&= 2E(\alpha^2) + 4\pi E(\alpha) - 2E(\alpha\beta) - E(l)^2
+\end{align*}
+只要分别求 $E(\alpha^2)$ 和 $E(\alpha\gamma)$ 两个期望即可. 事实上,
+\[E(\alpha^2) = \int_0^{2\pi} x^2\cdot f_\alpha(x)\ \mathrm{d}x = \int_0^{2\pi} \frac{nx^2(2\pi-x)^{n-1}}{(2\pi)^{n}}\ \mathrm{d}x = \frac{8\pi^2}{(n+1)(n+2)} .\]
+而 $E(\alpha\beta)$ 需要求 $\alpha\beta$ 的联合分布, 因此也要先求联合 cdf. 
+
+先求 $P(\alpha > x, \beta < y)$, 当 $x < y$ 时, $\alpha > x, \beta < y$ 意味着 $x < \theta_i < y$ 对所有的 $i$ 都成立, 即所有点的辐角都落在 $(x,y)$ 范围内, 因此概率为 
+\[P(\alpha > x, \beta < y) = \left(\frac{y-x}{2\pi}\right)^n .\]
+再根据 $P(\beta < y)$ 的值, 可得
+\[P(\alpha < x, \beta < y) = P(\beta < y) - P(\alpha > x, \beta < y) = \frac{y^n - (y-x)^n}{(2\pi)^n} . \]
+对它求偏导可得联合分布的 pdf:
+\[f_{\alpha,\beta}(x,y) = \frac{\partial^2}{\partial x\partial y}\left(\frac{y^n - (y-x)^n}{(2\pi)^n}\right) = \frac{n(n-1)(y-x)^{n-2}}{(2\pi)^n} .\]
+然后计算期望
+\[E(\alpha\beta) = \int_0^{2\pi}\int_0^y xyf_{\alpha,\beta}(x,y)\ \mathrm{d}x\mathrm{d}y = \frac{4\pi^2}{n+2} .\]
+所以方差为
+\[D(l) = 2E(\alpha^2) + 4\pi E(\alpha) - 2E(\alpha\beta) - E(l)^2 = \frac{8\pi^2(n-1)}{(n+1)^2(n+2)} .\]
+
+%------------------------------------------------------------------------------%
+\newpage
 一根木棍上独立地取两个随机点, 将木棍分成三段, 每个随机点都是均匀分布. 求三段可以构成三角形的概率.
 
 ~
