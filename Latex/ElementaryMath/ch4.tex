@@ -382,9 +382,9 @@ D(l) &= E(l^2) - E(l)^2 \\
 &= 2E(\alpha^2) + 2E(\alpha(2\pi-\beta)) - E(l)^2 \\
 &= 2E(\alpha^2) + 4\pi E(\alpha) - 2E(\alpha\beta) - E(l)^2
 \end{align*}
-只要分别求 $E(\alpha^2)$ 和 $E(\alpha\gamma)$ 两个期望即可. 事实上,
+只要再分别求 $E(\alpha^2)$ 和 $E(\alpha\beta)$ 两个期望即可. 事实上,
 \[E(\alpha^2) = \int_0^{2\pi} x^2\cdot f_\alpha(x)\ \mathrm{d}x = \int_0^{2\pi} \frac{nx^2(2\pi-x)^{n-1}}{(2\pi)^{n}}\ \mathrm{d}x = \frac{8\pi^2}{(n+1)(n+2)} .\]
-而 $E(\alpha\beta)$ 需要求 $\alpha\beta$ 的联合分布, 因此也要先求联合 cdf. 
+而 $E(\alpha\beta)$ 需要求 $\alpha,\beta$ 的联合分布, 因此也要先算联合 cdf. 
 
 先求 $P(\alpha > x, \beta < y)$, 当 $x < y$ 时, $\alpha > x, \beta < y$ 意味着 $x < \theta_i < y$ 对所有的 $i$ 都成立, 即所有点的辐角都落在 $(x,y)$ 范围内, 因此概率为 
 \[P(\alpha > x, \beta < y) = \left(\frac{y-x}{2\pi}\right)^n .\]
