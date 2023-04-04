@@ -655,7 +655,7 @@ $ y=1 $ 时，$ x=2 $；$ y=2 $ 时，$ x=1 $；这两个解都满足。
 如果存在一个区间 $[t,t+1]$, 两人都在此区间眨眼了, 意味着存在 $m,n\in \mathbb{Z}^+$ 和 $\delta,\epsilon\in(0,1)$, 使得
 \[mp = t + \delta, \qquad nq = t + \epsilon .\]
 两式分别除以 $p,q$, 并相加, 得:
-\[m+n = (\frac{1}{p} + \frac{1}{q})t + \frac{1}{p}\delta + \frac{1}{q}\epsilon = t + \frac{1}{p}\delta + \frac{1}{q}\epsilon .\]
+\[m+n = \left(\frac{1}{p} + \frac{1}{q}\right)t + \frac{1}{p}\delta + \frac{1}{q}\epsilon = t + \frac{1}{p}\delta + \frac{1}{q}\epsilon .\]
 因为 $\dfrac{1}{p}\delta + \dfrac{1}{q}\epsilon \in (0,1)$, 所以等式右边不可能是整数, 但等式最左边$m+n$ 是整数, 矛盾. 这就说明了两人不可能在一个以整数开始的单位区间内眨眼两次.
 
 以此为基础, 要进一步证明从1开始之后每个区间要有一次眨眼. 因为$p,q$均大于1, 所以$(0,1]$之间不会有眨眼, 于是只要证明 $(0,t]$ 区间恰好有 $t-1$ 次眨眼即可. 这段时间内第一个人眨眼$m=\left[\dfrac{t}{p}\right]$次, 第二个人眨眼了$n=\left[\dfrac{t}{q}\right]$次. 设$\dfrac{t}{p}$ 和 $\dfrac{t}{q}$的小数部分分别为 $\delta,\epsilon$, 于是有
