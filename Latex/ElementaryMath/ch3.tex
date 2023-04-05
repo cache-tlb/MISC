@@ -3291,6 +3291,101 @@ $PA + PB + PC = QK + QL + QM < QA + QB + QC$
 %------------------------------------------------------------------------------%
 \newpage
 
+\noindent 蒙日圆定理的几何证明(来自微博)
+
+定义1. 在平面上, 到两定点距离之和等于定长的点所构成的图形叫做椭圆, 这一对定点叫做椭圆的两个焦点, 记作 $F_1$ 和 $F_2$, 这个定长叫做椭圆的长轴长, 记作 $2a$, $F_1F_2$ 的中点叫做椭圆的中心, 记作 $O$. $F_1$ 和 $F_2$ 的距离叫做椭圆的焦距, 记作 $2c$. 记 $\sqrt{a^2-c^2}=b$, 那么 $2b$ 是椭圆的短轴长.
+
+定义2. 设 $l$ 是直线, $e$ 是椭圆, 如果 $l$ 与 $e$ 仅有唯一的公共点 $P$, 称 $l$ 与 $e$ 相切于 $P$, $l$ 是 $e$ 的切线. $P$ 是 $l$ 和 $e$ 的切点. 显然, 如果 $l$ 与 $e$ 相切于 $P$, 那么 $l$ 上所有异于 $P$ 的点都在 $e$ 之外.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.5]
+\coordinate[label=below:$O$] (O) at (0,0);
+\coordinate[label=below left:$F_1$] (F1) at (-1.5,0);
+\coordinate[label=below right:$F_2$] (F2) at (1.5,0);
+\coordinate[label=above:$P$] (P) at (-1.174,1.766);
+\coordinate[label=above left:$F_1'$] (F11) at (-2.672,2.756);
+%\coordinate[] (Q) at (-2.086,1.378);
+\coordinate[label=above:$Q$] (Q) at (-0.53,2.04);
+\coordinate[] (G) at (-3.209,0.9);
+\coordinate[] (H) at (2.156,3.182);
+\draw [rotate around={0:(0,0)},line width=1pt] (0,0) ellipse (2.5cm and 2cm);
+\draw[line width=1pt] (G)--(H);
+\draw[line width=1pt,dashed] (F1)--(F11) -- (F2);
+\draw[line width=1pt,dashed] (F1)--(P);
+\draw[line width=1pt] (F2)--(F1);
+\foreach \p in {O,F1,F2,P,Q,F11}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+\end{figure*}
+
+引理3 (椭圆的光学性质). 设 $l$ 是一条直线, $e$ 是一个椭圆, $F_1, F_2$ 是椭圆的两个焦点, $F_1'$ 是 $F_1$ 关于 $l$ 的对称点. 如果 $l$ 与 $e$ 相切于点 $P$, 那么 $F_1',P,F_2$ 三点共线.
+
+证明: 设 $F_1'F_2$ 交 $l$ 于 $Q$ 点. 假设 $Q\neq P$, 那么 $Q$ 在 $e$ 之外, 所以 $Q$ 到 $F_1, F_2$ 的距离之和大于 $P$ 到 $F_1, F_2$ 的距离之和, 即 
+$$QF_1 + QF_2 > PF_1 + PF_2 = PF_1'+PF_2 .$$
+而 $P,F_1', F_2$ 不共线, 由三角不等式, 
+$$PF_1'+PF_2 > F_1'F_2 = QF_1'+QF_2,$$
+由 $l$ 是 $F1, F_1'$ 的对称轴, 可得 $QF_1'=QF_1$, 代入上述式子得
+$$QF_1 + QF_2 > PF_1'+PF_2 > QF_1'+QF_2 = QF_1+QF_2.$$ 
+矛盾. 所以 $F_1'F_2$ 与 $l$ 的交点就是切点 $P$.
+
+~
+
+引理4. 矩形内任意一点到矩形相对顶点距离的平方和相等.
+
+证明: 由该点作每条边的垂线, 由勾股定理易得.
+
+~
+
+定理5 (蒙日圆). 设 $e$ 是以 $O$ 为中心的一个椭圆. $P$ 是椭圆外一点. $PA$ 和 $PB$ 分别与椭圆 $e$ 相切于 $A$ 和 $B$. 如果 $PA\perp PB$, 那么 $OP$ 为常数.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.5]
+\coordinate[label=below:$O$] (O) at (0,0);
+\coordinate[label=below left:$F_1$] (F1) at (-1.5,0);
+\coordinate[label=below right:$F_2$] (F2) at (1.5,0);
+\coordinate[label=above:$A$] (A) at (-1.174,1.766);
+\coordinate[label=above left:$F_1'$] (F11) at (-2.672,2.756);
+\coordinate[label=left:$Q$] (Q) at (-2.086,1.378);
+\coordinate[label=above:$P$] (P) at (1.42,2.869);
+\coordinate[label=above right:$B$] (B) at (2.367, 0.644);
+\coordinate[label=below right:$S$] (S) at (2.466, 0.411);
+\coordinate[label=above right:$F_2'$] (F22) at (3.432, 0.822);
+\coordinate[label=below right:$R$] (R) at (-1.04, -1.081);
+\coordinate[] (L) at (3.294, -1.535);
+\coordinate[] (G) at (-3.209,0.9);
+\draw [rotate around={0:(0,0)},line width=1pt] (0,0) ellipse (2.5cm and 2cm);
+\draw[line width=1pt] (G)--(P) --(L);
+\draw[line width=1pt,dashed] (F1)--(F11) -- (F2);
+\draw[line width=1pt,dashed] (F1)--(A);
+\draw[line width=1pt,dashed] (Q)--(O) -- (S);
+\draw[line width=1pt,dashed] (F2)--(F22) -- (F1);
+\draw[line width=1pt] (F2)--(F1);
+\draw[line width=1pt] (P)--(O);
+\draw[line width=1pt,dashed] (F2)--(B);
+\draw[line width=1pt,dashed] (F2) -- (R) --(F1);
+\draw[line width=1pt,dashed] (O) -- (R);
+\foreach \p in {O,F1,F2,A,Q,F11,P,B,S,F22,R}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+\end{figure*}
+
+证明: 设 $e$ 的两个焦点为 $F_1,F_2$, $F_1'$ 是 $F_1$ 关于 $PA$ 的对称点, $F_2'$ 是 $F_2$ 关于 $PB$ 的对称点. 由椭圆的光学性质(引理3)可知, $F_1', A, F_2$ 共线, 以及 $F_2', B, F_1$ 共线. 设直线 $F_1F_1'$ 与 $PA$ 交于 $Q$, 直线 $F_2F_2'$ 与 $PB$ 交于 $S$, 直线 $F_1'F_1$ 与 $F_2'F_2$ 交于 $R$, 设椭圆 $e$ 的长轴长为 $2a$, 则 
+\[ F_1'F_2 = F_1'A + AF_2 = F_1A+AF_2 = 2a .\]
+而 $Q,O$ 分别是 $F_1F_1'$ 和 $F_1F_2$ 的中点, 由三角形中位线的性质可得 
+$$OQ = \dfrac{1}{2}F_1'F_2 = a,$$ 
+类似地 
+$$OS = \dfrac{1}{2}F_1F_2' = a.$$
+
+另一方面, $PA\perp PB$, $PB\perp RS$, $PA \perp RQ$, 所以 $PQRS$ 是矩形. 设椭圆 $e$ 的焦距为 $2c$, 在直角三角形$RF_1F_2$ 中, $O$ 是斜边 $F_1F_2$ 的中点, 所以 
+$$OR = \dfrac{1}{2} F_1F_2 = c.$$
+由引理4可知, 
+\[OP^2 + OR^2 = OQ^2 + OS^2 .\]
+于是
+\[OP = \sqrt{ OQ^2 + OS^2 - OR^2} = \sqrt{a^2+a^2-c^2} = \sqrt{a^2+b^2} .\]
+
+%------------------------------------------------------------------------------%
+\newpage
+
 \noindent 来自微博
 
 对于空间四边形, 若其四条边都和一个球体相切, 求证: 四个切点位于同一个平面内.
