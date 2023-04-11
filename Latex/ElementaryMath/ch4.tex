@@ -199,6 +199,175 @@ E(X_1) = 1\cdot\mathrm{Prob}(X_1=1)+0\cdot\mathrm{Prob}(X_1=0) = \mathrm{Prob}(X
 所以最终期望为:
 \[E = K\left(1-(1-\frac{1}{N})^K \right) .\]
 
+
+%------------------------------------------------------------------------------%
+\newpage
+
+在区间 $[0,1]$ 上按均匀分布随机取 $n$ 个点, $n \ge 3$. 定义一个点 $P$ 的最近邻是最靠近 $P$ 的点. 如果一个点的最近邻的最近邻是它自己, 就称这个点是一个``好点''. 求``好点''个数的期望.
+
+~
+
+解: 若一个点 $P$ 是``好点'', 设 $P$ 的最近邻为 $P'$, 则 $P'$ 的最近邻是 $P$, 从而 $P'$ 也是``好点''. 这说明``好点'' 是成对出现的. 设 $n$ 个点的坐标为 $X_1, X_2, \cdots, X_n$, 它们都是 $[0,1]$ 上的均匀分布. 定义 $I_{i,j}$ 为点 $X_i, X_j$ 是否是一对 ``好点'', 即当点 $X_i, X_j$ 互为对方的最近邻时 $I_{i,j} = 1$, 否则 $I_{i,j}=0$, 则``好点''的个数为:
+\[ Y = \sum_{1\le i < j \le n}{2I_{i,j}}, \]
+期望为
+\[ E(Y) = \sum_{1\le i < j \le n}{2E(I_{i,j})} = \sum_{1\le i < j \le n}{2\cdot\mathrm{Prob}(X_i,X_j\text{互为最近邻})} .\]
+因为所有点都是独立同分布的, $X_i,X_j$ 互为最近邻的概率等同于 $X_1, X_2$ 互为最近邻的概率, 于是
+\[E(Y) = n(n-1)\cdot\mathrm{Prob}(X_1,X_2\text{互为最近邻}) .\]
+因为 $X_1, X_2$ 地位是对等的, 当 $X_1,X_2$ 互为最近邻时, 可能是 $X_1 \le X_2$, 也可能是 $X_1 > X_2$, 这两种情况的可能性也是相同的, 即
+\[\mathrm{Prob}(X_1,X_2\text{互为最近邻}) = 2\cdot\mathrm{Prob}(X_1,X_2\text{互为最近邻,且}X_1 \le X_2) .\]
+当 $X_1 \le X_2$, 同时它们还要互为最近邻, 需要看 $X_3, \cdots, X_n$ 的位置. 有需要分几种情况.
+
+(1) $X_1X_2$ 位置比较靠左, $X_3, \cdots, X_n$ 只能在右侧.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[label=below left:$0$] (A) at (0,0);
+\coordinate[label=below right:$1$] (B) at (6,0);
+\coordinate[label=below:$X_1$] (C) at (1,0);
+\coordinate[label=below:$X_2$] (D) at (2.5,0);
+\coordinate[] (E) at (4,0);
+\draw [line width=1pt,red] (A) -- (C);
+\draw [line width=1pt] (C) -- (D);
+\draw [line width=1pt,red] (D) -- (E);
+\draw [line width=1pt,green] (E) -- (B);
+\draw[] (5,0) node[anchor=south] {$X_3\cdots$};
+\foreach \p in {A,B,C,D,E}
+	\fill[fill=black,draw=black,thick] (\p) circle (1pt);
+\end{tikzpicture}
+\end{figure*}
+
+如上图所示, 对应的条件为
+\[
+\begin{cases}
+X_1 < X_2 - X_1 \\
+2(X_2 - X_1) + X_1 < 1
+\end{cases}
+\rightarrow \qquad
+\begin{cases}
+X_2 > 2X_1 \\
+2X_2 < 1 + X_1 
+\end{cases}
+\]
+
+(2) $X_1X_2$ 位置比较靠右, $X_3, \cdots, X_n$ 只能在左侧.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[label=below left:$0$] (A) at (0,0);
+\coordinate[label=below right:$1$] (B) at (6,0);
+\coordinate[label=below:$X_1$] (C) at (3.5,0);
+\coordinate[label=below:$X_2$] (D) at (5,0);
+\coordinate[] (E) at (2,0);
+\draw [line width=1pt,red] (B) -- (D);
+\draw [line width=1pt] (C) -- (D);
+\draw [line width=1pt,red] (C) -- (E);
+\draw [line width=1pt,green] (E) -- (A);
+\draw[] (1,0) node[anchor=south] {$X_3\cdots$};
+\foreach \p in {A,B,C,D,E}
+	\fill[fill=black,draw=black,thick] (\p) circle (1pt);
+\end{tikzpicture}
+\end{figure*}
+
+对应的条件为
+\[
+\begin{cases}
+1 - X_2 < X_2 - X_1 \\
+2(X_2 - X_1) + (1 - X_2) < 1
+\end{cases}
+\rightarrow \qquad
+\begin{cases}
+2X_2 > 1 + X_1 \\
+X_2 < 2X_1 
+\end{cases}
+\]
+
+(3) $X_1X_2$ 位置居中, $X_3, \cdots, X_n$ 可能在左右两端.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[label=below left:$0$] (A) at (0,0);
+\coordinate[label=below right:$1$] (B) at (6,0);
+\coordinate[label=below:$X_1$] (C) at (2.5,0);
+\coordinate[label=below:$X_2$] (D) at (3.5,0);
+\coordinate[] (E) at (1.5,0);
+\coordinate[] (F) at (4.5,0);
+\draw [line width=1pt,green] (F) -- (B);
+\draw [line width=1pt,red] (F) -- (D);
+\draw [line width=1pt] (C) -- (D);
+\draw [line width=1pt,red] (C) -- (E);
+\draw [line width=1pt,green] (E) -- (A);
+\draw[] (1,0) node[anchor=south] {$X_3\cdots$};
+\draw[] (5,0) node[anchor=south] {$X_3\cdots$};
+\foreach \p in {A,B,C,D,E,F}
+	\fill[fill=black,draw=black,thick] (\p) circle (1pt);
+\end{tikzpicture}
+\end{figure*}
+
+对应的条件为
+\[
+\begin{cases}
+X_2 - 2(X_2-X_1) > 0\\
+X_1 + 2(X_2-X_1) < 1\\
+X_2 > X_1
+\end{cases}
+\rightarrow \qquad
+\begin{cases}
+X_2 < 2X_1 \\
+2X_2 < 1 + X_1\\
+X_2 > X_1
+\end{cases}
+\]
+
+以上三个情况对应的区域分别如下:
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[label=below left:$O$] (O) at (0,0);
+\coordinate[label=below:$1$] (A) at (5,0);
+\coordinate[label=left:$1$] (B) at (0,5);
+\coordinate[] (C) at (5,5);
+\coordinate[] (D) at (0,2.5);
+\coordinate[] (E) at (2.5,5);
+\coordinate[] (F) at (1.66667,3.3333);
+\draw[->,line width=1pt] (-1,0) -- (6.2,0) node[right] {$X_1$};
+\draw[->,line width=1pt] (0,-1.0) -- (0,6.2) node[above] {$X_2$};
+\fill [fill=red!30] (O)--(F)--(D)--cycle;
+\fill [fill=green!30] (C)--(E)--(F)--cycle;
+\fill [fill=blue!30] (O)--(F)--(C)--cycle;
+\draw[line width=1pt] (O) -- (A) -- (C) -- (B) -- cycle;
+\draw[line width=1pt] (O) -- (E);
+\draw[line width=1pt] (C) -- (D);
+\draw[line width=1pt] (O) -- (C);
+\draw[] (0.5,2) node[] {$(1)$};
+\draw[] (3,4.5) node[] {$(2)$};
+\draw[] (2,2.7) node[] {$(3)$};
+\foreach \p in {A,B,C,D,E,F,O}
+	\fill[fill=black,draw=black,thick] (\p) circle (1pt);
+\end{tikzpicture}
+\end{figure*}
+
+对于情况 (1), 点 $X_3$ 等等可能的范围是 $(2(X_2-X_1)+X_1, 1)$, 即 $(2X_2-X_1, 1)$, 区间长度为 $1-2X_2+X_1$. 对应的概率为
+\begin{align*}
+P_1 &= \mathrm{Prob}(X_1,X_2\text{互为最近邻,且处于(1)区域}) \\
+&= \int_0^{1/3}\int_{2x}^{(1+x)/2} (1 - 2y+x)^{n-2}\ \mathrm{d}y\mathrm{d}x\\
+&= \frac{1}{6n(n-1)} .
+\end{align*}
+
+对于情况 (2), 与情况 (1) 是对称的. 
+
+对于情况 (3), 点 $X_3$ 等等可能的范围是$(0, X_2-2(X_2-X_1))\cup (X_1+2(X_2-X_1), 1)$, 区间长度为 $1+3X_1 - 3X_2$, 对应的概率为
+\begin{align*}
+P_3 &= \mathrm{Prob}(X_1,X_2\text{互为最近邻,且处于(3)区域}) \\
+&= \int_0^{1/3}\int_{x}^{2x}(1+3x-3y)^{n-2}\ \mathrm{d}y\mathrm{d}x + \int_{1/3}^1\int_{x}^{(1+x)/2}(1+3x-3y)^{n-2}\ \mathrm{d}y\mathrm{d}x\\
+&= \frac{1}{3n} .
+\end{align*}
+
+所以三种情况加起来, 得到
+\[\mathrm{Prob}(X_1,X_2\text{互为最近邻,且}X_1<X_2) = 2P_1 + P_3 = \frac{1}{3(n-1)} .\]
+
+再根据前面的推论, 可得``好点''个数期望为 
+\[E(Y) = n(n-1)\cdot 2\cdot\frac{1}{3(n-1)} = \frac{2n}{3} .\]
+
 %------------------------------------------------------------------------------%
 \newpage
 \noindent 来自 Paul Nahin (Ballot Theorem)
