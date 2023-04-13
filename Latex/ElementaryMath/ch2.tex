@@ -132,6 +132,37 @@ S &=\frac{1}{2}\sqrt{(ab)^2-\frac{(7-4c^2)^2}{4}}\\
 \newpage
 %------------------------------------------------------------------------------%
 \section{函数}
+\noindent 群英荟萃
+
+设 
+\[f(x) = \sin x + \cos x + \tan x + \cot x + \sec x + \csc x ,\]
+求 $ |f(x)| $ 的最小值.
+
+~
+
+解: 设 
+\[ y = \sin x + \cos x = \sqrt{2}\sin(x+\frac{\pi}{4}), \]
+则 $y\in[-\sqrt{2},\sqrt{2}]$, 并且有
+\[2\sin x \cos x = (\sin x + \cos x)^2 - 1 = y^2 - 1 .\]
+以及
+\begin{align*}
+f(x) &= \sin x + \cos x + \tan x + \cot x + \sec x + \csc x \\
+&= f(x) = \sin x + \cos x + \frac{\sin x}{\cos x} + \frac{\cos x}{\sin x} + \frac{1}{\cos x} + \frac{1}{\sin x} \\
+&= \sin x + \cos x + \frac{2}{2\sin x\cos x} + \frac{2(\sin x + \cos x)}{2\sin x\cos x}\\
+&= y + \frac{2}{y^2 - 1} + \frac{2y}{y^2-1}\\
+&= y+ \frac{2}{y-1}
+\end{align*}
+
+设 $g(y) = y + \dfrac{2}{y-1}$, 则 $g'(y) = 1 - \dfrac{2}{(y-1)^2}$. 
+
+当 $y\in(1,\sqrt{2}]$ 时, $g'(y) < 0$, 且 $g(y) > 0$, 此时 $|g(y)|$ 最小为 $g(\sqrt{2}) = 2+3\sqrt{2}\approx 6.24$. 
+
+当 $y\in[-\sqrt{2},1)$ 时, $y - 1 < 0$, $g(y) = (y-1) + \dfrac{2}{y-1} + 1$ 在 $y-1 = -\sqrt{2}$ 时有最大值 $1-2\sqrt{2} < 0$.
+
+综合以上, $|f(x)|$ 最小值为 $2\sqrt{2}-1$.
+
+\newpage
+%------------------------------------------------------------------------------%
 
 \noindent 2019南京大学计算机拔尖班二次选拔:
 
