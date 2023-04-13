@@ -2,6 +2,65 @@
 
 \section{不等式}
 
+\noindent 柯西不等式
+
+设 $a_i,b_i\in\mathbb{R}, i=1,2,\cdots,n$, 则
+\[ \left(\sum_{i=1}^n{a_ib_i}\right)^2\le\left(\sum_{i=1}^na_i^2\right)\left(\sum_{i=1}^nb_i^2\right) .\]
+
+\noindent 证明:
+
+由算术-几何不等式 $a^2+b^2 \ge 2ab$ 可以推导出来.
+
+令 
+\[A = \sum_{i=1}^na_i^2, \qquad B = \sum_{i=1}^nb_i^2, \]
+若 $A = 0$ 或 $B = 0$, 则不等式显然成立. 这里讨论 $A > 0, B > 0$ 的情况. 对于任意的 $i$, 由算术-几何不等式有
+\[\frac{a_i^2}{A} + \frac{b_i^2}{B} \ge 2\frac{a_ib_i}{\sqrt{AB}} .\]
+将这些不等式加起来得
+\begin{align*}
+\sum_{i=1}^n\frac{a_i^2}{A} + \sum_{i=1}^n\frac{b_i^2}{B} &\ge 2\sum_{i=1}^n\frac{a_ib_i}{\sqrt{AB}}\\
+2 &\ge 2 \sum_{i=1}^n\frac{a_ib_i}{\sqrt{AB}}\\
+AB &\ge \left(\sum_{i=1}^na_ib_i\right)^2
+\end{align*}
+即证明了结论.
+
+~
+
+\noindent 另一种证法:
+
+对于任意的 $x\in\mathbb{R}$, 以及任意的 $i=1,2,\cdots,n$, 
+\[ (a_ix+b_i)^2 = a_i^2x^2+2a_ib_ix+b_i^2 \ge 0 ,\] 
+将 $n$ 个不等式加起来, 得
+\[\left( \sum_{i=1}^na_i^2 \right)x^2 + 2\left(\sum_{i=1}^na_ib_i\right)x + \left(\sum_{i=1}^nb_i^2\right) \ge 0.\]
+这个不等式要对于任意的实数 $x$ 都成立, 所以判别式要小于等于 $0$, 即
+\[ \Delta = 4\left(\sum_{i=1}^na_ib_i\right)^2 - 4\left( \sum_{i=1}^na_i^2 \right)\left( \sum_{i=1}^nb_i^2 \right) \le 0. \]
+这也就证明了柯西不等式.
+
+~
+
+\noindent 应用1: 
+
+若对于任意的 $i$, 满足 $a_i\in\mathbb{R}, x_i > 0$, 则有
+\[\left( \frac{a_1^2}{x_1} + \frac{a_2^2}{x_2} + \cdots + \frac{a_n^2}{x_n} \right) \ge \frac{(a_1+a_2+\cdots+a_n)^2}{x_1+x_2+\cdots+x_n} .\]
+
+由柯西不等式, 
+\[\left( \sum_i(\sqrt{x_i})^2 \right)\left(\sum_i(\frac{a_i}{\sqrt{x_i}})^2\right) \ge \left(\sum_i \sqrt{x_i}\cdot\frac{a_i}{\sqrt{x_i}}\right)^2 ,\]
+即
+\[ \left(\sum_i x_i\right) \left(\sum_i\frac{a_i^2}{x_i}\right) \ge \left(\sum_ia_i\right)^2.\]
+
+~
+
+\noindent 应用2:
+
+若 $a_i\in\mathbb{R}$, 则有
+\[ (a_1+a_2+\cdots+a_n)^2 \le n(a_1^2+a_2^2+\cdots+a_n^2) .\]
+
+只要令 $b_i=1$, 直接用柯西不等式可得结论. 进一步, 若 $a_i \ge 0$, 可以定义这一组数的``熵''为:
+\[Q = \frac{(a_1+a_2+\cdots+a_n)^2}{a_1^2+a_2^2+\cdots+a_n^2} .\]
+则 $Q\in[1,n]$, 当所有的 $a_i$ 都相等时, $Q$ 最大, 而当 $a_i$ 只有一个值非零, 其余都是零, 则 $Q$ 最小. $Q$ 可以用来衡量固定的总和在一组数之间的分布情况. 例如概率, 如果$n$个互斥的事件等可能发生, 则熵最大, 而如果只有一个事件百分之百发生, 则熵最小.
+
+\newpage
+%------------------------------------------------------------------------------%
+
 已知 $a,b,c,d$ 为正实数, 求证
 \[22a + 25b + 30c + 30d \ge 360 \sqrt[3]{\frac{abcd}{2a+5b+10c+30d}},\]
 并确定等式成立的条件.
