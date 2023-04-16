@@ -161,25 +161,21 @@ p(t) &= C_{2m+1}^1t^m - C_{2m+1}^3t^{m-1} \pm\cdots + (-1)^m C_{2m+1}^{2m+1} \\
 
 先证一个引理: 如下图所示, 直角三角形 $ ABC $, 感光元件在直角 $ C $ 上, 直角边长为 $ a $ 和 $ b $, 斜边上的高长 $ h $. 
 
-\begin{wrapfigure}{o}{5cm}
+\begin{wrapfigure}{o}{5.2cm}
 \centering
 \definecolor{rvwvcq}{rgb}{0.08235294117647059,0.396078431372549,0.7529411764705882}
 \definecolor{wrwrwr}{rgb}{0.3803921568627451,0.3803921568627451,0.3803921568627451}
 \begin{tikzpicture}[]
-
 \coordinate[label=left:$C$] (C) at (0,0);
 \coordinate[label=above:$B$] (B) at (0,3);
 \coordinate[label=right:$A$] (A) at (4,0);
 \coordinate[label=above right:$D$] (D) at (1.44,1.92);
-
 \tkzMarkRightAngle[line width=1pt](A,C,B);
 \tkzMarkRightAngle[line width=1pt](C,D,A);
-
 \draw [line width=1pt] (C) to [edge label=$a$] (B);
 \draw [line width=1pt] (A) to [edge label=$b$] (C);
 \draw [line width=1pt] (A)-- (B);
 \draw [line width=1pt,dash pattern=on 3pt off 3pt] (C) to [edge label=$h$] (D);
-
 \foreach \p in {A,B,C,D}
 	\fill[fill=rvwvcq,thick] (\p) circle (1.25pt);
 \end{tikzpicture}
@@ -305,7 +301,7 @@ a^2b^2 &= c^2h^2\\
 
 \newpage
 %------------------------------------------------------------------------------%
-\section{Leibniz级数与$\pi$}
+\section{Leibniz级数与\texorpdfstring{$\pi$}{pi}}
 
 证明: $$ 1 - \frac{1}{3} + \frac{1}{5} - \frac{1}{7} + \cdots = \frac{\pi}{4} $$.
 
@@ -378,7 +374,7 @@ $$ D^{(1)}_n = (n+1)^{m} - n^m = 1 + C_m^1n + C_m^2n^2+\cdots+C_m^{m-1}n^{m-1} .
 
 说明当 $ k = m $ 的时候也成立. 所以命题得证.
 
-\subsection{$4k+1$型素数的平方和分解}
+\subsection{\texorpdfstring{$4k+1$}{4k+1}型素数的平方和分解}
 
 \noindent 定理: 如果素数 $ p $ 模 $ 4 $ 余数是 $ 1 $, 则存在唯一一对整数 $a,b$, 使得 $ p = a^2 + b^2 $.
 
@@ -481,7 +477,7 @@ $$ z = x\cdot y = (a+bi)(c+di) = (ac-bd)+i(ad+bc), $$ 则 $$ \bar{z} = (ac-bd)-i
 
 若 $ p = 4k + 1$, 存在唯一的分解方式.
 
-\subsection{半径为 $ \sqrt{n} $ 的圆周上的整点个数}
+\subsection{半径为 \texorpdfstring{$ \sqrt{n} $}{sqrtn} 的圆周上的整点个数}
 
 考虑圆心在原点, 半径为 $ R $ 的圆, 当 $ R $ 足够大时, 圆内的整点数量和圆的面积趋近于相等. 因此如果知道圆内整点数量和半径 $ R $ 的关系, 就能求出 $ \pi $ 的一种逼近方式.
 
@@ -509,7 +505,7 @@ $$ z = x\cdot y = (a+bi)(c+di) = (ac-bd)+i(ad+bc), $$ 则 $$ \bar{z} = (ac-bd)-i
 
 于是对于 $ n = \prod{p_i^{m_i}} $, 分解出来的高斯整数个数是 $ G(n) = \prod{F(p_i,m_i)} $. 可以把这个乘积展开, 并利用 $ \chi $ 函数的可乘性. 则 $ G(n) = \sum_{d|n}{\chi(d)} $, 也就是对 $ n $ 的所有因数求 $ \chi $ 函数值, 再加起来. 
 
-\subsection{半径 $ R $ 的圆内的整点个数}
+\subsection{半径 \texorpdfstring{$ R $}{R} 的圆内的整点个数}
 令 $ n $ 从 $ 1 $ 取到 $ R^2 $, 对上面的结论分别求 $ G(n) $, 并求和, 就得到半径 $ R $ 的圆内的整点个数. 现在观察不同的 $ \chi $ 函数出现了多少次.
 \begin{align*}
 G(1) &= \chi(1) \\
@@ -925,7 +921,7 @@ Q &= \frac{1}{1-\frac{1}{4}}\cdot\frac{1}{1-\frac{1}{9}}\cdot\frac{1}{1-\frac{1}
 			&= 2\left( 1+\frac{1}{2}(-\frac{1}{4}) + \frac{1}{2!}\frac{1}{2}(-\frac{1}{2})(-\frac{1}{4})^2 + \cdots \right)
 \end{align*}
 
-\subsection{牛顿的速算 $\pi$ 的算法}
+\subsection{牛顿的速算 \texorpdfstring{$\pi$}{pi} 的算法}
 单位圆的方程为 $ x^2 + y^2 = 1 $, 考虑用积分求第一象限的1/4圆 $ y = \sqrt{1-x^2} $ 的面积:
 \begin{align*}
 \frac{\pi}{4} &= \int_0^1{(1-x^2)^\frac{1}{2} dx} \\
@@ -1008,7 +1004,7 @@ Q &= \frac{1}{1-\frac{1}{4}}\cdot\frac{1}{1-\frac{1}{9}}\cdot\frac{1}{1-\frac{1}
 
 \begin{minipage}[t]{0.35\linewidth}
 \centering
-\begin{tikzpicture}[]
+\begin{tikzpicture}[scale=0.9]
   \coordinate (O) at (0,0);
 \coordinate (1) at (0,1.41);
 \coordinate (2) at (0,2);
@@ -1054,7 +1050,7 @@ Q &= \frac{1}{1-\frac{1}{4}}\cdot\frac{1}{1-\frac{1}{9}}\cdot\frac{1}{1-\frac{1}
 \end{minipage}
 \begin{minipage}[t]{0.59\linewidth}
 \centering
-\begin{tikzpicture}[]
+\begin{tikzpicture}[scale=0.9]
 \draw[] (-4,2) -- (4,2) -- (4,-2);
 \draw[] (-4,-2) to [edge label = $2 R$] (-4, 2);
 \draw[] (4,-2) to [edge label = $2\pi R$] (-4, -2);
