@@ -246,6 +246,40 @@ B &= \frac{1}{n+1} + \frac{1}{(n+1)(n+2)} + \cdots \\
 \[\sum_{k=2}^n Y_k = \sum_{m=2}^n X_m ,\]
 这就证明了题述的等式.
 
+
+\newpage
+%------------------------------------------------------------------------------%
+\noindent Ramanujan's 723rd problem
+
+证明: 对于任意正整数 $n$, 有
+\[ \left[\sqrt{n} + \sqrt{n+1}\right] = \left[\sqrt{4n+1}\right] .\]
+这里 $[\cdot]$ 是向下取整函数.
+
+~
+
+解: 首先易证明 $\sqrt{n} + \sqrt{n+1} > \sqrt{4n+1}$. 事实上,
+\begin{align*}
+\sqrt{n} + \sqrt{n+1} > \sqrt{4n+1} \iff & n + (n+1) + 2\sqrt{n(n+1)} > 4n + 1 \\
+\iff & 2\sqrt{n(n+1)} > 2n \\
+\iff & \sqrt{n+1} > \sqrt{n} .
+\end{align*}
+
+再者, $\sqrt{n} + \sqrt{n+1}$ 不可能是整数, 因为
+\begin{align*}
+\sqrt{n} + \sqrt{n+1} \in \mathbb{Z} &\Rightarrow (\sqrt{n} + \sqrt{n+1})^2 \in \mathbb{Z} \\
+&\Rightarrow n + (n+1) + 2\sqrt{n(n+1)} \in \mathbb{Z} \\
+&\Rightarrow \sqrt{4n^2+4n} \in \mathbb{Z}
+\end{align*}
+但 $2n < \sqrt{4n^2+4n} < 2n+1$, 这就说明了 $\sqrt{n} + \sqrt{n+1}$ 不可能是整数.
+
+然后用反证法, 如果 $\left[\sqrt{n} + \sqrt{n+1}\right] \neq \left[\sqrt{4n+1}\right]$, 则必然是 $\left[\sqrt{n} + \sqrt{n+1}\right] > \left[\sqrt{4n+1}\right]$, 设 $k = \left[\sqrt{n} + \sqrt{n+1}\right]$, 则
+\[\sqrt{n} + \sqrt{n+1} > k > \sqrt{4n+1} .\]
+平方后再移项得:
+\[\sqrt{4n(n+1)} > k^2 - (2n+1) > 2n .\]
+但 $\sqrt{4n(n+1)} < 2n+1$, 这将得出 $2n < k^2 - (2n+1) < 2n+1$, 但 $k^2 - (2n+1)$ 是整数, 这是不可能的. 所以必然有 
+\[ \left[\sqrt{n} + \sqrt{n+1}\right] = \left[\sqrt{4n+1}\right] .\]
+
+
 \newpage
 %------------------------------------------------------------------------------%
 
