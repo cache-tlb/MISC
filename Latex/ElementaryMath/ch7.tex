@@ -400,15 +400,19 @@ $\mathrm{d}A$ 在 $\vec{PO}$ 方向上的投影面积为 $\mathrm{d}A\cdot\cos\a
 \]
 先计算 
 \[f(s,t) = \Omega_{[0,s]\times[0,t]} = \int_0^t{\int_0^s\frac{1}{(x^2+y^2+1)^{\frac{3}{2}}}\ \mathrm{d}x}\ \mathrm{d}y\ , \]
-令 $u = \dfrac{x}{\sqrt{x^2+y^2+1}}$, 则积分上下限分别是 $u(x=0) = 0$, $u(x=s)=\dfrac{s}{\sqrt{s^2+y^2+1}}$, 
+令 $u = \dfrac{x}{\sqrt{x^2+y^2+1}}$, 则
 \[\dfrac{\mathrm{d}u}{\mathrm{d}x} = \dfrac{y^2+1}{(x^2+y^2+1)^\frac{3}{2}} ,\] 
+积分上下限分别是 
+$$u(x=0) = 0, \qquad u(x=s)=\dfrac{s}{\sqrt{s^2+y^2+1}}, $$
 积分换元得:
 \begin{align*}
 f(s,t) &= \int_0^t{\int_0^{\frac{s}{\sqrt{s^2+y^2+1}}}{\frac{1}{1+y^2}}\ \mathrm{d}u}\ \mathrm{d}y\\
 &=\int_0^t{\frac{s}{(y^2+1)\sqrt{y^2+s^2+1}}}\ \mathrm{d}y . 
 \end{align*}
 
-继续换元, 令 $v = \dfrac{y}{\sqrt{y^2+s^2+1}} $, 积分上下限为 $v(y=0) = 0$, $v(y=t) = \dfrac{t}{\sqrt{s^2+t^2+1}}$, 并且
+继续换元, 令 $v = \dfrac{y}{\sqrt{y^2+s^2+1}} $, 积分上下限为 
+$$v(y=0) = 0, \qquad v(y=t) = \dfrac{t}{\sqrt{s^2+t^2+1}}, $$
+并且
 \[\frac{\mathrm{d}v}{\mathrm{d}y} = \frac{s^2+1}{(y^2+s^2+1)^\frac{3}{2}} ,\qquad y^2 + 1 = \frac{v^2s^2+1}{1-v^2} ,\qquad 1-v^2=\frac{s^2+1}{y^2+s^2+1} .\]
 于是
 \begin{align*}
@@ -569,52 +573,52 @@ I_i = \frac{\arccos(\langle p_i,p_j \rangle)}{||p_i\times p_j||}\langle p_i\time
 %------------------------------------------------------------------------------%
 \noindent Tube light 的 irradiance 计算
 
-Tube light 是一条只有长度, 没有粗细的线段, 线段上每一处都相当于一个点光源, 满足平方反比衰减, 线段两端点相对于着色点的坐标分别为 $\bold{L}_0, \bold{L}_1$, 着色点的法线为 $\bold{n}$, 则着色点的 irradiance 为:
-\[I = \int_{\bold{L}_0}^{\bold{L}_1}\frac{\langle \bold{n},\bold{L} \rangle}{|\bold{L}|^3}\ \mathrm{d}\bold{L} = \frac{\dfrac{\langle\bold{n},\bold{L}_1\rangle}{|\bold{L}_1|}+\dfrac{\langle\bold{n},\bold{L}_0\rangle}{|\bold{L}_0|} }{\langle\bold{L}_0,\bold{L}_1\rangle + |\bold{L}_0|\cdot|\bold{L}_1|}\]
+Tube light 是一条只有长度, 没有粗细的线段, 线段上每一处都相当于一个点光源, 满足平方反比衰减, 线段两端点相对于着色点的坐标分别为 $\mathbf{L}_0, \mathbf{L}_1$, 着色点的法线为 $\mathbf{n}$, 则着色点的 irradiance 为:
+\[I = \int_{\mathbf{L}_0}^{\mathbf{L}_1}\frac{\langle \mathbf{n},\mathbf{L} \rangle}{|\mathbf{L}|^3}\ \mathrm{d}\mathbf{L} = \frac{\dfrac{\langle\mathbf{n},\mathbf{L}_1\rangle}{|\mathbf{L}_1|}+\dfrac{\langle\mathbf{n},\mathbf{L}_0\rangle}{|\mathbf{L}_0|} }{\langle\mathbf{L}_0,\mathbf{L}_1\rangle + |\mathbf{L}_0|\cdot|\mathbf{L}_1|}\]
 
-设$\bold{v} = \bold{L}_1 - \bold{L}_0$, 则线段的参数方程为 
+设$\mathbf{v} = \mathbf{L}_1 - \mathbf{L}_0$, 则线段的参数方程为 
 \[
-\bold{L}(t) = \bold{L}_0 + t\bold{v}.
+\mathbf{L}(t) = \mathbf{L}_0 + t\mathbf{v}.
 \]
 于是积分式变换为:
 \begin{align*}
-I &= \int_{\bold{L}_0}^{\bold{L}_1}\frac{\langle \bold{n},\bold{L} \rangle}{|\bold{L}|^3}\ \mathrm{d}\bold{L} \\
-&= \int_0^1\frac{\langle \bold{n}, \bold{L}_0+t\bold{v} \rangle}{(\langle \bold{L}_0+t\bold{v},\bold{L}_0+t\bold{v}\rangle)^{\frac{3}{2}}}\ \mathrm{d}t \\
-&= \int_0^1\frac{\langle\bold{n},\bold{L}_0\rangle + \langle\bold{n},\bold{v}\rangle\cdot t}{\sqrt{\langle\bold{v},\bold{v}\rangle\cdot t^2 + 2\langle\bold{L}_0,\bold{v}\rangle\cdot t + \langle\bold{L}_0,\bold{L}_0\rangle}^3}\ \mathrm{d}t \\
+I &= \int_{\mathbf{L}_0}^{\mathbf{L}_1}\frac{\langle \mathbf{n},\mathbf{L} \rangle}{|\mathbf{L}|^3}\ \mathrm{d}\mathbf{L} \\
+&= \int_0^1\frac{\langle \mathbf{n}, \mathbf{L}_0+t\mathbf{v} \rangle}{(\langle \mathbf{L}_0+t\mathbf{v},\mathbf{L}_0+t\mathbf{v}\rangle)^{\frac{3}{2}}}\ \mathrm{d}t \\
+&= \int_0^1\frac{\langle\mathbf{n},\mathbf{L}_0\rangle + \langle\mathbf{n},\mathbf{v}\rangle\cdot t}{\sqrt{\langle\mathbf{v},\mathbf{v}\rangle\cdot t^2 + 2\langle\mathbf{L}_0,\mathbf{v}\rangle\cdot t + \langle\mathbf{L}_0,\mathbf{L}_0\rangle}^3}\ \mathrm{d}t \\
 &= \int_0^1\frac{Dt+E}{\sqrt{At^2+Bt+C}^3}\ \mathrm{d}t \\
 &= \frac{2(D(Bt+2C) - E(2At+B))}{(B^2-4AC)\sqrt{At^2+Bt+C}}\bigg|_0^1\\
 &= \frac{2}{B^2-4AC}\left(\frac{D(B + 2C) - E(2A+B)}{\sqrt{A+B+C}} - \frac{2CD - BE}{\sqrt{C}}\right)
 \end{align*}
 其中
 \[
-A = \langle\bold{v},\bold{v}\rangle, \quad
-B = 2\langle\bold{L}_0,\bold{v}\rangle, \quad
-C = \langle\bold{L}_0,\bold{L}_0\rangle, \quad
-D = \langle\bold{n},\bold{v}\rangle,\quad 
-E = \langle\bold{n},\bold{L}_0\rangle
+A = \langle\mathbf{v},\mathbf{v}\rangle, \quad
+B = 2\langle\mathbf{L}_0,\mathbf{v}\rangle, \quad
+C = \langle\mathbf{L}_0,\mathbf{L}_0\rangle, \quad
+D = \langle\mathbf{n},\mathbf{v}\rangle,\quad 
+E = \langle\mathbf{n},\mathbf{L}_0\rangle
 \]
 这里省去了求原函数的推导, 可以验证原函数确实是正确的. 进一步计算:
 \begin{align*}
-\sqrt{A+B+C} &= \sqrt{\langle\bold{L}_0+\bold{v},\bold{L}_0+\bold{v}\rangle} = |\bold{L}_1| \\
-\sqrt{C} &= |\bold{L}_0|\\
-B^2-4AC &= 4(\langle\bold{L}_0,\bold{L}_1\rangle-\langle\bold{L}_0,\bold{L}_0\rangle)^2 - 4\langle\bold{L}_1-\bold{L}_0,\bold{L}_1-\bold{L}_0\rangle\cdot\langle\bold{L}_0,\bold{L}_0\rangle \\
-&= 4(\langle\bold{L}_0,\bold{L}_1\rangle^2 - \langle\bold{L}_0,\bold{L}_0\rangle\cdot\langle\bold{L}_1,\bold{L}_1\rangle)\\
-2CD-BE &= 2\langle\bold{L}_0,\bold{L}_0 \rangle\cdot\langle\bold{n},\bold{L}_1-\bold{L}_0\rangle - 2\langle\bold{n},\bold{L}_0 \rangle\cdot\langle\bold{L}_0,\bold{L}_1-\bold{L}_0\rangle\\
-&= 2(\langle\bold{L}_0,\bold{L}_0 \rangle\cdot\langle\bold{n},\bold{L}_1\rangle - \langle\bold{L}_0,\bold{L}_1 \rangle\cdot\langle\bold{n},\bold{L}_0\rangle) \\
-B+2C &= 2\langle\bold{L}_0,\bold{v}\rangle + 2\langle\bold{L}_0,\bold{L}_0\rangle = 2\langle\bold{L}_0,\bold{L}_1\rangle \\
-2A+B &= 2\langle\bold{v},\bold{v}\rangle + 2\langle\bold{L}_0,\bold{v}\rangle = 2\langle\bold{L}_1,\bold{L}_1 - \bold{L}_0\rangle
+\sqrt{A+B+C} &= \sqrt{\langle\mathbf{L}_0+\mathbf{v},\mathbf{L}_0+\mathbf{v}\rangle} = |\mathbf{L}_1| \\
+\sqrt{C} &= |\mathbf{L}_0|\\
+B^2-4AC &= 4(\langle\mathbf{L}_0,\mathbf{L}_1\rangle-\langle\mathbf{L}_0,\mathbf{L}_0\rangle)^2 - 4\langle\mathbf{L}_1-\mathbf{L}_0,\mathbf{L}_1-\mathbf{L}_0\rangle\cdot\langle\mathbf{L}_0,\mathbf{L}_0\rangle \\
+&= 4(\langle\mathbf{L}_0,\mathbf{L}_1\rangle^2 - \langle\mathbf{L}_0,\mathbf{L}_0\rangle\cdot\langle\mathbf{L}_1,\mathbf{L}_1\rangle)\\
+2CD-BE &= 2\langle\mathbf{L}_0,\mathbf{L}_0 \rangle\cdot\langle\mathbf{n},\mathbf{L}_1-\mathbf{L}_0\rangle - 2\langle\mathbf{n},\mathbf{L}_0 \rangle\cdot\langle\mathbf{L}_0,\mathbf{L}_1-\mathbf{L}_0\rangle\\
+&= 2(\langle\mathbf{L}_0,\mathbf{L}_0 \rangle\cdot\langle\mathbf{n},\mathbf{L}_1\rangle - \langle\mathbf{L}_0,\mathbf{L}_1 \rangle\cdot\langle\mathbf{n},\mathbf{L}_0\rangle) \\
+B+2C &= 2\langle\mathbf{L}_0,\mathbf{v}\rangle + 2\langle\mathbf{L}_0,\mathbf{L}_0\rangle = 2\langle\mathbf{L}_0,\mathbf{L}_1\rangle \\
+2A+B &= 2\langle\mathbf{v},\mathbf{v}\rangle + 2\langle\mathbf{L}_0,\mathbf{v}\rangle = 2\langle\mathbf{L}_1,\mathbf{L}_1 - \mathbf{L}_0\rangle
 \end{align*}
 \begin{align*}
-D(B+2C)-E(2A+B) &= 2\langle\bold{n},\bold{L}_1-\bold{L}_0\rangle \cdot \langle\bold{L}_0,\bold{L}_1\rangle - 2\langle\bold{n},\bold{L}_0\rangle\cdot\langle\bold{L}_1,\bold{L}_1 - \bold{L}_0\rangle\\
-&= 2(\langle\bold{n},\bold{L}_1\rangle\cdot\langle\bold{L}_0,\bold{L}_1\rangle - \langle\bold{n},\bold{L}_0\rangle\cdot\langle\bold{L}_1,\bold{L}_1\rangle)
+D(B+2C)-E(2A+B) &= 2\langle\mathbf{n},\mathbf{L}_1-\mathbf{L}_0\rangle \cdot \langle\mathbf{L}_0,\mathbf{L}_1\rangle - 2\langle\mathbf{n},\mathbf{L}_0\rangle\cdot\langle\mathbf{L}_1,\mathbf{L}_1 - \mathbf{L}_0\rangle\\
+&= 2(\langle\mathbf{n},\mathbf{L}_1\rangle\cdot\langle\mathbf{L}_0,\mathbf{L}_1\rangle - \langle\mathbf{n},\mathbf{L}_0\rangle\cdot\langle\mathbf{L}_1,\mathbf{L}_1\rangle)
 \end{align*}
 代入前面的式子:
 \begin{align*}
 I &= \frac{2}{B^2-4AC}\left(\frac{D(B + 2C) - E(2A+B)}{\sqrt{A+B+C}} - \frac{2CD - BE}{\sqrt{C}}\right)\\
-&= \frac{ \dfrac{\langle\bold{n},\bold{L}_1\rangle\cdot\langle\bold{L}_0,\bold{L}_1\rangle - \langle\bold{n},\bold{L}_0\rangle\cdot|\bold{L}_1|^2}{|\bold{L}_1|} - \dfrac{|\bold{L}_0|^2\cdot\langle\bold{n},\bold{L}_1\rangle - \langle\bold{L}_0,\bold{L}_1\rangle\cdot\langle\bold{n},\bold{L}_0\rangle}{|\bold{L}_0|} }{\langle\bold{L}_0,\bold{L}_1\rangle^2-|\bold{L}_0|^2\cdot|\bold{L}_1|^2}\\
-&= \frac{  \dfrac{\langle\bold{n},\bold{L}_1\rangle\cdot\langle\bold{L}_0,\bold{L}_1\rangle}{|\bold{L}_1|} + \dfrac{\langle\bold{n},\bold{L}_0\rangle\cdot\langle\bold{L}_0,\bold{L}_1\rangle}{\bold{L}_0} - \langle\bold{n},\bold{L}_0\rangle\cdot|\bold{L}_1| - \langle\bold{n},\bold{L}_1\rangle\cdot|\bold{L}_0|}{(\langle\bold{L}_0,\bold{L}_1\rangle+|\bold{L}_0|\cdot|\bold{L}_1|)(\langle\bold{L}_0,\bold{L}_1\rangle-|\bold{L}_0|\cdot|\bold{L}_1|)} \\
-&= \frac{\langle\bold{L}_0,\bold{L}_1\rangle\left(\dfrac{\langle\bold{n},\bold{L}_1\rangle}{|\bold{L}_1|}+\dfrac{\langle\bold{n},\bold{L}_0\rangle}{|\bold{L}_0|}\right) - |\bold{L}_0|\cdot|\bold{L}_1|\left(\dfrac{\langle\bold{n},\bold{L}_0\rangle}{|\bold{L}_0|}+\dfrac{\langle\bold{n},\bold{L}_1\rangle}{|\bold{L}_1|}\right)}{(\langle\bold{L}_0,\bold{L}_1\rangle+|\bold{L}_0|\cdot|\bold{L}_1|)(\langle\bold{L}_0,\bold{L}_1\rangle-|\bold{L}_0|\cdot|\bold{L}_1|)} \\
-&= \frac{\dfrac{\langle\bold{n},\bold{L}_1\rangle}{|\bold{L}_1|}+\dfrac{\langle\bold{n},\bold{L}_0\rangle}{|\bold{L}_0|} }{\langle\bold{L}_0,\bold{L}_1\rangle + |\bold{L}_0|\cdot|\bold{L}_1|}
+&= \frac{ \dfrac{\langle\mathbf{n},\mathbf{L}_1\rangle\cdot\langle\mathbf{L}_0,\mathbf{L}_1\rangle - \langle\mathbf{n},\mathbf{L}_0\rangle\cdot|\mathbf{L}_1|^2}{|\mathbf{L}_1|} - \dfrac{|\mathbf{L}_0|^2\cdot\langle\mathbf{n},\mathbf{L}_1\rangle - \langle\mathbf{L}_0,\mathbf{L}_1\rangle\cdot\langle\mathbf{n},\mathbf{L}_0\rangle}{|\mathbf{L}_0|} }{\langle\mathbf{L}_0,\mathbf{L}_1\rangle^2-|\mathbf{L}_0|^2\cdot|\mathbf{L}_1|^2}\\
+&= \frac{  \dfrac{\langle\mathbf{n},\mathbf{L}_1\rangle\cdot\langle\mathbf{L}_0,\mathbf{L}_1\rangle}{|\mathbf{L}_1|} + \dfrac{\langle\mathbf{n},\mathbf{L}_0\rangle\cdot\langle\mathbf{L}_0,\mathbf{L}_1\rangle}{\mathbf{L}_0} - \langle\mathbf{n},\mathbf{L}_0\rangle\cdot|\mathbf{L}_1| - \langle\mathbf{n},\mathbf{L}_1\rangle\cdot|\mathbf{L}_0|}{(\langle\mathbf{L}_0,\mathbf{L}_1\rangle+|\mathbf{L}_0|\cdot|\mathbf{L}_1|)(\langle\mathbf{L}_0,\mathbf{L}_1\rangle-|\mathbf{L}_0|\cdot|\mathbf{L}_1|)} \\
+&= \frac{\langle\mathbf{L}_0,\mathbf{L}_1\rangle\left(\dfrac{\langle\mathbf{n},\mathbf{L}_1\rangle}{|\mathbf{L}_1|}+\dfrac{\langle\mathbf{n},\mathbf{L}_0\rangle}{|\mathbf{L}_0|}\right) - |\mathbf{L}_0|\cdot|\mathbf{L}_1|\left(\dfrac{\langle\mathbf{n},\mathbf{L}_0\rangle}{|\mathbf{L}_0|}+\dfrac{\langle\mathbf{n},\mathbf{L}_1\rangle}{|\mathbf{L}_1|}\right)}{(\langle\mathbf{L}_0,\mathbf{L}_1\rangle+|\mathbf{L}_0|\cdot|\mathbf{L}_1|)(\langle\mathbf{L}_0,\mathbf{L}_1\rangle-|\mathbf{L}_0|\cdot|\mathbf{L}_1|)} \\
+&= \frac{\dfrac{\langle\mathbf{n},\mathbf{L}_1\rangle}{|\mathbf{L}_1|}+\dfrac{\langle\mathbf{n},\mathbf{L}_0\rangle}{|\mathbf{L}_0|} }{\langle\mathbf{L}_0,\mathbf{L}_1\rangle + |\mathbf{L}_0|\cdot|\mathbf{L}_1|}
 \end{align*}
 
 

@@ -589,14 +589,18 @@ G(x) = \frac{1}{r-s}\left(\frac{1}{1-rx} - \frac{1}{1-sx}\right) .
 G(x) = \frac{1}{r-s}((r-s)x + (r^2-s^2)x^2 + (r^3-s^3)x^3 + \cdots) \\
 \]
 
-对比 $x^n$ 的系数, 可以得到通项公式为 $F_n = \dfrac{r^n - s^n}{r-s}$, 由求根公式解得 $r=\dfrac{\sqrt{5}+1}{2}, s=\dfrac{\sqrt{5}-1}{2}$, 所以通项公式为:
+对比 $x^n$ 的系数, 可以得到通项公式为 
+$$F_n = \dfrac{r^n - s^n}{r-s},$$ 
+由求根公式解得 
+$$r=\dfrac{\sqrt{5}+1}{2}, \qquad s=\dfrac{\sqrt{5}-1}{2},$$ 
+所以通项公式为:
 \[F_n = \frac{1}{\sqrt{5}}\left( \left(\frac{\sqrt{5}+1}{2} \right)^n - \left(\frac{\sqrt{5}-1}{2} \right)^n \right)\]
 
 ~
 
 ~
 
-问题: 求 $x_1 + x_2 + \cdots + x_k = n, (n\ge k)$ 的非负整数解个数.
+\noindent 问题: 求 $x_1 + x_2 + \cdots + x_k = n, (n\ge k)$ 的非负整数解个数.
 
 解: 设 $f(x) = (1+x+x^2+x^3+\cdots)^k$, 则 $f(x)$ 的展开式的每一项的形式为 $x^{m_1}x^{m_2}\cdots x^{m_k}$, 所以一组满足 $m_1+m_2+\cdots+m_k=n$ 的组合对应一组解, 所有非负整数解的个数就是 $x^n$ 项的系数.
 
@@ -610,7 +614,7 @@ a_n = \frac{f^{(n)}(0)}{n!} = \frac{k\cdot(k+1)\cdots(k+n-1)}{n!} = C^{k-1}_{n+k
 
 ~
 
-问题: 连续掷 10 次骰子, 求所得点数之和为 30 的概率.
+\noindent 问题: 连续掷 10 次骰子, 求所得点数之和为 30 的概率.
 
 解: 设 $a_n$ 为所得点数之和为 $n$ 的可能的情况数, 则数列 $\{a_n\}$ 的生成函数为
 \[
@@ -650,10 +654,18 @@ f(x) = x^{10}\cdot\sum_{n=0}^{10}{(-1)^nC_{10}^nx^{6n}} \cdot \sum_{n=0}^{\infty
 \begin{align*}
 E(2n) &= D(2n-1) + F(2n-1) = C(2n-2) + G(2n-2) \\
 &= B(2n-3) + H(2n-3) + D(2n-3) + F(2n-3) \\
-&= A(2n-4) + C(2n-4) + A(2n-4) + G(2n-4) + C(2n-4) + G(2n-4)\\
+B(2n-3) &= A(2n-4) + C(2n-4) \\
+H(2n-3) &= A(2n-4) + G(2n-4) \\
+D(2n-3) &= C(2n-4) \\
+F(2n-3) &=  G(2n-4) \\
+A(2n-4) &= B(2n-5)+H(2n-5)\\
+E(2n-2) &= C(2n-4) + G(2n-4)\\
+&= B(2n-5) + H(2n-5) + D(2n-5) + F(2n-5)\\
+E(2n-4) &= D(2n-5) + F(2n-5)\\
+E(2n) &= B(2n-3) + H(2n-3) + D(2n-3) + F(2n-3) \\
 &= 2(A(2n-4) + C(2n-4) + G(2n-4)) \\
-&= 2(B(2n-5)+H(2n-5) + B(2n-5) + H(2n-5) + D(2n-5) + F(2n-5) ) \\
-&= 4(B(2n-5) + H(2n-5) + D(2n-5) + F(2n-5) ) - 2(D(2n-5) + F(2n-5))\\
+&= 2(B(2n-5)+H(2n-5) + E(2n-2))\\
+&= 2(E(2n-2) + E(2n-2) - E(2n-4))\\
 &= 4E(2n-2) - 2E(2n-4)
 \end{align*}
 即 $a_{2n} = 4a_{2n-2}-2a_{2n-4}$.  设 $b_n = a_{2n}$, 则 
@@ -728,7 +740,7 @@ $ y=1 $ 时，$ x=2 $；$ y=2 $ 时，$ x=1 $；这两个解都满足。
 %------------------------------------------------------------------------------%
 \noindent IMO 2013 第一题
 
-证明: 对于任意一对正整数 $k$ 和 $n$, 都存在 $k$ 个(不必不相同的)正整数 $m_1, m_2, \cdots, m_k$, 使得
+证明: 对于任意一对正整数 $k$ 和 $n$, 都存在 $k$ 个正整数 $m_1, m_2, \cdots, m_k$ (这些数不必是不相同的), 使得
 \[1 + \frac{2^k-1}{n} = \left(1+\frac{1}{m_1}\right)\left(1+\frac{1}{m_2}\right)\cdots\left(1+\frac{1}{m_k}\right)\]
 
 ~
@@ -1275,14 +1287,14 @@ B & C & A
 \newpage
 %------------------------------------------------------------------------------%
 
-第 5 届 IMO 试题
+\noindent 第 5 届 IMO 试题
 
 求证：
 \[
  \cos(\frac{\pi}{7})-\cos(\frac{2\pi}{7})+\cos(\frac{3\pi}{7})=\frac{1}{2}.
 \]
-\begin{wrapfigure}{o}{5cm}
-\begin{tikzpicture}[cap=round,scale=2.0]
+\begin{wrapfigure}{o}{5.2cm}
+\begin{tikzpicture}[cap=round,scale=1.8]
 \tikzstyle{axes}=[line width=1pt]
 \coordinate[label=right:$A$] (A) at (0.8982934325496409,0.43939607308006734);
 \coordinate[label=right:$G$] (G) at (0.8982934325496409,-0.43939607308006734);
@@ -1462,7 +1474,7 @@ a_t\sin\alpha &= \cos(t\alpha)\sin\alpha - \cos\alpha\sin(t\alpha)\\
 ~
 
 用反证法, 假设 $n$ 维空间存在一组向量 $x_1,x_2,\cdots,x_n,x_{n+1},x_{n+2}$, 它们两两之间的内积都是负数. 因为 $n$ 维空间最多存在 $n$ 个线性无关的向量, 因此存在一组不全为 0 的系数 $b_i$ 使得
-\[b_1x_1 + b_2x_2 + \cdots + b_nx_n + b_{n+1}x_{n+1}=\bold{0}.\]
+\[b_1x_1 + b_2x_2 + \cdots + b_nx_n + b_{n+1}x_{n+1}=\mathbf{0}.\]
 不失一般性, 可设 $b_{n+1}\neq 0$, 并设 $a_i = \dfrac{-b_i}{b_{n+1}}$, 则
 \[ x_{n+1} = a_1x_1+a_2x_2 + \cdots + a_nx_n .\]
 系数 $a_i$ 可以分成大于等于0和小于0的两部分, 不妨设 $a_i < 0, i=1,2,\cdots,k$, 而 $a_j \ge 0, j=k+1,k+2,\cdots,n$. 并设
@@ -1476,7 +1488,7 @@ z &= a_{k+1}x_{k+1}+a_{k+2}x_{k+2}+\cdots+a_nx_n = \sum_{j=k+1}^na_jx_j,
 \[(x_{n+1},z) = (w,z) + (z,z) \ge 0 .\]
 但另一方面, 
 \[(x_{n+1},z) = \sum_{j=k+1}^na_j(x_{n+1},x_j) ,\]
-由 $(x_{n+1},x_j) < 0, a_j \ge 0$, 有 $(x_{n+1},z) \le 0$. 两部分结合起来得 $(x_{n+1},z) = 0$. 这说明 $(z,w) = 0, (z,z) = 0$, 所以只能是 $z = \bold{0}$. 这样 $x_{n+1}$ 实际上只包含了 $w$ 的那部分, 即 
+由 $(x_{n+1},x_j) < 0, a_j \ge 0$, 有 $(x_{n+1},z) \le 0$. 两部分结合起来得 $(x_{n+1},z) = 0$. 这说明 $(z,w) = 0, (z,z) = 0$, 所以只能是 $z = \mathbf{0}$. 这样 $x_{n+1}$ 实际上只包含了 $w$ 的那部分, 即 
 $$x_{n+1} = w = \sum_{i=1}^ka_ix_i, \ \ a_i < 0, \ \ i=1,2,\cdots k$$.
 
 再看 $x_{n+1}$ 与 $x_{n+2}$ 的内积, 
@@ -1486,11 +1498,11 @@ $$x_{n+1} = w = \sum_{i=1}^ka_ix_i, \ \ a_i < 0, \ \ i=1,2,\cdots k$$.
 ~
 
 类似的思路: 前面一样, 仍然假设 $n$ 维空间存在一组向量 $x_1,x_2,\cdots,x_n,x_{n+1},x_{n+2}$, 它们两两之间的内积都是负数. 因为 $n$ 维空间最多存在 $n$ 个线性无关的向量, 因此存在一组不全为 0 的系数 $b_i$ 使得
-\[b_1x_1 + b_2x_2 + \cdots + b_nx_n + b_{n+1}x_{n+1}=\bold{0}.\]
+\[b_1x_1 + b_2x_2 + \cdots + b_nx_n + b_{n+1}x_{n+1}=\mathbf{0}.\]
 然后这里两边都与 $x_{n+2}$ 取内积, 得
 \[b_1(x_1,x_{n+2}) + b_2(x_2,x_{n+2}) + \cdots + b_n(x_n,x_{n+2}) + b_{n+1}(x_{n+1},x_{n+2}) = 0 .\]
 这里 $(x_i,x_{n+2}) < 0$, 而 $n+1$ 个系数 $b_1,b_2,\cdots,b_{n+1}$ 又不全为0, 所以至少有一个大于0, 并且至少有一个小于0. 将它们分成大于0, 小于0, 等于 0 的三类, 设 $b_1,\cdots,b_k > 0$; $b_{k+1},b_{k+2},\cdots b_m < 0$; $b_{m+1},b_{m+2},\cdots,b_{n+1} = 0$. 则
-\[b_1x_1 + b_2x_2 + \cdots b_kx_k + b_{k+1}x_{k+1} + \cdots + b_mx_m = \bold{0} .\]
+\[b_1x_1 + b_2x_2 + \cdots b_kx_k + b_{k+1}x_{k+1} + \cdots + b_mx_m = \mathbf{0} .\]
 或者写成
 \[b_1x_1 + b_2x_2 + \cdots b_kx_k = -(b_{k+1}x_{k+1} + \cdots + b_mx_m ) = V.\]
 对 $V$ 的两种形式求内积:
@@ -1674,8 +1686,8 @@ C_{m-n}^n + C_{m-n-1}^{n-1} &= 2C_{m-n}^n - C_{m-n-1}^n \\
 \definecolor{rvwvcq}{rgb}{0.08235294117647059,0.396078431372549,0.7529411764705882}
 \centering
 \begin{minipage}[t]{0.49\linewidth}
+\centering
 \begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=1cm,y=1cm,scale=0.8]
-\clip(-4.5,-0.4) rectangle (4.95,5.15);
 \draw [line width=1pt] (-4,0)-- (-2,4);
 \draw [line width=1pt] (-2,4)-- (4,0);
 \draw [line width=1pt] (4,0)-- (-4,0);
@@ -1711,8 +1723,8 @@ C_{m-n}^n + C_{m-n-1}^{n-1} &= 2C_{m-n}^n - C_{m-n-1}^n \\
 \end{tikzpicture}
 \end{minipage}
 \begin{minipage}[t]{0.49\linewidth}
+\centering
 \begin{tikzpicture}[line cap=round,line join=round,>=triangle 45,x=1cm,y=1cm,scale=0.8]
-\clip(-4.5,-0.4) rectangle (4.95,5.15);
 \draw [line width=1pt] (-4,0)-- (-2,4);
 \draw [line width=1pt] (-2,4)-- (4,0);
 \draw [line width=1pt] (4,0)-- (-4,0);
