@@ -2667,6 +2667,85 @@ S_{\triangle BOC} &= S_{\triangle COP} + S_{\triangle BOP} - S_{\triangle BCP} \
 %------------------------------------------------------------------------------%
 \newpage
 
+已知正五边形内有一点, 连接它与各顶点, 分割面积如下. 求未知部分的面积大小.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[label=below left:$A$] (A) at (0,0);
+\coordinate[label=below right:$B$] (B) at (3,0);
+\coordinate[label=right:$C$] (C) at (3.927, 2.853);
+\coordinate[label=above:$D$] (D) at (1.5, 4.617);
+\coordinate[label=left:$E$] (E) at (-0.927, 2.853);
+\coordinate[label=above:$F$] (F) at (0.67165, 1.93209);
+\fill [fill=red!20] (A)--(E)--(F)--cycle;
+\fill [fill=green!20] (A)--(F)--(B)--cycle;
+\fill [fill=blue!20] (C)--(B)--(F)--cycle;
+\draw [line width=1pt] (A) -- (B) -- (C) -- (D) -- (E) -- cycle;
+\draw [line width=1pt] (A) -- (F)-- (E);
+\draw [line width=1pt] (B) -- (F) -- (C);
+\foreach \p in {A,B,C,D,E,F}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\node at (0, 1.67) {$1$};
+\node at (1.2, 0.65) {$2$};
+\node at (2.4, 1.6) {$3$};
+\node at (1.35, 3.15) {?};
+\end{tikzpicture}
+\end{figure*}
+
+\begin{wrapfigure}{o}{6.5cm}
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[label=below left:$A$] (A) at (0,0);
+\coordinate[label=below right:$B$] (B) at (3,0);
+\coordinate[label=right:$C$] (C) at (3.927, 2.853);
+\coordinate[label=above:$D$] (D) at (1.5, 4.617);
+\coordinate[label=left:$E$] (E) at (-0.927, 2.853);
+\coordinate[label=above:$F$] (F) at (0.67165, 1.93209);
+\coordinate[label=below:$P$] (P) at (1.5, -4.617);
+\fill [fill=red!20] (A)--(E)--(F)--cycle;
+\fill [fill=green!20] (A)--(F)--(B)--cycle;
+\fill [fill=blue!20] (C)--(B)--(F)--cycle;
+\draw [line width=1pt] (A) -- (B) -- (C) -- (D) -- (E) -- cycle;
+\draw [line width=1pt] (A) -- (F)-- (E);
+\draw [line width=1pt] (B) -- (F) -- (C);
+\draw [line width=1pt] (A) -- (P) -- (B);
+\draw [dashed,line width=1pt] (P) -- (F);
+\foreach \p in {A,B,C,D,E,F,P}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\node at (0, 1.67) {$1$};
+\node at (1.2, 0.65) {$2$};
+\node at (2.4, 1.6) {$3$};
+\node at (1.35, 3.15) {?};
+\end{tikzpicture}
+\end{wrapfigure}
+
+解: 延长 $EA$, $CB$, 交于 $P$. 连接 $FP$.
+
+先设法求出 $\triangle ABP$ 的面积. 因为 $\triangle ABP$ 与正五边形的总面积的比值关系是固定的, 所以只要求出 $\triangle ABP$ 的面积, 就可以求出正五边形的面积, 进而求出四边形 $CDEF$ 的面积.
+
+注意到 $\triangle AEF$ 与 $\triangle APF$ 高相等, 它们的面积之比就是 $AE$ 与 $AP$ 的长度之比. 而在正五边形中, 
+$$\cos 72\degree = \frac{AB}{2AP} = \frac{\sqrt{5}-1}{4}. $$
+所以 $$S_{\triangle AFP} = S_{\triangle AFE}\cdot\dfrac{AP}{AE} = \dfrac{1}{2\cos 72\degree}. $$
+同理, 
+$$S_{\triangle BFP} = S_{\triangle BFC}\cdot\dfrac{BP}{BC} = \dfrac{3}{2\cos 72\degree} .$$
+于是
+\begin{align*}
+S_{\triangle ABP} &= S_{\triangle AFP} + S_{\triangle BFP} - S_{\triangle AFB} \\
+&= \dfrac{2}{\cos 72\degree} - 2 = 2\sqrt{5}.
+\end{align*}
+
+然后建立 $S_{\triangle ABP}$ 与 $AB$ 长度的关系. 事实上有
+\[S_{\triangle ABP} = \frac{1}{2}AB\cdot AP\cdot\sin 72\degree = \frac{AB^2\tan 72\degree}{4} .\]
+而正五边形面积与 $AB$ 的关系为
+\[S_{ABCDE} = 5\cdot\frac{1}{2}\cdot AB\cdot\frac{AB}{2\tan 54\degree} = \frac{5 AB^2\tan 54\degree}{4} .\]
+所以 
+\[S_{ABCDE} = \frac{5\tan 54\degree}{\tan 72\degree}\cdot(\frac{2}{\cos 72\degree}-2) = 10.\]
+从而 
+\[S_{CDEF} = 10 - 1 - 2 - 3 = 4. \]
+
+%------------------------------------------------------------------------------%
+\newpage
+
 \noindent 来自微博
 
 平行四边形 $ABCD$ 中, 已知 $\triangle ABE, \triangle ECF, \triangle ADF$ 的面积分别是 $4,7,9$, 求$\triangle AEF$ 的面积.
