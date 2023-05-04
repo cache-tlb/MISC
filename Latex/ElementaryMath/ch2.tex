@@ -1287,6 +1287,45 @@ B & C & A
 分别求行列式, 有 $\mathrm{det}(D) = a^3 + b^3 + c^3 - 3abc, \mathrm{det}(E) = x^3+y^3+z^3-3xyz$, 所求表达式就是 
 \[ \mathrm{det}(D)\cdot\mathrm{det}(E) = \mathrm{det}(DE) = A^3+B^3+C^3-3ABC = 27 . \]
 
+\newpage
+%------------------------------------------------------------------------------%
+\noindent 阿里巴巴数学竞赛
+
+求证方程
+\[x^3+3y^3+9z^3-9xyz=1 \]
+有无穷组整数解.
+
+~
+
+解: 设 $a = \sqrt[3]{3}$, $M = \begin{bmatrix}
+0 & a & 0 \\
+0 & 0 & a \\
+a & 0 & 0
+\end{bmatrix}$, 则 $M^2 = \begin{bmatrix}
+0 & 0 & a^2 \\
+a^2 & 0 & 0 \\
+0 & a^2 & 0
+\end{bmatrix}$, $M^3=3I$.
+
+于是 $|xI + yM + zM^2| = \begin{vmatrix}
+x & ay & a^2z \\
+a^2z & x & ay \\
+ay & a^2z & x
+\end{vmatrix} = x^3+3y^3+9z^3-9xyz $.
+
+容易验证 $(x_0,y_0,z_0) = (4,3,2)$ 是原方程的一组整数解, 若 $(x,y,z)$ 也是原方程的一组解, 则必然满足
+\begin{align*}
+1 &= |4I + 3M + 2M^2|\cdot |xI+yM+zM^2|\\
+&= |(4I + 3M + 2M^2)(xI + yM + zM^2)|\\
+&= |(4x+6y+9z)I + (3x+4y+6z)M + (2x+3y+4z)M^2|
+\end{align*}
+这意味着 $(4x+6y+9z, 3x+4y+6z, 2x+3y+4z)$ 也是原方程的一组解. 从一组正整数解 $(x_0, y_0, z_0)$ 出发, 可以依次构造出
+\begin{align*}
+x_{n+1} &= 4x_n+6y_n+9z_n > x_n,\\
+y_{n+1} &= 3x_n+4y_n+6z_n > y_n, \\ 
+z_{n+1} &= 2x_n+3y_n+4z_n > z_n.
+\end{align*}
+所以这些解都不会重复, 因而有无穷组解.
 
 \newpage
 %------------------------------------------------------------------------------%
