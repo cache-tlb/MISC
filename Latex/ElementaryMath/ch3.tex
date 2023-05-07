@@ -2203,6 +2203,69 @@ $\angle BO'C = 2\angle BAC = 120\degree + 2\alpha$, $\angle CBO' = \angle BCO' =
 $\angle CDO' = \angle BDC - \angle BDO' = (90\degree + \alpha) - (90\degree - \alpha) = 2\alpha = \angle CAO'$. 这样可得 $ACDO'$ 四点共圆. 所以$\angle DAO' = \angle DCO' = \alpha$, $\angle CAD = \angle CAO' + \angle DAO' = 3\alpha$.
 
 
+%------------------------------------------------------------------------------%
+\newpage
+下图半圆内, $\angle AGC = \angle EGH$, $\angle EHG = \angle DHB$, $\angle CAG = 70\degree$, $\angle DBH = 65\degree$, 求 $\angle GEH$.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.2]
+\coordinate[label=below:$O$] (O) at (0,0);
+\coordinate[label=left:$A$] (A) at (-3,0);
+\coordinate[label=right:$B$] (B) at (3,0);
+\coordinate[label=above left:$C$] (C) at (-2.298, 1.928);
+\coordinate[label=above right:$D$] (D) at (1.928, 2.298);
+\coordinate[label=above:$E$] (E) at (0.951, 2.845);
+%\coordinate[label=below:$F$] (F) at (0.951, -2.845);
+\coordinate[label=below:$G$] (G) at (-0.985, 0);
+\coordinate[label=below:$H$] (H) at (1.492, 0);
+\draw [line width=1pt] (A) -- (B) arc(0:180:3);
+\draw [line width=1pt] (A) -- (C) -- (G) -- (E) -- (H) -- (D) -- (B);
+\foreach \p in {A,B,C,D,E,G,H,O}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\draw pic[red,draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=C--G--A};
+\draw pic[red,draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=H--G--E};
+\draw pic[blue,draw,line width=1pt, angle eccentricity=2.0, angle radius=0.2cm] {angle=E--H--G};
+\draw pic[blue,draw,line width=1pt, angle eccentricity=2.0, angle radius=0.2cm] {angle=B--H--D};
+\draw pic[blue,draw,line width=1pt, angle eccentricity=2.0, angle radius=0.3cm] {angle=E--H--G};
+\draw pic[blue,draw,line width=1pt, angle eccentricity=2.0, angle radius=0.3cm] {angle=B--H--D};
+\draw pic["?",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.3cm] {angle=G--E--H};
+\draw pic["$70\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.3cm] {angle=G--A--C};
+\draw pic["$65\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.3cm] {angle=D--B--H};
+\end{tikzpicture}
+\end{figure*}
+
+解: 延长 $CG$, $DH$, 交于 $F$. 在 $\triangle EGH$ 与 $\triangle FGH$ 中, 有 $\angle FGH = \angle AGC = \angle EGH$, $\angle FHG = \angle DHB = \angle EHG$, 公共边 $GH$, 所以 $\triangle EGH \cong \triangle FGH$, 于是 $OE = OF$, 说明 $F$ 也在圆上.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.2]
+\coordinate[label=below:$O$] (O) at (0,0);
+\coordinate[label=left:$A$] (A) at (-3,0);
+\coordinate[label=right:$B$] (B) at (3,0);
+\coordinate[label=above left:$C$] (C) at (-2.298, 1.928);
+\coordinate[label=above right:$D$] (D) at (1.928, 2.298);
+\coordinate[label=above:$E$] (E) at (0.951, 2.845);
+\coordinate[label=below:$F$] (F) at (0.951, -2.845);
+\coordinate[label=below:$G$] (G) at (-0.985, 0);
+\coordinate[label=below:$H$] (H) at (1.492, 0);
+\draw [line width=1pt] (A) -- (B) arc(0:180:3);
+\draw [line width=1pt] (A) -- (C) -- (G) -- (E) -- (H) -- (D) -- (B);
+\draw [gray,dashed,line width=1pt] (G)--(F)--(H);
+\draw [gray,dashed,line width=1pt] (C)--(O)--(D);
+\foreach \p in {A,B,C,D,E,F,G,H,O}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\draw pic[red,draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=C--G--A};
+\draw pic[red,draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=H--G--E};
+\draw pic[blue,draw,line width=1pt, angle eccentricity=2.0, angle radius=0.2cm] {angle=E--H--G};
+\draw pic[blue,draw,line width=1pt, angle eccentricity=2.0, angle radius=0.2cm] {angle=B--H--D};
+\draw pic[blue,draw,line width=1pt, angle eccentricity=2.0, angle radius=0.3cm] {angle=E--H--G};
+\draw pic[blue,draw,line width=1pt, angle eccentricity=2.0, angle radius=0.3cm] {angle=B--H--D};
+\draw pic["?",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.3cm] {angle=G--E--H};
+\draw pic["$70\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.3cm] {angle=G--A--C};
+\draw pic["$65\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.3cm] {angle=D--B--H};
+\end{tikzpicture}
+\end{figure*}
+
+而根据等腰三角形 $AOC$ 和 $BOD$ 易知 $\angle AOC = 40\degree$, $\angle BOD = 50\degree$, 于是 $\angle COD = 90\degree$, 进而 $\angle GEH = \angle GFH = \dfrac{1}{2}\angle COD = 45\degree$.
 
 %------------------------------------------------------------------------------%
 \newpage
