@@ -463,11 +463,11 @@ f(s,t) &= \int_0^\frac{t}{\sqrt{s^2+t^2+1}} {\frac{s(1-v^2)}{v^2s^2+1}\cdot\frac
 \InterSec{s1}{s2}{I3};
 \InterSec{s1}{s3}{I2};
 \InterSec{s3}{s2}{I1};
-\draw[fill=red,opacity=0.2] (I1) to [bend right=8.5]  (I2) to [bend left=7,,line width=1pt] (I3) to [bend left=6](I1);
+\draw[fill=red,opacity=0.2] (I1) to [bend right=8.5]  (I2) to [bend left=7] (I3) to [bend left=6](I1);
 \InterSec{d1}{d2}{J3};
 \InterSec{d1}{d3}{J2};
 \InterSec{d3}{d2}{J1};
-\draw[fill=blue,opacity=0.2] (J1) to [bend right=8.5]  (J2) to [bend left=7] (J3) to [bend left=6] (J1);
+\draw[fill=blue,opacity=0.2] (J1) to [bend right=8.5] (J2) to [bend left=7] (J3) to [bend left=6] (J1);
 \foreach \p in {I1,I2,I3,J1,J2,J3}
 	\fill[fill=black,draw=black,thick] (\p) circle (0.5pt);
 \draw[] (I1) node[below,xshift=-0.1cm,yshift=-0.3cm] {$\alpha$};
