@@ -434,6 +434,72 @@ f(s,t) &= \int_0^\frac{t}{\sqrt{s^2+t^2+1}} {\frac{s(1-v^2)}{v^2s^2+1}\cdot\frac
 & = \dfrac{2\pi}{3} .
 \end{align*} 
 
+
+\newpage
+%------------------------------------------------------------------------------%
+\noindent 球面三角形的立体角计算
+
+单位球面上有三个大圆, 构成一个球面三角形, 顶点为 $A,B,C$, 其内角分别是 $\alpha, \beta, \gamma$. 求球面三角形的立体角(即面积).
+\newcommand{\InterSec}[3]{%
+  \path[name intersections={of=#1 and #2, by=#3, sort by=#1,total=\t}]
+  \pgfextra{\xdef\InterNb{\t}}; }
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=2]
+\pgfmathsetmacro\R{2} 
+\draw [line width=1pt] (0,0,0) circle (\R);
+\foreach \angle[count=\n from 1] in {-5,225,290} {
+	\begin{scope}[rotate=\angle]
+		\path[draw,line width=0.5pt,dashed,name path global=d\n] (2,0) arc [start angle=0,
+			end angle=180,
+           x radius=2cm,
+           y radius=1cm] ;
+		\path[draw,line width=0.5pt,name path global=s\n] (-2,0) arc [start angle=180,
+           end angle=360,
+           x radius=2cm,
+           y radius=1cm] ;
+	\end{scope}
+}
+\InterSec{s1}{s2}{I3};
+\InterSec{s1}{s3}{I2};
+\InterSec{s3}{s2}{I1};
+\draw[fill=red,opacity=0.2] (I1) to [bend right=8.5]  (I2) to [bend left=7,,line width=1pt] (I3) to [bend left=6](I1);
+\InterSec{d1}{d2}{J3};
+\InterSec{d1}{d3}{J2};
+\InterSec{d3}{d2}{J1};
+\draw[fill=blue,opacity=0.2] (J1) to [bend right=8.5]  (J2) to [bend left=7] (J3) to [bend left=6] (J1);
+\foreach \p in {I1,I2,I3,J1,J2,J3}
+	\fill[fill=black,draw=black,thick] (\p) circle (0.5pt);
+\draw[] (I1) node[below,xshift=-0.1cm,yshift=-0.3cm] {$\alpha$};
+\draw[] (I2) node[above left,xshift=-0.3cm,yshift=0.15cm] {$\beta$};
+\draw[] (I3) node[right,yshift=0.1cm] {$\gamma$};
+\draw[] (J1) node[above,xshift=0.1cm,yshift=0.3cm] {$\alpha$};
+\draw[] (J2) node[below right,xshift=0.3cm,yshift=-0.15cm] {$\beta$};
+\draw[] (J3) node[left,yshift=-0.1cm] {$\gamma$};
+\draw[] (I1) node[right] {$A$};
+\draw[] (I2) node[above right] {$B$};
+\draw[] (I3) node[below left] {$C$};
+\draw[] (J1) node[left] {$A'$};
+\draw[] (J2) node[below left] {$B'$};
+\draw[] (J3) node[above right] {$C'$};
+\end{tikzpicture}
+\end{figure*}
+
+解: 设三个大圆相交的另外三个交点对应分别为 $A',B',C'$. 
+考虑半圆弧 $ABA'$ 和半圆弧 $ACA'$ 所围成的区域, 由于球面关于直径 $AA'$ 是旋转对称的, 故 $ABA'$ 和 $ACA'$ 围成的区域面积占球表面积的比例就是 $\alpha$ 占 $2\pi$ 的比值. 即
+\[S_{\triangle ABC} + S_{\triangle A'BC} = \frac{\alpha}{2\pi}\cdot 4\pi = 2\alpha .\]
+类似的, 还有
+\[S_{\triangle ABC} + S_{\triangle AB'C} = 2\beta .\]
+以及
+\[S_{\triangle ABC} + S_{\triangle ABC'} = 2\gamma .\]
+
+另一方面, 四个三角形 $\triangle ABC$, $\triangle ABC'$, $\triangle A'BC$, $\triangle A'BC'$ 正好拼成半个球面, 而 $\triangle A'BC'$ 和 $\triangle AB'C$ 是对称的, 所以
+\[S_{\triangle ABC} + S_{\triangle ABC'} + S_{\triangle A'BC} + S_{\triangle AB'C} = 2\pi .\]
+
+通过上述 4 个方程, 可以解出
+\[S_{\triangle ABC} = \alpha + \beta + \gamma - \pi .\]
+
+
 \newpage
 %------------------------------------------------------------------------------%
 \noindent Shoelace Theorem
