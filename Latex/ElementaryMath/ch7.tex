@@ -448,26 +448,20 @@ f(s,t) &= \int_0^\frac{t}{\sqrt{s^2+t^2+1}} {\frac{s(1-v^2)}{v^2s^2+1}\cdot\frac
 \begin{tikzpicture}[scale=2]
 \pgfmathsetmacro\R{2} 
 \draw [line width=1pt] (0,0,0) circle (\R);
-\foreach \angle[count=\n from 1] in {-5,225,290} {
+\foreach \angle/\linecolor[count=\n from 1] in {-5/red,225/green,290/blue} {
 	\begin{scope}[rotate=\angle]
-		\path[draw,line width=0.5pt,dashed,name path global=d\n] (2,0) arc [start angle=0,
-			end angle=180,
-           x radius=2cm,
-           y radius=1cm] ;
-		\path[draw,line width=0.5pt,name path global=s\n] (-2,0) arc [start angle=180,
-           end angle=360,
-           x radius=2cm,
-           y radius=1cm] ;
+		\path[draw,\linecolor,line width=0.5pt,dashed,name path global=d\n] (2,0) arc [start angle=0, end angle=180, x radius=2cm, y radius=1cm] ;
+		\path[draw,\linecolor,line width=0.5pt,name path global=s\n] (-2,0) arc [start angle=180, end angle=360, x radius=2cm, y radius=1cm] ;
 	\end{scope}
 }
 \InterSec{s1}{s2}{I3};
 \InterSec{s1}{s3}{I2};
 \InterSec{s3}{s2}{I1};
-\draw[fill=red,opacity=0.2] (I1) to [bend right=8.5]  (I2) to [bend left=7] (I3) to [bend left=6](I1);
+\draw[fill=gray,opacity=0.2] (I1) to [bend right=8.5]  (I2) to [bend left=7.5] (I3) to [bend left=7.5](I1);
 \InterSec{d1}{d2}{J3};
 \InterSec{d1}{d3}{J2};
 \InterSec{d3}{d2}{J1};
-\draw[fill=blue,opacity=0.2] (J1) to [bend right=8.5] (J2) to [bend left=7] (J3) to [bend left=6] (J1);
+\draw[fill=orange,opacity=0.2] (J1) to [bend right=8.5] (J2) to [bend left=7.5] (J3) to [bend left=7.5] (J1);
 \foreach \p in {I1,I2,I3,J1,J2,J3}
 	\fill[fill=black,draw=black,thick] (\p) circle (0.5pt);
 \draw[] (I1) node[below,xshift=-0.1cm,yshift=-0.3cm] {$\alpha$};
@@ -498,6 +492,130 @@ f(s,t) &= \int_0^\frac{t}{\sqrt{s^2+t^2+1}} {\frac{s(1-v^2)}{v^2s^2+1}\cdot\frac
 
 通过上述 4 个方程, 可以解出
 \[S_{\triangle ABC} = \alpha + \beta + \gamma - \pi .\]
+
+~
+
+\noindent 另有直接用球面上二重积分的解法, 来自 \href{https://web.math.sinica.edu.tw/math_media/d351/35105.pdf}{数学传播 第35卷1期}.
+
+将球心置于原点, 用 $\theta,\phi$ 对球面进行参数化, 其中 $\theta$ 代表经度, $\phi$ 代表球面上的点和球心的连线与 $z^+$ 轴的夹角, $\theta\in[0,2\pi)$, $\phi\in[0,\pi]$, 则 $\theta, \phi$ 与 $x,y,z$ 的关系为
+\[x = \sin\phi \cos\theta, \qquad y = \sin\phi \sin\theta, \qquad z = \cos\phi .\]
+
+注意到任意三角形都可以分成两个直角三角形的和或差, 因此下面只考虑球面上直角三角形的面积. 不失一般性, 可以将 $A$ 点置于北极点, $C$ 点置于 $xz$ 平面, $B$ 点的 $y$ 坐标大于 $0$, $\angle ACB = 90\degree$, 如下图所示.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=2]
+\pgfmathsetmacro\R{2} 
+\coordinate (O) at (0,0,0);
+
+\begin{scope}[rotate=0]
+	\fill [fill=gray!20] (0,0) ellipse (2cm and 0.7cm);
+	\path[draw,line width=1pt,dashed,name path global=d4] (2,0) arc [start angle=0, end angle=180, x radius=2cm, y radius=0.7cm];
+	\path[draw,line width=1pt,name path global=s4] (-2,0) arc [start angle=180, end angle=360, x radius=2cm, y radius=0.7cm];
+\end{scope}
+\begin{scope}[rotate=270]
+%	\path[draw,green,line width=0.5pt,dashed,name path global=d1] (2,0) arc [start angle=0, end angle=180, x radius=2cm, y radius=1cm];
+	\path[draw,green,line width=1pt,name path global=s1] (-2,0) arc [start angle=180,end angle=360,x radius=2cm,y radius=1cm];
+\end{scope}
+
+\begin{scope}[rotate=90]
+%	\path[draw,red,line width=0.5pt,dashed,name path global=d2] (2,0) arc [start angle=0, end angle=180, x radius=2cm, y radius=0.5cm];
+	\path[draw,red,line width=1pt,name path global=s2] (-2,0) arc [start angle=180, end angle=360, x radius=2cm, y radius=0.5cm];
+\end{scope}
+
+\begin{scope}[rotate=160]
+	%\path[draw,blue,line width=0.5pt,dashed,name path global=d3] (2,0) arc [start angle=0, end angle=180, x radius=2cm, y radius=1.2cm];
+	\path[draw,blue,line width=1pt,name path global=s3] (-2,0) arc [start angle=180, end angle=360, x radius=2cm, y radius=1.2cm];
+\end{scope}
+
+\draw [line width=1pt] (O) circle (\R);
+\InterSec{s1}{s2}{I3};
+\InterSec{s1}{s3}{I2};
+\InterSec{s3}{s2}{I1};
+%\InterSec{d1}{d2}{J3};
+%\InterSec{d1}{d3}{J2};
+%\InterSec{d3}{d2}{J1};
+
+\InterSec{s4}{s1}{X};
+\InterSec{s4}{s2}{XY};
+%\draw[line width=1pt,blue] (I1) to [bend right=8.5]  (I2);
+\draw[shorten >= -3cm,-Stealth,line width=1pt] (O)--(X) ;
+\draw[shorten >= -1.5cm,-Stealth,line width=1pt] (O)--(I3) ;
+\draw[dashed,line width=1pt] (O) -- (I2);
+\draw[dashed,line width=1pt] (XY) -- (O) -- (I1);
+\coordinate (Y) at (1.409, -0.497);
+\draw[shorten >= -3cm,-Stealth,line width=1pt] (O)--(Y) ;
+
+\foreach \p in {I1,I2,I3,O,X,XY,Y}
+	\fill[fill=black,draw=black,thick] (\p) circle (0.5pt);
+
+\node at (0.15,0.1) {$O$};
+\node at (-2.1,-1.55) {$x$};
+\node at (2.7,-1.12) {$y$};
+\node at (0.15,2.65) {$z$};
+\node[anchor=south west] at (I1) {$B$};
+\node[anchor=south west] at (I3) {$A$};
+\node[anchor=south east] at (I2) {$C$};
+%\draw pic["$\phi$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.5cm] {angle=I3--O--I2};
+%\draw pic["$\theta$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.3cm] {angle=X--O--XY};
+\draw[line width=1pt] (242:0.4 and 0.14) arc (242:283:0.4 and 0.14);
+\node[anchor=north] at (260:0.6 and 0.21) {$\theta_1 = A$};
+\draw[line width=1pt] (90:0.2 and 0.4) arc (90:140:0.2 and 0.4);
+\node[anchor=south] at (130:0.24 and 0.48) {$\phi_0$};
+\draw[line width=1pt] (90:0.3 and 0.6) arc (90:56:0.3 and 0.6);
+\node[anchor=south] at (65:0.35 and 0.7) {$\phi_1$};
+\end{tikzpicture}
+\end{figure*}
+
+$A,B,C$ 三点的坐标分别为:
+\begin{align*}
+A &= (0, 0, 1) \\
+B &= (\sin\phi_1\cos A, \sin\phi_1\sin A, \cos\phi_1) \\
+C &= (\sin\phi_0, 0, \cos\phi_0)
+\end{align*}
+
+因为 $\angle C = 90\degree$, 则弧线 $\overset{\frown}{CB}$ 所在的大圆平面与 $xz$ 平面垂直, 设这个大圆的法向量为 $\vec{v} = (l,m,n)$, 则由$\vec{v}$ 垂直于 $y$ 轴可得 $m=0$, 并由 $\vec{v}\perp\vec{OB}$ 和 $\vec{v}\perp\vec{OC}$, 可进一步得
+\begin{align*}
+& l\cdot\sin\phi_1\cos A + n\cdot \cos\phi_1 = 0\\
+& l\cdot\sin\phi_0 + n\cdot\cos\phi_0 = 0 
+\end{align*}
+这样就相当于 $l,m,n$ 都已知了. 将 $l,n$ 都乘以 $-1$, 得到的向量依然是平面 $OBC$ 的法向量, 因此在后面的计算中, 总是取 $l \le 0$ 的情况.
+
+对于 $\triangle ABC$ 区域求积分, 外层对 $\theta$ 积分, 范围是 $\theta\in[0,A]$. 内层对 $\phi$ 积分, 积分下限是 $\phi = 0$, 上限到弧线 $\overset{\frown}{CB}$ 为止. 设弧线 $\overset{\frown}{CB}$ 上的点的球面参数坐标为 $P = (\theta,\phi)$, 需要满足 $\vec{v}\perp\vec{OB}$, 即
+\[l\cdot\sin\phi\cos\theta + n\cdot\cos\phi = 0 ,\]
+当外层的 $\theta$ 给定时, 内存的积分上限可由上式得出:
+\[\cot \phi_\theta = -\frac{l}{n}\cos\theta ,\]
+或
+\[\cos \phi_\theta = \frac{-l\cos\theta}{\sqrt{n^2+l^2\cos^2\theta}} .\]
+
+于是 $\triangle ABC$ 的面积为 
+\begin{align*}
+S &= \int_{\theta=0}^A\int_{\phi=0}^{\phi_\theta} \sin\phi\ \mathrm{d}\phi\ \mathrm{d}\theta \\
+&= \int_{\theta=0}^A \int_{\cos\phi=1}^{\cos\phi_\theta} -1\ \mathrm{d}\cos\phi\ \mathrm{d}\theta \\
+&= \int_{\theta=0}^A \left( 1 + \frac{l\cos\theta}{\sqrt{n^2+l^2\cos^2\theta}} \right)\mathrm{d}\theta \\
+&= A + \int_{\theta=0}^A \frac{l\cos\theta}{\sqrt{n^2+l^2\cos^2\theta}}\ \mathrm{d}\theta
+\end{align*}
+令 $t=\sin\theta$, 则积分下限和上限为 $t = 0$ 和 $t = \sin A$, 则
+\begin{align*}
+\int \frac{l\cos\theta}{\sqrt{n^2+l^2\cos^2\theta}}\ \mathrm{d}\theta &= \int \frac{l}{\sqrt{l^2+n^2-l^2t^2}}\ \mathrm{d}t\\
+&= \arcsin\frac{lt}{\sqrt{l^2+n^2}} \\
+&= \frac{\pi}{2} - \arccos\frac{lt}{\sqrt{l^2+n^2}}\\
+\int_{\theta=0}^A \frac{l\cos\theta}{\sqrt{n^2+l^2\cos^2\theta}}\ \mathrm{d}\theta &= \frac{\pi}{2} - \arccos\frac{lt}{\sqrt{l^2+n^2}}\ \bigg|_0^{\sin A} \\
+&= \frac{\pi}{2} - \arccos\frac{l\sin A}{\sqrt{l^2+n^2}}
+\end{align*}
+
+然后计算 $\angle B$. 因为 $B$ 是平面 $OAB$ 和平面 $OBC$ 的夹角, 也就是这两个平面法线的夹角, 而法线分别为 $(l,0,n)$ 和 $(-\sin A, \cos A, 0)$, 对他们求内积得
+\begin{align*}
+\cos B &= \frac{-l \sin A}{\sqrt{l^2+n^2}}, \\
+\cos(\pi-B) &= -\cos B = \frac{l \sin A}{\sqrt{l^2+n^2}}.
+\end{align*}
+
+注意到 $\angle C = \dfrac{\pi}{2}$, 于是
+\begin{align*}
+S &= A + \frac{\pi}{2} - \arccos\frac{l\sin A}{\sqrt{l^2+n^2}} \\
+&= A + \frac{\pi}{2} - (\pi - B) \\
+& = A + B - \frac{\pi}{2} \\
+& = A + B + C - \pi.
+\end{align*}
 
 
 \newpage
