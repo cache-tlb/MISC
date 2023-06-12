@@ -2904,6 +2904,85 @@ S_{\triangle ABP} &= S_{\triangle AFP} + S_{\triangle BFP} - S_{\triangle AFB} \
 可以解出 
 \[x = 5, \ \ y = 9, \ \ z = 7.\]
 
+
+%------------------------------------------------------------------------------%
+\newpage
+
+如下图, $\triangle ABC$ 为正三角形, 其内部的一点 $P$ 到三边的距离分别是 $a,b,c$, 求三个四边形的面积之比.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[label=below left:$A$] (A) at (0,0);
+\coordinate[label=below right:$B$] (B) at (6,0);
+\coordinate[label=above:$C$] (C) at (3, 5.196);
+\coordinate[label=above:$P$] (P) at (2.02136, 1.83836);
+\coordinate[label=left:$E$] (E) at (1.301, 2.254);
+\coordinate[label=below:$F$] (F) at (2.021, 0);
+\coordinate[label=right:$D$] (D) at (4.209, 3.102);
+\coordinate[] (G) at (1.061, 1.838);
+\coordinate[] (H) at (1.541, 2.67);
+\coordinate[] (I) at (3.48, 4.365);
+\coordinate[] (J) at (4.939, 1.838);
+\coordinate[] (K) at (3.083, 0);
+\coordinate[] (L) at (0.96, 0);
+
+\fill [fill=red!20] (A)--(E)--(P)--(F)--cycle;
+\fill [fill=green!20] (B)--(D)--(P)--(F)--cycle;
+\fill [fill=blue!20] (C)--(E)--(P)--(D)--cycle;
+\draw [line width=1pt] (A) -- (B) -- (C) -- cycle;
+\draw [line width=1pt] (P) to [edge label = $a$] (D); 
+\draw [line width=1pt] (P) to [edge label = $b$] (E);
+\draw [line width=1pt] (P) to [edge label = $c$] (F);  
+\foreach \p in {A,B,C,D,E,F,P}
+	\fill[fill=black,draw=black,thick] (\p) circle (0.8pt);
+\end{tikzpicture}
+\end{figure*}
+
+解: 如下图, 过 $P$ 点作各边的平行线, 则每块四边形区域可以拆成两个直角三角形与一个平行四边形面积之和. 
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[label=below left:$A$] (A) at (0,0);
+\coordinate[label=below right:$B$] (B) at (6,0);
+\coordinate[label=above:$C$] (C) at (3, 5.196);
+\coordinate[label=above:$P$] (P) at (2.02136, 1.83836);
+\coordinate[label=left:$E$] (E) at (1.301, 2.254);
+\coordinate[label=below:$F$] (F) at (2.021, 0);
+\coordinate[label=right:$D$] (D) at (4.209, 3.102);
+\coordinate[] (G) at (1.061, 1.838);
+\coordinate[] (H) at (1.541, 2.67);
+\coordinate[] (I) at (3.48, 4.365);
+\coordinate[] (J) at (4.939, 1.838);
+\coordinate[] (K) at (3.083, 0);
+\coordinate[] (L) at (0.96, 0);
+
+\fill [fill=red!20] (A)--(E)--(P)--(F)--cycle;
+\fill [fill=green!20] (B)--(D)--(P)--(F)--cycle;
+\fill [fill=blue!20] (C)--(E)--(P)--(D)--cycle;
+\draw [line width=1pt] (A) -- (B) -- (C) -- cycle;
+\draw [line width=1pt] (P) to [edge label = $a$] (D); 
+\draw [line width=1pt] (P) to [edge label = $b$] (E);
+\draw [line width=1pt] (P) to [edge label = $c$] (F);  
+\draw [line width=1pt,dashed] (H)--(K);
+\draw [line width=1pt,dashed] (G)--(J);
+\draw [line width=1pt,dashed] (I)--(L);
+\foreach \p in {A,B,C,D,E,F,P,G,H,I,J,K,L}
+	\fill[fill=black,draw=black,thick] (\p) circle (0.8pt);
+\end{tikzpicture}
+\end{figure*}
+
+对于顶部的四边形区域, 两个直角三角形的面积分别为:
+\begin{align*} 
+S_1 &= \frac{1}{2}\cdot\frac{a}{\sqrt{3}}\cdot a = \frac{a^2}{2\sqrt{3}} \\
+S_2 &= \frac{b^2}{2\sqrt{3}}
+\end{align*}
+平行四边形的面积为
+\[S_3 = \frac{2a}{\sqrt{3}} \cdot b .\]
+所以总面积为
+\[S = \frac{2}{\sqrt{3}}(a^2+b^2+4ab) .\]
+可以推出三个四边形的面积之比为:
+\[ a^2+b^2+4ab : b^2+c^2+4bc : c^2+a^2+4ca .\]
+
 %------------------------------------------------------------------------------%
 \newpage
 
