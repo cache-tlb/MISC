@@ -2269,6 +2269,9 @@ $\angle CDO' = \angle BDC - \angle BDO' = (90\degree + \alpha) - (90\degree - \a
 
 %------------------------------------------------------------------------------%
 \newpage
+
+\section{圆}
+
 康威圆: 任意三角形上, 在每个顶点上将两边延伸出去此顶点对应的那边的长度, 这样得到的六点共圆. 这个圆称为此三角形的康威圆.
 \begin{figure*}[htbp]
 \centering
@@ -2448,6 +2451,8 @@ MS\cdot MT &= (MC+r)\cdot(MC-r) = MC^2-r^2 \\
 %------------------------------------------------------------------------------%
 \newpage
 
+\section{长度问题}
+
 下图中，$ \triangle EAD $ 是直角三角形，$ B $、$ C $ 在线段 $ AD $ 上，$ AB=3 $，$ BC=2 $，$ CD=1 $，$ \angle EAB= \angle BEC $，求 $ DE $ 的长。
 
 \begin{figure*}[htbp]
@@ -2481,6 +2486,66 @@ MS\cdot MT &= (MC+r)\cdot(MC-r) = MC^2-r^2 \\
 \end{align*}
 
 再由 $ \angle EAB=\angle BEC $，可得 $ \triangle AEC \sim \triangle EBC $，所以 $ BC/EC=EC/AC $；从而 $ EC^2=AC*BC=10 $。所以 $ x=3 $.
+
+
+%------------------------------------------------------------------------------%
+\newpage
+
+下图中, $C,D$ 是以 $AB$ 为直径的半圆弧上的两点, 若 $AD=7$, $BC=CD=15$, 求 $AB$.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.2]
+\coordinate[label=below:$O$] (O) at (0,0);
+\coordinate[label=below left:$A$] (A) at (-3,0);
+\coordinate[label=below right:$B$] (B) at (3,0);
+\coordinate[label=above:$C$] (C) at (0.84, 2.88);
+\coordinate[label=above left:$D$] (D) at (-2.53, 1.613);
+\draw [line width=1pt] (A) -- (B);
+\draw[line width=1pt] (B) arc [start angle=0, end angle=180, radius=3cm];
+\draw [line width=1pt] (B) to [edge label = 15] (C);
+\draw [line width=1pt] (C) to [edge label = 15] (D);
+\draw [line width=1pt] (D) to [edge label = 7] (A);
+\foreach \p in {O,A,B,C,D}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+\end{figure*}
+
+~
+
+解: 连接 $OC, BD$, 交于 $E$ 点, 并连接 $OD$. 如下图.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.2]
+\coordinate[label=below:$O$] (O) at (0,0);
+\coordinate[label=below left:$A$] (A) at (-3,0);
+\coordinate[label=below right:$B$] (B) at (3,0);
+\coordinate[label=above:$C$] (C) at (0.84, 2.88);
+\coordinate[label=above left:$D$] (D) at (-2.53, 1.613);
+\coordinate[label=above left:$E$] (E) at (intersection of O--C and B--D);
+\draw [line width=1pt] (A) -- (B);
+\draw[line width=1pt] (B) arc [start angle=0, end angle=180, radius=3cm];
+\draw [line width=1pt] (B) -- (C);
+\draw [line width=1pt] (C) -- (D);
+\draw [line width=1pt] (D) -- (A);
+\draw[line width=1pt] (B) -- (D);
+\draw[line width=1pt,red] (O) to [edge label = 3.5] (E) to [edge label' = $R-3.5$] (C);
+\draw[line width=1pt] (O) -- (D);
+\tkzMarkRightAngle[line width=1pt](C,E,B);
+\foreach \p in {O,A,B,C,D,E}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+\end{figure*}
+
+首先证明 $OC \perp BD$, 这是因为由 $CD=CB$, $DO=BO$, 得 $OC$ 垂直平分 $BD$.
+
+然后因为 $\angle ADB$ 是直径所对得圆周角, 所以 $AD \perp BD$, 进而可知 $OE$ 是 $\triangle ABD$ 得中位线, 所以 $OE = \dfrac{AD}{2} = 3.5$.
+
+设圆半径为 $R$, 则
+\[ R^2-3.5^2 = BE^2= 15^2-(R-3.5)^2 ,\]
+\[2R^2 - 7R - 225  = 0.\]
+
+解得 $R=12.5$, 所以直径为 $AB=2R=25$.
+
 
 %------------------------------------------------------------------------------%
 \newpage
