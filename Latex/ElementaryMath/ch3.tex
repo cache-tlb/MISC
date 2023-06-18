@@ -2506,7 +2506,7 @@ MS\cdot MT &= (MC+r)\cdot(MC-r) = MC^2-r^2 \\
 \draw [line width=1pt] (C) to [edge label = 15] (D);
 \draw [line width=1pt] (D) to [edge label = 7] (A);
 \foreach \p in {O,A,B,C,D}
-	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+	\fill[fill=black,draw=black,thick] (\p) circle (1pt);
 \end{tikzpicture}
 \end{figure*}
 
@@ -2532,7 +2532,7 @@ MS\cdot MT &= (MC+r)\cdot(MC-r) = MC^2-r^2 \\
 \draw[line width=1pt] (O) -- (D);
 \tkzMarkRightAngle[line width=1pt](C,E,B);
 \foreach \p in {O,A,B,C,D,E}
-	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+	\fill[fill=black,draw=black,thick] (\p) circle (1pt);
 \end{tikzpicture}
 \end{figure*}
 
@@ -2546,6 +2546,53 @@ MS\cdot MT &= (MC+r)\cdot(MC-r) = MC^2-r^2 \\
 
 解得 $R=12.5$, 所以直径为 $AB=2R=25$.
 
+
+%------------------------------------------------------------------------------%
+\newpage
+
+下图直角扇形内已知 $BE=24, EF=7$, 求扇形半径.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.2]
+\coordinate[label=left:$O$] (O) at (0,0);
+\coordinate[] (A) at (-3,0);
+\coordinate[label=right:$B$] (B) at (3,0);
+\coordinate[label=left:$D$] (D) at (0, 3);
+\coordinate[label=above right:$E$] (E) at (0.84, 2.88);
+\coordinate[label=left:$F$] (F) at (intersection of O--D and A--E);
+\draw [line width=1pt] (D) -- (O) to [edge label=$?$] (B);
+\draw[line width=1pt] (B) arc [start angle=0, end angle=90, radius=3cm];
+\draw [line width=1pt] (B) to [edge label' = 24] (E) to [edge label = 7] (F);
+\tkzMarkRightAngle[line width=1pt](F,E,B);
+\tkzMarkRightAngle[line width=1pt](F,O,B);
+\foreach \p in {O,B,D,E,F}
+	\fill[fill=black,draw=black,thick] (\p) circle (1pt);
+\end{tikzpicture}
+\end{figure*}
+
+解: 将直角扇形补全为半圆, 如下图. 易知 $AEF$ 共线.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.2]
+\coordinate[label=below:$O$] (O) at (0,0);
+\coordinate[label=below left:$A$] (A) at (-3,0);
+\coordinate[label=below right:$B$] (B) at (3,0);
+\coordinate[label=above left:$D$] (D) at (0, 3);
+\coordinate[label=above right:$E$] (E) at (0.84, 2.88);
+\coordinate[label=left:$F$] (F) at (intersection of O--D and A--E);
+\draw [line width=1pt] (D) -- (O);
+\draw [line width=1pt] (A) -- (B);
+\draw[line width=1pt] (B) arc [start angle=0, end angle=180, radius=3cm];
+\draw [line width=1pt] (B) to [edge label' = 24] (E) to [edge label = 7] (F) -- (A);
+\draw [line width=1pt,dashed] (B) -- (F);
+\tkzMarkRightAngle[line width=1pt](F,E,B);
+\tkzMarkRightAngle[line width=1pt](F,O,B);
+\foreach \p in {O,A,B,D,E,F}
+	\fill[fill=black,draw=black,thick] (\p) circle (1pt);
+\end{tikzpicture}
+\end{figure*}
+
+$AF=BF = \sqrt{7^2+24^2}=25$, $AE = AF+EF = 32$, $AB = \sqrt{AE^2+BE^2}=40$, 所以半径为 20.
 
 %------------------------------------------------------------------------------%
 \newpage
