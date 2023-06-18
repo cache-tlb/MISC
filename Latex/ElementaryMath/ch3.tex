@@ -3780,6 +3780,63 @@ $PA + PB + PC = QK + QL + QM < QA + QB + QC$
 %------------------------------------------------------------------------------%
 \newpage
 
+费马点的应用: 处理形如 $x^2+xy+y^2$ 的多项式. 若三角形两边长为 $x,y$, 夹角为 $120\degree$, 则第三边长为 $\sqrt{x^2+y^2-2xy\cos 120\degree} = \sqrt{x^2+xy+y^2}$
+
+例: 实数 $x,y,z > 0$, 证明:
+\begin{align*}
+& xy\sqrt{x^2+xy+y^2} + yz\sqrt{y^2+yz+z^2} + zx\sqrt{z^2+zx+x^2} \\
+ & \ge \sqrt{(x^2+xy+y^2)(y^2+yz+z^2)(z^2+zx+x^2)}
+\end{align*}
+
+解: 设 $P$ 是 $\triangle ABC$ 的费马点, $PA=x$, $PB=y$, $PC=z$. 则
+\[ 
+AB = \sqrt{x^2+xy+y^2}, \quad
+BC = \sqrt{y^2+yz+z^2}, \quad
+CA = \sqrt{z^2+zx+x^2}
+\]
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[label=below:$P$] (P) at (0,0);
+\coordinate[label=above:$A$] (A) at (0,2);
+\coordinate[label=left:$B$] (B) at (-2.851, -1.646);
+\coordinate[label=right:$C$] (C) at (3.952, -2.282);
+\draw [line width=1pt] (A) -- (B) -- (C) -- cycle;
+\draw [line width=1pt] (P) to [edge label=$x$] (A);
+\draw [line width=1pt] (P) to [edge label=$y$] (B);
+\draw [line width=1pt] (P) to [edge label'=$z$] (C);
+\foreach \p in {A,B,C,P}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.0pt);
+\end{tikzpicture}
+\end{figure*}
+
+待证明不等式变为
+\[\frac{PA\cdot PB}{CA\cdot CB} + \frac{PB\cdot PC}{AB\cdot AC} + \frac{PC\cdot PA}{BC\cdot BA} \ge 1\]
+
+设 $A,B,C,P$ 点对应的复数分别为 $a,b,c,p$, 对于复平面任一点 $w$, 定义函数
+\[f(w) = \frac{(w-a)(w-b)}{(c-a)(c-b)} + \frac{(w-b)(w-c)}{(a-b)(a-c)} + \frac{(w-c)(w-a)}{(b-c)(b-a)}\]
+注意到各项分母都是常数, 而分子都是 $w$ 的二次函数, 所以 $f(w)$ 也是 $w$ 的二次函数. 又因为 $f(w)$ 在 $w=a, w=b, w=c$ 处函数值都是 $1$, 所以 $f(w)$ 在整个复平面的值都恒等于 $1$. 也可以直接将 $f(w)$ 展开:
+\begin{align*}
+f(w) &= -\frac{(a-b)(w-a)(w-b)+(b-c)(w-b)(w-c)+(c-a)(w-c)(w-a)}{(a-b)(b-c)(c-a)} \\
+&= -\frac{(a-b+b-c+c-a)w^2-(a^2-b^2+b^2-c^2+c^2-a^2)w+M}{(a-b)(b-c)(c-a)} \\
+&= -\frac{M}{(a-b)(b-c)(c-a)}
+\end{align*}
+这里 $M$ 是一个与 $w$ 无关的常数, 说明 $f(w)$ 是常值函数, 再代入 $w=a$ 即可知 $f(w)$ 恒等于 $1$.
+
+特别地, 取 $w=p$, 则 $f(p) = 1$, 即
+\[\frac{(p-a)(p-b)}{(c-a)(c-b)} + \frac{(p-b)(p-c)}{(a-b)(a-c)} + \frac{(p-c)(p-a)}{(b-c)(b-a)} = 1\]
+两边分别取复数的模:
+\begin{align*}
+1 &=\bigg|\frac{(p-a)(p-b)}{(c-a)(c-b)} + \frac{(p-b)(p-c)}{(a-b)(a-c)} + \frac{(p-c)(p-a)}{(b-c)(b-a)}\bigg|\\
+& \le \bigg|\frac{(p-a)(p-b)}{(c-a)(c-b)}\bigg| + \bigg|\frac{(p-b)(p-c)}{(a-b)(a-c)}\bigg| + \bigg|\frac{(p-c)(p-a)}{(b-c)(b-a)}\bigg| \\
+&= \frac{|p-a|\cdot |p-b|}{|c-a|\cdot |c-b|} + \frac{|p-b|\cdot |p-c|}{|a-b|\cdot |a-c|} + \frac{|p-c|\cdot |p-a|}{|b-c|\cdot |b-a|}\\
+&= \frac{PA\cdot PB}{CA\cdot CB} + \frac{PB\cdot PC}{AB\cdot AC} + \frac{PC\cdot PA}{BC\cdot BA}
+\end{align*}
+这就证明了原命题是成立的.
+
+%------------------------------------------------------------------------------%
+\newpage
+
 \noindent 蒙日圆定理的几何证明(来自微博)
 
 定义1. 在平面上, 到两定点距离之和等于定长的点所构成的图形叫做椭圆, 这一对定点叫做椭圆的两个焦点, 记作 $F_1$ 和 $F_2$, 这个定长叫做椭圆的长轴长, 记作 $2a$, $F_1F_2$ 的中点叫做椭圆的中心, 记作 $O$. $F_1$ 和 $F_2$ 的距离叫做椭圆的焦距, 记作 $2c$. 记 $\sqrt{a^2-c^2}=b$, 那么 $2b$ 是椭圆的短轴长.
