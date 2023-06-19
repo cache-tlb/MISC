@@ -2594,6 +2594,34 @@ MS\cdot MT &= (MC+r)\cdot(MC-r) = MC^2-r^2 \\
 
 $AF=BF = \sqrt{7^2+24^2}=25$, $AE = AF+EF = 32$, $AB = \sqrt{AE^2+BE^2}=40$, 所以半径为 20.
 
+~
+
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.2]
+\coordinate[label=left:$O$] (O) at (0,0);
+\coordinate[] (A) at (-3,0);
+\coordinate[label=right:$B$] (B) at (3,0);
+\coordinate[label=left:$D$] (D) at (0, 3);
+\coordinate[label=above right:$E$] (E) at (0.84, 2.88);
+\coordinate[label=left:$F$] (F) at (intersection of O--D and A--E);
+\draw [line width=1pt] (D) -- (F) to [edge label'=$x$] (O) to [edge label'=$R$] (B);
+\draw[line width=1pt] (B) arc [start angle=0, end angle=90, radius=3cm];
+\draw [line width=1pt] (B) to [edge label' = 24] (E) to [edge label' = 7] (F);
+\draw [line width=1pt,dashed] (E) -- (O);
+\draw [line width=1pt,dashed] (B) to [edge label=25] (F);
+\tkzMarkRightAngle[line width=1pt](F,E,B);
+\tkzMarkRightAngle[line width=1pt](F,O,B);
+\foreach \p in {O,B,D,E,F}
+	\fill[fill=black,draw=black,thick] (\p) circle (1pt);
+\end{tikzpicture}
+\end{figure*}
+或者根据 $OBEF$ 四点共圆, 由托勒密定理, 
+\[ BF\cdot OE = BE\cdot OF + EF\cdot OB \]
+$BF = 25$, 设扇形半径为 $R$, $OF=x$, 则:
+\[25 R = 24 x + 7 R ,\]
+所以 $x = \dfrac{4}{3}R$, 在直角三角形 $OBF$ 中, $OF:OB = 3:4$, 从而 $OF:OB:BF = 3:4:5$, 于是求出 $OB=\dfrac{4}{5}\cdot BF = 20$ .
+
 %------------------------------------------------------------------------------%
 \newpage
 
