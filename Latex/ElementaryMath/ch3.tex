@@ -3123,6 +3123,78 @@ S_2 &= \frac{b^2}{2\sqrt{3}}
 可以推出三个四边形的面积之比为:
 \[ a^2+b^2+4ab : b^2+c^2+4bc : c^2+a^2+4ca .\]
 
+
+%------------------------------------------------------------------------------%
+\newpage
+
+\noindent 来自微博
+
+如下图, 等腰直角三角形被一分为三, 已知其中两个三角形的面积, 第三个三角形是直角三角形, 求它的面积.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.2]
+\coordinate[label=below left:$A$] (A) at (-3,0);
+\coordinate[label=below right:$B$] (B) at (3,0);
+\coordinate[label=above:$C$] (C) at (0,3);
+\coordinate[] (D) at (-0.621, 1.501);
+%\coordinate[label=below:$E$] (E) at (-1.501, -0.621);
+\fill [fill=red!20] (A)--(C)--(D)--cycle;
+\fill [fill=blue!20] (A)--(B)--(D)--cycle;
+\fill [fill=green!20] (B)--(C)--(D)--cycle;
+\draw [line width=1pt] (A) -- (C) node [midway,sloped] {$\bracevert$};
+\draw [line width=1pt] (B) -- (C) node [midway,sloped] {$\bracevert$};
+\draw [line width=1pt] (A) -- (B);
+\draw [line width=1pt] (A) -- (D);
+\draw [line width=1pt] (B) -- (D);
+\draw [line width=1pt] (C) -- (D);
+\tkzMarkRightAngle[line width=1pt](C,D,B);
+\tkzMarkRightAngle[line width=1pt](A,C,B);
+\foreach \p in {A,B,C,D}
+	\fill[fill=black,draw=black,thick] (\p) circle (1pt);
+\node at (-1,1.6) {$25$};
+\node at (-0.5,0.5) {$84$};
+\node at (0.5,1.5) {$?$};
+\node[anchor=north] at (D) {$D$};
+\end{tikzpicture}
+\end{figure*}
+
+解: 过点 $A$ 作 $BD$ 的平行线, 与 $CD$ 的延长线交于 $E$. 则 $AE\perp CE$. 设待求三角形面积为 $S$.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.2]
+\coordinate[label=below left:$A$] (A) at (-3,0);
+\coordinate[label=below right:$B$] (B) at (3,0);
+\coordinate[label=above:$C$] (C) at (0,3);
+\coordinate[label=above right:$D$] (D) at (-0.621, 1.501);
+\coordinate[label=below:$E$] (E) at (-1.501, -0.621);
+\draw [line width=1pt] (A) -- (C) node [midway,sloped] {$\bracevert$};
+\draw [line width=1pt] (B) -- (C) node [midway,sloped] {$\bracevert$};
+\draw [line width=1pt] (A) -- (D);
+\draw [line width=1pt] (B) -- (D);
+\draw [line width=1pt] (C) -- (E);
+\draw [line width=1pt] (A) -- (E) -- (B) -- cycle;
+\tkzMarkRightAngle[line width=1pt](E,D,B);
+\tkzMarkRightAngle[line width=1pt](A,E,D);
+\draw pic[draw,line width=1pt, angle eccentricity=1.5, angle radius=0.5cm] {angle=A--C--E};
+\draw pic[draw,line width=1pt, angle eccentricity=1.5, angle radius=0.5cm] {angle=C--B--D};
+\foreach \p in {A,B,C,D,E}
+	\fill[fill=black,draw=black,thick] (\p) circle (1pt);
+\node at (0.5,1.5) {$S$};
+\end{tikzpicture}
+\end{figure*}
+
+$\triangle ABD$ 与 $\triangle EBD$ 同底等高, 故 $S_{\triangle EBD} = S_{\triangle ABD} = 84$. 
+
+由 $\angle ACD + \angle BCD = \angle CBD + \angle BCD = 90\degree$, 得 $\angle ACD = \angle CBD$, 并且 $AC=CB$, $\angle AEC = \angle CDB = 90\degree$, 得 $\triangle AEC \cong \triangle CDB$. 从而 $S_{\triangle AEC} = S_{\triangle CDB} = S$, $S_{\triangle ADE} = S - 25$.
+
+$\triangle ACD$ 与 $\triangle ADE$ 有一个公共的高, 面积之比为底边长度之比, 即
+\[\frac{CD}{DE} = \frac{S_{\triangle ACD}}{S_{\triangle ADE}} .\]
+类似的, 也有
+\[\frac{CD}{DE} = \frac{S_{\triangle BCD}}{S_{\triangle BDE}} .\]
+从而可得
+\[\frac{25}{S-25} = \frac{S}{84} .\]
+解得: $S=60$.
+
 %------------------------------------------------------------------------------%
 \newpage
 
