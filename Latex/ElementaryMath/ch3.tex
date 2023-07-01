@@ -1242,6 +1242,71 @@ $\angle CEF= \angle CEA + \angle DEF = 60\degree + 20\degree = 80\degree = \angl
 
 %------------------------------------------------------------------------------%
 \newpage
+
+\noindent 来自微博:
+
+下图中, $AD\perp BC$, $\angle ABE=\angle DBE=10\degree$, $\angle CAD=40\degree$, 求 $\angle BCE$.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=0.8]
+\coordinate[label=above:$A$] (A) at (0,3);
+\coordinate[label=below left:$B$] (B) at (-8.242, 0);
+\coordinate[label=below right:$C$] (C) at (2.517, 0);
+\coordinate[label=below:$D$] (D) at (0,0);
+\coordinate[label=below left:$E$] (E) at (0, 1.453);
+%\coordinate[label=above right:$F$] (F) at (0, 6.916);
+%\coordinate[label=above:$G$] (G) at (-2.863, 9.318);
+%\coordinate[label=above left:$H$] (H) at (intersection of A--B and E--G);
+\draw [line width=1pt] (A) -- (B) --(C) -- (A)-- (D);
+\draw [line width=1pt] (B)--(E) --(C);
+\foreach \p in {A,B,C,D,E}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\tkzMarkRightAngle[line width=1pt](A,D,C);
+\draw pic["$40\degree$",draw,line width=1pt, angle eccentricity=1.6, angle radius=0.55cm] {angle=D--A--C};
+\draw pic["$10\degree$",draw,line width=1pt, angle eccentricity=1.2, angle radius=2.5cm] {angle=E--B--A};
+\draw pic["$10\degree$",draw,line width=1pt, angle eccentricity=1.2, angle radius=2.7cm] {angle=D--B--E};
+\draw pic["$?$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.5cm] {angle=E--C--B};
+\end{tikzpicture}
+\end{figure*}
+
+解: 延长 $DA$ 至 $F$, 使得 $AF=AC$. 由 $\angle BAF=180\degree - \angle BAD = 110\degree$, $\angle BAC = \angle BAD + \angle DAC = 110\degree$, 故 $\angle BAF = \angle BAC$, 由 SAS 得 $\triangle BAF\cong \triangle BAC$, 于是 $BF=BC$, $\angle AFB = \angle ACB = 50\degree$.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=0.8]
+\coordinate[label=right:$A$] (A) at (0,3);
+\coordinate[label=below left:$B$] (B) at (-8.242, 0);
+\coordinate[label=below right:$C$] (C) at (2.517, 0);
+\coordinate[label=below:$D$] (D) at (0,0);
+\coordinate[label=below left:$E$] (E) at (0, 1.453);
+\coordinate[label=above:$F$] (F) at (0, 6.916);
+\coordinate[label=above:$G$] (G) at (-2.863, 9.318);
+\coordinate[label=above left:$H$] (H) at (intersection of A--B and E--G);
+\draw [line width=1pt] (A) -- (B) --(C) -- (A)-- (D);
+\draw [line width=1pt] (B)--(E) --(C);
+\draw [dashed,line width=1pt] (B)--(G) --(C);
+\draw [dashed,line width=1pt] (G) --(E);
+\draw [dashed,line width=1pt] (B)--(F) --(A);
+\foreach \p in {A,B,C,D,E,F,G,H}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\tkzMarkRightAngle[line width=1pt](A,D,C);
+\tkzMarkRightAngle[line width=1pt](B,H,E);
+%\draw pic["$40\degree$",draw,line width=1pt, angle eccentricity=1.6, angle radius=0.55cm] {angle=D--A--C};
+%\draw pic["$10\degree$",draw,line width=1pt, angle eccentricity=1.2, angle radius=2.5cm] {angle=E--B--A};
+%\draw pic["$10\degree$",draw,line width=1pt, angle eccentricity=1.2, angle radius=2.7cm] {angle=D--B--E};
+%\draw pic["$?$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.5cm] {angle=E--C--B};
+\end{tikzpicture}
+\end{figure*}
+
+作 $EH\perp AB$ 于 $H$, 在直角三角形 $BED$ 和 $BEH$ 中, 由 ASA 得 $\triangle BED \cong \triangle BEH$, 故 $BD = BH$, $\angle BEH = \angle BED = 80\degree$. 
+
+延长$EH$至$G$, 使得$EG=EB$, 则 $\angle BGE = \angle GBE = 50\degree$. $\angle CBG = \angle CBE + \angle EBG = 60\degree$.
+
+在 $\triangle BHG$ 与 $\triangle BDF$ 中, $\angle BHG=\angle BDF=90\degree$, $\angle EGB = \angle DFB = 50\degree$, $BH=BD$, 故 $\triangle BHG\cong \triangle BDF$, $BG=BF$, 推出 $BG=BC$.
+
+由此可得 $\triangle GBC$ 是等边三角形, $\angle BCG = 60\degree$, $BC = GC$. 由 SSS 可得 $\triangle CEG\cong \triangle CEB$, 则 $\angle BCE = \angle GCE = \dfrac{1}{2}BCG = 30\degree$.
+
+%------------------------------------------------------------------------------%
+\newpage
 \noindent 来自微博:
 
 下图中, $AB = CD$, $\angle ABC = 24\degree, \angle BAC = 30\degree$. 求 $\angle ADC$.
