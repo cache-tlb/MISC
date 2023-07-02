@@ -1341,6 +1341,57 @@ $\angle GBC = \angle GBF - \angle FBC = 50\degree$, $\angle ACD = 90\degree- \an
 
 $E,F$ 关于 $BC$ 对称, 所以 $\angle DEC = \angle DFC = 60\degree$, 于是 $\angle BCE = 90\degree-\angle DEC = 30\degree$.
 
+~
+
+用三倍角公式求解: 
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[label=right:$A$] (A) at (0,3);
+\coordinate[label=below left:$B$] (B) at (-8.242, 0);
+\coordinate[label=below right:$C$] (C) at (2.517, 0);
+\coordinate[label=below right:$D$] (D) at (0,0);
+\coordinate[label=below left:$E$] (E) at (0, 1.453);
+\coordinate[label=below:$F$] (F) at (0, -1.453);
+\draw [line width=1pt] (A) -- (B) --(C) -- (A)-- (D);
+%\draw [line width=1pt] (B)--(E) --(C);
+\draw [line width=1pt] (C)--(F) --(D);
+\draw [line width=1pt] (B)--(F);
+\foreach \p in {A,B,C,D,E,F}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\tkzMarkRightAngle[line width=1pt](A,D,C);
+\draw pic["$40\degree$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.5cm] {angle=D--A--C};
+\draw pic["$20\degree$",draw,line width=1pt, angle eccentricity=1.5, angle radius=1.2cm] {angle=D--B--A};
+\draw pic["$10\degree$",draw,line width=1pt, angle eccentricity=1.5, angle radius=1.8cm] {angle=F--B--D};
+\draw pic["$30\degree$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.6cm] {angle=D--C--F};
+\end{tikzpicture}
+\end{figure*}
+
+将 $E$ 点沿着 $BC$ 翻折下来, 则 $\angle FBC = 10\degree$, $\angle BCE = \angle BCF$.
+
+可以验证, 正弦和余弦得三倍角分别满足:
+\begin{align*}
+\sin(3\alpha) &= 4\sin\alpha\sin(60\degree+\alpha)\sin(60\degree-\alpha) \\
+\cos(3\alpha) &= 4\cos\alpha\cos(60\degree+\alpha)\cos(60\degree-\alpha)
+\end{align*}
+于是 
+\[\tan(3\alpha) = \tan\alpha\tan(60\degree+\alpha)\tan(60\degree-\alpha) .\]
+
+令 $\alpha=20\degree$, 则 
+\begin{align*}
+\tan 60\degree &= \tan 20\degree\cdot\tan 80\degree\cdot\tan 40\degree \\
+\cot 80\degree &= \cot 60\degree \cdot\tan 20\degree \cdot\tan 40\degree \\
+\tan 10\degree &= \tan 20\degree\cdot\tan 30\degree\cdot\tan 40\degree
+\end{align*}
+
+回到原题, 
+\[\tan 10\degree = \frac{DF}{DB}, \quad \tan 20\degree = \frac{DA}{DB}, \quad \tan 40\degree = \frac{DC}{DA}, \quad \tan\angle DCF = \frac{DF}{DC} .\]
+代入得
+\[\frac{DF}{DB} = \frac{DA}{DB}\cdot \frac{DC}{DA} \cdot \tan 30\degree .\]
+所以
+\[\tan 30\degree = \frac{DF}{DC} ,\]
+说明 $\angle DCF = 30\degree$.
+
 %------------------------------------------------------------------------------%
 \newpage
 \noindent 来自微博:
