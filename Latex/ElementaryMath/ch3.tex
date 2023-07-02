@@ -1269,7 +1269,9 @@ $\angle CEF= \angle CEA + \angle DEF = 60\degree + 20\degree = 80\degree = \angl
 \end{tikzpicture}
 \end{figure*}
 
-解: 延长 $DA$ 至 $F$, 使得 $AF=AC$. 由 $\angle BAF=180\degree - \angle BAD = 110\degree$, $\angle BAC = \angle BAD + \angle DAC = 110\degree$, 故 $\angle BAF = \angle BAC$, 由 SAS 得 $\triangle BAF\cong \triangle BAC$, 于是 $BF=BC$, $\angle AFB = \angle ACB = 50\degree$.
+解: 延长 $DA$ 至 $F$, 使得 $AF=AC$. 
+
+由 $\angle BAF=180\degree - \angle BAD = 110\degree$, $\angle BAC = \angle BAD + \angle DAC = 110\degree$, 故 $\angle BAF = \angle BAC$, 由 SAS 得 $\triangle BAF\cong \triangle BAC$, 于是 $BF=BC$, $\angle AFB = \angle ACB = 50\degree$.
 \begin{figure*}[htbp]
 \centering
 \begin{tikzpicture}[scale=1]
@@ -1307,13 +1309,15 @@ $\angle CEF= \angle CEA + \angle DEF = 60\degree + 20\degree = 80\degree = \angl
 
 ~
 
-另一种解法: 作 $E$ 关于 $AC$ 对称的点 $F$, 以 $BF$ 为边作正三角形 $\triangle BFG$, 并连接 $AG, CF, DF$.
+\noindent 另一种解法
+
+作 $E$ 关于 $AC$ 对称的点 $F$, 以 $BF$ 为边作正三角形 $\triangle BFG$, 并连接 $AG, CF, DF$.
 \begin{figure*}[htbp]
 \centering
 \begin{tikzpicture}[scale=1]
-\coordinate[label=right:$A$] (A) at (0,3);
-\coordinate[label=below left:$B$] (B) at (-8.242, 0);
-\coordinate[label=below right:$C$] (C) at (2.517, 0);
+\coordinate[label=above right:$A$] (A) at (0,3);
+\coordinate[label=left:$B$] (B) at (-8.242, 0);
+\coordinate[label=right:$C$] (C) at (2.517, 0);
 \coordinate[label=below right:$D$] (D) at (0,0);
 \coordinate[label=below left:$E$] (E) at (0, 1.453);
 \coordinate[label=below:$F$] (F) at (0, -1.453);
@@ -1347,9 +1351,9 @@ $E,F$ 关于 $BC$ 对称, 所以 $\angle DEC = \angle DFC = 60\degree$, 于是 $
 \begin{figure*}[htbp]
 \centering
 \begin{tikzpicture}[scale=1]
-\coordinate[label=right:$A$] (A) at (0,3);
-\coordinate[label=below left:$B$] (B) at (-8.242, 0);
-\coordinate[label=below right:$C$] (C) at (2.517, 0);
+\coordinate[label=above:$A$] (A) at (0,3);
+\coordinate[label=left:$B$] (B) at (-8.242, 0);
+\coordinate[label=right:$C$] (C) at (2.517, 0);
 \coordinate[label=below right:$D$] (D) at (0,0);
 \coordinate[label=below left:$E$] (E) at (0, 1.453);
 \coordinate[label=below:$F$] (F) at (0, -1.453);
@@ -1391,6 +1395,72 @@ $E,F$ 关于 $BC$ 对称, 所以 $\angle DEC = \angle DFC = 60\degree$, 于是 $
 所以
 \[\tan 30\degree = \frac{DF}{DC} ,\]
 说明 $\angle DCF = 30\degree$.
+
+~
+
+\noindent 推广
+
+基于 $\tan 10\degree = \tan 20\degree\cdot\tan 30\degree\cdot\tan 40\degree$, 可以设计一系列格点角问题. 例如, 可以随意排列四个角度的顺序.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[label=above:$A$] (A) at (0,3);
+\coordinate[label=left:$B$] (B) at (-8.242, 0);
+\coordinate[label=right:$C$] (C) at (1.732, 0);
+\coordinate[label=below left:$D$] (D) at (0,0);
+\coordinate[label=below left:$E$] (E) at (0, 1.453);
+\coordinate[label=below:$F$] (F) at (0, -1.453);
+\draw [line width=1pt] (A) -- (B) --(C) -- (A)-- (D);
+\draw [dashed,line width=1pt] (B)--(E) --(C);
+\draw [line width=1pt] (C)--(F) --(D);
+\draw [line width=1pt] (B)--(F);
+\foreach \p in {A,B,C,D,E,F}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\tkzMarkRightAngle[line width=1pt](A,D,C);
+\draw pic["$40\degree$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.6cm] {angle=D--C--F};
+%\draw pic["$20\degree$",draw,line width=1pt, angle eccentricity=1.5, angle radius=1.2cm] {angle=D--B--A};
+\draw pic["$10\degree$",draw,line width=1pt, angle eccentricity=1.5, angle radius=1.8cm] {angle=E--B--A};
+\draw pic["$10\degree$",draw,line width=1pt, angle eccentricity=1.5, angle radius=1.7cm] {angle=D--B--E};
+\draw pic["$10\degree$",draw,line width=1pt, angle eccentricity=1.5, angle radius=1.8cm] {angle=F--B--D};
+\draw pic["$30\degree$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.7cm] {angle=D--A--C};
+\end{tikzpicture}
+\end{figure*}
+
+若令三倍角公式中的 $\alpha = 10\degree$, 可得 $\tan 30\degree = \tan 10\degree\cdot\tan 70\degree\cdot\tan 50\degree$. 于是可以构造如下的图形.
+\begin{figure*}[h!]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[label=above:$A$] (A) at (0, 3.274);
+\coordinate[label=left:$B$] (B) at (-5.671, 0);
+\coordinate[label=right:$C$] (C) at (2.747, 0);
+\coordinate[label=below left:$D$] (D) at (0,0);
+\coordinate[label=below left:$E$] (E) at (0, 1);
+\coordinate[label=below:$F$] (F) at (0, -3.274);
+\draw [line width=1pt] (A) -- (B) --(C) -- (A)-- (D);
+\draw [line width=1pt] (B)--(E) --(C);
+\draw [line width=1pt] (C)--(F) --(D);
+\draw [line width=1pt] (B)--(F);
+\foreach \p in {A,B,C,D,E,F}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\tkzMarkRightAngle[line width=1pt](F,D,C);
+\draw pic["$50\degree$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.6cm] {angle=D--C--F};
+\draw pic["$70\degree$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.4cm] {angle=D--E--C};
+\draw pic["$20\degree$",draw,line width=1pt, angle eccentricity=1.5, angle radius=1.0cm] {angle=E--B--A};
+\draw pic["$10\degree$",draw,line width=1pt, angle eccentricity=1.5, angle radius=1.7cm] {angle=D--B--E};
+\draw pic["$30\degree$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.8cm] {angle=F--B--D};
+\draw pic["$40\degree$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.6cm] {angle=D--A--C};
+\end{tikzpicture}
+\end{figure*}
+
+此外, 还可以利用关系: $\tan 6\degree = \tan 12\degree\cdot\tan 24\degree\cdot\tan 48\degree$, 构造类似的图. 这个关系不方便直接由三倍角公式得到, 但可以应用两次三倍角公式. 分别令 $\alpha=18\degree$ 和 $\alpha=24\degree$, 根据三倍角公式依次可得:
+\begin{align*}
+\tan 54\degree &= \tan 18\degree\cdot\tan 78\degree\cdot\tan 42\degree \qquad (1) \\
+\tan 72\degree &= \tan 24\degree\cdot\tan 84\degree\cdot\tan 36\degree \qquad (2)
+\end{align*}
+用 (1) 式除以 (2) 式得:
+\[\tan 54\degree\cdot\tan 18\degree = \tan 18\degree\cdot\tan 78\degree\cdot\tan 42\degree\cdot\tan 66\degree\cdot\tan 6\degree\cdot\tan 54\degree .\]
+再将含有 $78\degree, 42\degree, 66\degree$ 的项移到左边就得到了
+\[\tan 12\degree\cdot\tan 24\degree\cdot\tan48\degree = \tan 6\degree .\]
 
 %------------------------------------------------------------------------------%
 \newpage
