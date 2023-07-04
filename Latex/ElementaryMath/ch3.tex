@@ -2489,6 +2489,60 @@ $\angle CDO' = \angle BDC - \angle BDO' = (90\degree + \alpha) - (90\degree - \a
 
 而根据等腰三角形 $AOC$ 和 $BOD$ 易知 $\angle AOC = 40\degree$, $\angle BOD = 50\degree$, 于是 $\angle COD = 90\degree$, 进而 $\angle GEH = \angle GFH = \dfrac{1}{2}\angle COD = 45\degree$.
 
+
+%------------------------------------------------------------------------------%
+\newpage
+
+\noindent 来自网络
+
+下图中有三个正六边形, 有一个未知角度 $\alpha$, 求 $\tan\alpha$.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\tikzmath{
+	\x1 = -4; \x2 = -3; \x3=-1; \x4=0; \x5=2; \x6=3; \x7=5; \x8=6;
+	\y1 =3.464; \y2 =1.732; \y3=0; \y4=-1.732; \y5=-3.464; } 
+\coordinate[] (A) at (\x1,\y3);
+\coordinate[] (B) at (\x7,\y2);
+\coordinate[] (C) at (\x6,\y4);
+\draw [line width=1pt] (\x1,\y3) -- (\x2,\y2) -- (\x3,\y2) -- (\x4,\y3)--(\x3,\y4)--(\x2,\y4)--cycle;
+\draw [line width=1pt] (\x3,\y2)--(\x4,\y1)--(\x5,\y1)--(\x6,\y2)--(\x5,\y3)--(\x4,\y3);
+\draw [line width=1pt] (\x6,\y2)--(\x7,\y2)--(\x8,\y3)--(\x7,\y4)--(\x6,\y4)--(\x5,\y3);
+\draw [red,line width=1pt] (A)--(B)--(C);
+\foreach \p in {A,B,C}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\draw pic["$\alpha$",red,draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=A--B--C};
+\end{tikzpicture}
+\end{figure*}
+
+~
+
+解: 将下方补一个正六边形, 易知 $B,C,D$ 共线, 以及 $D,E,A$ 共线, 且 $\angle CDE = 90\degree$.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\tikzmath{
+	\x1 = -4; \x2 = -3; \x3=-1; \x4=0; \x5=2; \x6=3; \x7=5; \x8=6;
+	\y1 =3.464; \y2 =1.732; \y3=0; \y4=-1.732; \y5=-3.464; } 
+\coordinate[label=left:$A$] (A) at (\x1,\y3);
+\coordinate[label=above right:$B$] (B) at (\x7,\y2);
+\coordinate[label=below right:$C$] (C) at (\x6,\y4);
+\coordinate[label=below right:$D$] (D) at (\x5,\y5);
+\coordinate[label=below left:$E$] (E) at (\x3,\y4);
+\draw [line width=1pt] (\x1,\y3) -- (\x2,\y2) -- (\x3,\y2) -- (\x4,\y3)--(\x3,\y4)--(\x2,\y4)--cycle;
+\draw [line width=1pt] (\x3,\y2)--(\x4,\y1)--(\x5,\y1)--(\x6,\y2)--(\x5,\y3)--(\x4,\y3);
+\draw [line width=1pt] (\x6,\y2)--(\x7,\y2)--(\x8,\y3)--(\x7,\y4)--(\x6,\y4)--(\x5,\y3);
+\draw [line width=1pt] (\x6,\y4)--(\x5,\y5)--(\x4,\y5)--(\x3,\y4);
+\draw [red,line width=1pt] (D)--(A)--(B)--(C);
+\foreach \p in {A,B,C,D,E}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\draw pic["$\alpha$",red,draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=A--B--C};
+\tkzMarkRightAngle[line width=1pt](A,D,C);
+\end{tikzpicture}
+\end{figure*}
+
+设正六边形边长为 $1$, 则 $BC = 3$, $AD = 2\sqrt{3}$, 所以 $\tan\alpha = \dfrac{2\sqrt{3}}{3}$.
+
 %------------------------------------------------------------------------------%
 \newpage
 
