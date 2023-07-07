@@ -6,18 +6,17 @@ $\triangle ABC$中, $BC$ 的中点为 $D$, 则 $AB^2 + AC^2 = 2(AD^2+BD^2)$.
 
 \begin{figure*}[htbp]
 \centering
-\begin{tikzpicture}[cap=round,scale=1]
-\tikzstyle{axes}=[line width=1pt]
+\begin{tikzpicture}[scale=1]
 \coordinate[label=below:$D$,] (D) at (0.0,0.0);
 \coordinate[label=below:$B$] (B) at (-2.5,0.0);
 \coordinate[label=below:$C$] (C) at (2.5,0.0);
 \coordinate[label=above:$A$] (A) at (1.0,3.0);
-\draw[] (B) to [edge label = $c$] (A);
-\draw[] (A) to [edge label = $b$] (C);
-\draw[] (C) to (B);
-\draw[densely dashed] (A) to (D);
+\draw[line width=1pt] (B) to [edge label = $c$] (A);
+\draw[line width=1pt] (A) to [edge label = $b$] (C);
+\draw[line width=1pt] (C) to (B);
+\draw[dashed,line width=1pt] (A) to (D);
 \foreach \p in {A,B,C,D}
-	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+	\fill[fill=black,draw=black,thick] (\p) circle (1pt);
 \end{tikzpicture}
 \end{figure*}
 
