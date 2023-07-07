@@ -33,6 +33,53 @@ AC^2 &= AD^2+CD^2-2AD\cdot CD \cdot \cos\angle ADC.
 
 %------------------------------------------------------------------------------%
 \newpage
+
+\noindent 角平分线的长度关系.
+
+$\triangle ABC$中, $\angle BAC$ 的平分线交 $BC$ 于 $D$. 设 $AB=x$, $AC=y$, $AD=z$, $BD=u$, $CD=v$. 则
+
+(1) $\dfrac{x}{y} = \dfrac{u}{v}$;
+
+(2) $z^2 = xy - uv$.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[label=below:$D$,] (D) at (0.351, 0);
+\coordinate[label=below:$B$] (B) at (-3,0.0);
+\coordinate[label=below:$C$] (C) at (3,0.0);
+\coordinate[label=above:$A$] (A) at (1.0,4.0);
+\draw[line width=1pt] (B) to [edge label = $x$] (A);
+\draw[line width=1pt] (C) to [edge label' = $y$] (A);
+\draw[line width=1pt] (B) to [edge label' = $u$] (D);
+\draw[line width=1pt] (C) to [edge label = $v$] (D);
+\draw[dashed,line width=1pt] (A) to [edge label = $z$] (D);
+\foreach \p in {A,B,C,D}
+	\fill[fill=black,draw=black,thick] (\p) circle (1pt);
+\draw pic["$\alpha$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.5cm] {angle=B--A--D};
+\draw pic["$\alpha$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.6cm] {angle=D--A--C};
+\end{tikzpicture}
+\end{figure*}
+
+\begin{proof}
+设 $\angle BAD = \angle CAD = \alpha$, 由正弦定理, 
+\[\frac{u}{\sin\alpha}=\frac{x}{\sin\angle ADB}, \qquad \frac{v}{\sin\alpha}=\frac{y}{\sin\angle ADC} .\]
+并注意到 $\sin\angle ADB = \sin\angle ADC$, 所以有 $\dfrac{x}{y} = \dfrac{u}{v}$.
+
+由余弦定理, 
+\begin{align*}
+u^2 &= x^2 + z^2 - 2xz\cos\alpha  \\ 
+v^2 &= y^2 + z^2 - 2yz\cos\alpha
+\end{align*}
+设$\dfrac{x}{y} = \dfrac{u}{v} = k$, 则 $x = ky, u = kv$, 代入并令上面二式相减可得
+\[ (k^2-1)v^2 = (k^2-1)y^2 - 2(k-1)yz\cos\alpha . \]
+可以求出 $2yz\cos\alpha = (k+1)(y^2-v^2)$. 代入 $v^2$ 的表达式得
+\[ k(y^2-v^2) = z^2 \]
+即
+\[z^2 = xy - uv.\]
+\end{proof}
+
+%------------------------------------------------------------------------------%
+\newpage
 托勒密定理: 圆内接四边形两条对角线的乘积等于两对对边乘积之和.
 
 如下图所示, $ABCD$ 为圆内接四边形, 则对角线 $AC$ 与 $BD $ 的乘积等于一对对边 $AB$ 与 $CD$ 的乘积加上另一对对边 $AD$ 与 $BC$ 的乘积, 即 $AC\cdot BD = AB\cdot CD + AD\cdot BC$.
