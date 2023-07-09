@@ -4274,6 +4274,87 @@ YZ^2 = XY^2+ZX^2 - 2XY\cdot ZX\cdot \cos\alpha
 \[ PQ^2 = 16\sin^2\beta\sin^2\gamma\sin^2\alpha .\]
 所以 $PQ = PR = QR$, 即 $\triangle PQR$ 为等边三角形.
 
+~
+
+\noindent 另一个证明(几何法):
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1.5]
+\coordinate[label=below left:$A$] (A) at (0,0);
+\coordinate[label=above:$B$] (B) at (5.072, 5.072);
+\coordinate[label=below right:$C$] (C) at (8,0);
+\coordinate[] (D) at (2.135, 2.135);
+\coordinate[] (E) at (3.65, 3.65);
+\coordinate[] (F) at (3.226, 0);
+\coordinate[] (G) at (5.516, 0);
+\coordinate[] (J) at (6.928, 1.856);
+\coordinate[] (I) at (6, 3.464);
+\coordinate[label=above left:$R$] (R) at (intersection of A--I and B--F);
+\coordinate[label=below:$Q$] (Q) at (intersection of A--J and C--D);
+\coordinate[label=right:$P$] (P) at (intersection of B--G and C--E);
+\coordinate[label=right:$L$] (L) at (5.389, 1.444);
+\coordinate[label=right:$H$] (H) at (6.516, 2.571);
+\coordinate[label=below:$K$] (K) at (4.716, 0);
+\coordinate[label=above right:$N$] (N) at (intersection of B--L and R--H);
+\coordinate[label=below left:$M$] (M) at (intersection of A--L and R--K);
+\coordinate[label=right:$X$] (X) at (4.784, 1.358);
+\draw [red,line width=1pt] (A) -- (R);
+\draw [red,line width=1pt] (A) -- (L);
+\draw [green,line width=1pt] (B) -- (L);
+\draw [green,line width=1pt] (B) -- (R);
+\draw [blue,line width=1pt] (C) -- (Q);
+\draw [blue,line width=1pt] (C) -- (P);
+\draw [line width=1pt] (A) -- (B) -- (C) -- cycle;
+\draw [line width=1pt] (P) -- (Q) -- (R) -- cycle;
+\draw [gray,line width=1pt] (R) -- (H);
+\draw [gray,line width=1pt] (R) -- (K);
+\draw [gray,line width=1pt] (H) -- (X) -- (R);
+\foreach \p in {A,B,C,P,Q,R,M,N,K,H,L,X}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.0pt);
+\draw[line width=1pt] (R) circle (1.221cm);
+\draw pic["$\alpha$",draw,line width=1pt, angle eccentricity=1.6, angle radius=1.2cm] {angle=R--A--B};
+\draw pic["$\alpha$",draw,line width=1pt, angle eccentricity=1.2, angle radius=1.5cm] {angle=Q--A--R};
+\draw pic["$\alpha$",draw,line width=1pt, angle eccentricity=1.6, angle radius=1.2cm] {angle=C--A--Q};
+\draw pic["$\beta$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.8cm] {angle=A--B--R};
+\draw pic["$\beta$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.9cm] {angle=R--B--P};
+\draw pic["$\beta$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.8cm] {angle=P--B--C};
+\draw pic["$\gamma$",draw,line width=1pt, angle eccentricity=1.6, angle radius=0.8cm] {angle=B--C--P};
+\draw pic["$\gamma$",draw,line width=1pt, angle eccentricity=1.6, angle radius=0.9cm] {angle=P--C--Q};
+\draw pic["$\gamma$",draw,line width=1pt, angle eccentricity=1.6, angle radius=0.8cm] {angle=Q--C--A};
+\end{tikzpicture}
+\end{figure*}
+
+设 $AQ$, $BP$ 的延长线交于 $L$, 因为 $AR$, $BR$ 分别是 $\angle BAL$ 和 $\angle ABL$ 的平分线, 所以 $R$ 是 $\triangle ABL$ 的内心. 作 $\triangle ABL$ 的内接圆, 与 $AL$, $BL$ 分别相切于 $M,N$. 延长 $RN$ 交 $BC$ 于 $H$, 延长 $RM$ 交 $AC$ 于 $K$. 设 $H$ 到内切圆的切线与圆相切于 $X$, 并且该切线与 $AL$ 交于 $Y$ (图中未画出 $Y$, 后面将证明 $Y$ 与 $Q$ 重合). 
+
+立刻可得: $\triangle BNR \cong \triangle BNH$, $\angle RXH = 90\degree$, $NH=NR=RX$.
+
+直角 $\triangle RHX$ 中, 直角边是斜边长的一半, 所以 $\angle HRX = 60\degree$, $\angle RHX = 30\degree$.
+
+四边形 $RNLM$ 中, $\angle RML = \angle RNL = 90\degree$, 于是 $\angle MRN = 180\degree - \angle MLN$. 另一方面, $\triangle ABL$ 中, 
+\[ 180\degree - \angle MLN = \angle BAL + \angle ABL = 2\alpha+2\beta = 120\degree - 2\gamma  .\]
+于是 $\angle MRN = 120\degree - 2\gamma$.
+
+$\triangle AMR \cong \triangle AMK$, $AL$ 是 $RK$ 的中垂线, 而 $Y$ 在 $AL$ 上, 故 $\angle YKR = \angle YRK$. $AL$, $HX$ 均是内切圆的切线, 并且相交于 $Y$, 于是有
+\begin{align*}
+\angle YRM = \angle YRX &= \frac{1}{2}\angle MRX = \frac{1}{2}(\angle MRH - \angle XRH) \\
+ &= \frac{1}{2}(120\degree - 2\gamma - 60\degree) = 30\degree - \gamma.
+\end{align*}
+
+$RK = 2RM = 2RN = RH$, 则 $\triangle RKH$ 为等腰三角形, 故有
+\[\angle RHK = \angle RKH = \frac{1}{2}(180\degree - \angle HRK) = \frac{1}{2}(180\degree - 120\degree + 2\gamma) = 30\degree + \gamma. \]
+另一方面, $\angle RHK = \angle RHY + \angle YHK = \angle YHK + 30\degree$, 得到 $\angle YHK = \gamma$.
+
+由 $\angle RKH = \angle RKY + \angle YKH$, $\angle RKH = 30\degree + \gamma$, $\angle RKY = \angle YRM$, $\angle YRM = 30\degree - \gamma$, 推出 $30\degree + \gamma = 30\degree - \gamma + \angle YKH$, 得 $\angle YKH = 2\gamma$.
+
+$\angle HYK = 180\degree - \angle YKH - \angle YHK = 180\degree - 3\gamma$, 而 $\angle ACB = 3\gamma$, 所以 $\angle HYK + \angle ACB = 180\degree$, 得 $Y, H, C, K$ 四点共圆. 进而得 $\angle YCK = \angle YHK = \gamma$. 而 $\angle QCK = \gamma$, 说明 $Y$ 在射线 $CQ$ 上. 但 $Y$ 又在 $AL$ 上, 所以 $Y$ 是 $CQ$ 与 $AL$ 的交点, 也就是 $Q$ 点. 可知 $H,X,Q$ 共线, 且与内切圆相切.
+
+同理可得 $KP$ 也与内切圆相切.
+
+由于 $\triangle RHK$ 是等腰三角形, $RM = RN$, $KP,HQ$ 与圆相切, 容易证明这部分图形是对称的, 由此可得 $\angle QRX = \angle MRQ = \angle PRN$. 进而
+\[\angle PRQ = \angle PRX + \angle XRQ = \angle PRX + \angle PRN = \angle HRX = 60\degree .\]
+
+同理可以证明 $\angle PQR = \angle RPQ = 60\degree$. 所以 $\triangle PQR$ 是等边三角形.
+
 %------------------------------------------------------------------------------%
 \newpage
 
