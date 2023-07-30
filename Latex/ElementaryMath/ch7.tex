@@ -810,6 +810,46 @@ I &= \frac{2}{B^2-4AC}\left(\frac{D(B + 2C) - E(2A+B)}{\sqrt{A+B+C}} - \frac{2CD
 \end{align*}
 
 
+\newpage
+%------------------------------------------------------------------------------%
+\section{包络线问题}
+平面直角坐标系中, 原点为$O$, $x,y$ 轴上各有一点 $A(1,0), B(0,1)$, 将 $OA,OB$分别分成 $N$ 份, 对应得到 $N$ 个端点 (原点除外), 每个轴上第 $i$ 个端点从小到大依次记为 $A_i, B_i$. 连接 $A_1B_N, A_2B_{N-1}, \cdots A_NB_1$, 得到一些线段. 当 $N\to\infty$ 时, 求这些线段的包络线.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=5]
+\coordinate[label=below left:$O$] (O) at (0,0);
+\coordinate[label=right:$x$] (X) at (1.2, 0);
+\coordinate[label=above:$y$] (Y) at (0, 1.2);
+\coordinate[] (A) at (0, 1);
+\coordinate[] (B) at (1, 0);
+\draw[-Stealth,line width=1pt] (O)--(X) ;
+\draw[-Stealth,line width=1pt] (O)--(Y) ;
+\draw[line width=1pt,gray] (1,0) -- (0,0.2);
+\draw[line width=1pt,gray] (0.8,0) -- (0,0.4);
+\draw[line width=1pt,gray] (0.6,0) -- (0,0.6);
+\draw[line width=1pt,gray] (0.4,0) -- (0,0.8);
+\draw[line width=1pt,gray] (0.2,0) -- (0,1);
+\foreach \p in {O,A,B}
+	\fill[fill=black,draw=black,thick] (\p) circle (0.2pt);
+\end{tikzpicture}
+\end{figure*}
+
+解: 第 $i$ 条线段过点 $(\dfrac{i}{N}, 0)$ 和 $(0, \dfrac{N+1-i}{N})$, 其中 $1\le i\le N$. 该线段的方程为
+\[\frac{1}{i}\cdot x + \frac{1}{N+1-i}\cdot y=\frac{1}{N}.\]
+或
+\[y=\frac{N+1}{N} + x - \left(\frac{i}{N} + \frac{N+1}{i}\cdot x\right).\]
+
+若某点 $(x_0,y_0)$ 落在包络线以下, 则至少存在一条线段在该点上方. 对于给定的 $x_0$, 便利所有的 $i$, 求出 $y_0$ 的最大值, 则它就是包络线上的点. 也就是要求下面的最值问题:
+\[y_0 = \mathop{\max}_i \left\{ \frac{N+1}{N} + x_0 - \left(\frac{i}{N} + \frac{N+1}{i}\cdot x_0\right) \right\} .\]
+根据代数-几何不等式, 当 $\dfrac{i}{N} = \dfrac{N+1}{i}\cdot x_0$ 时取得最大值
+\[ y_0 = \frac{N+1}{N} + x_0 - 2\sqrt{\frac{N+1}{N}\cdot x_0} .\]
+虽然此时 $i$ 不一定是整数, 但 $y_0$ 
+当 $N\to\infty$ 时, 变为
+\[y_0 = 1 + x_0 - 2\sqrt{x_0} .\]
+或写成
+\[\sqrt{x_0}+\sqrt{y_0} = 1.\]
+因此包络线的方程为 $\sqrt{x}+\sqrt{y}=1$.
+
 
 
 
