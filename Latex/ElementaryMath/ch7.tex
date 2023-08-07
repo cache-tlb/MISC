@@ -916,5 +916,39 @@ y &= (1-t)^2 .
 \[x^{\frac{2}{3}} + y^{\frac{2}{3}} = 1.\]
 
 
+\newpage
+%------------------------------------------------------------------------------%
+\noindent 定速抛体问题
+
+一个喷泉有一个小的半球形喷嘴, 位于水池中水的表面. 喷嘴上由很多均匀分布的小洞, 通过这些小洞, 水以相同的速度向不同的方向喷出. 求喷泉形成的水钟的形状.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=10,domain=0:1]
+\coordinate (O) at (0,0);
+\draw[domain=0:0.433,range=0:1,color=green,line width=1pt] plot (\x,{\x*0.57735-\x^2/0.75}) ;
+\draw[domain=0:0.5,range=0:1,color=green,line width=1pt] plot (\x,{\x*1-\x^2/0.5}) ;
+\draw[domain=0:0.433,range=0:1,color=green,line width=1pt] plot (\x,{\x*1.7321-\x^2/0.25}) ;
+\draw[domain=0:0.25,range=0:1,color=green,line width=1pt] plot (\x,{\x*3.732-\x^2/0.066987}) ;
+\draw[domain=0:0.087,range=0:1,color=green,line width=1pt] plot (\x,{\x*11.43-\x^2/0.007596}) ;
+\draw[domain=0:0.5,range=0:1,color=red,line width=1pt,dashed] plot (\x,{0.25-\x^2}) ;
+\draw[-Stealth,line width=1pt] (0.0,0) -- (0.6,0) node[right] {$x$};
+\draw[-Stealth,line width=1pt] (0,0.0) -- (0,0.35) node[above] {$y$};
+\end{tikzpicture}
+\end{figure*}
+
+解: 设水的初速度为 $v_0$, 与地面夹角为 $\theta$, 重力加速度为 $g$. 其轨迹的参数方程为:
+\begin{align*}
+x &= v_0\cos\theta\cdot t \qquad\qquad\quad \cdots (1) \\
+y &= v_0\sin\theta\cdot t - \frac{1}{2}gt^2 \qquad \cdots (2) 
+\end{align*}
+将 (1) 式代入 (2) 式可得轨迹的标准方程为:
+\[ y = \tan\theta\cdot x - \frac{g}{2v_0^2\cos^2\theta}\cdot x^2 \]
+
+给定 $x_0$, 遍历所有的 $\theta$, 找到最大的 $y_0$, 则 $(x_0,y_0)$ 就是包络线上的点, 即:
+\[ y_0 = \mathop{\max}_{\theta}\left\{ \tan\theta\cdot x_0 - \frac{g}{2v_0^2\cos^2\theta}\cdot x_0^2 \right\} . \]
+令 $\dfrac{\mathrm{d}y}{\mathrm{d}\theta} = 0$, 解得 $\tan\theta = \dfrac{v_0^2}{gx_0}$. 代入求得 $y_0 = -\dfrac{gx_0^2}{2v_0^2} + \dfrac{v_0^2}{2g}$.
+所以包络线方程为
+\[ y = -\frac{g}{2v_0^2}\cdot x^2 + \frac{v_0^2}{2g} .\]
+是一个对称轴在 $y$ 轴上的抛物线.
 
 
