@@ -855,9 +855,10 @@ I &= \frac{2}{B^2-4AC}\left(\frac{D(B + 2C) - E(2A+B)}{\sqrt{A+B+C}} - \frac{2CD
 注: 若设 $t = \dfrac{i}{N}$, 则 $\dfrac{N+1-i}{N} = 1 - t + \dfrac{1}{N}$, 当 $N\to\infty$ 时, 线段过点 $(t,0)$ 和 $(0,1-t)$. 给定 $x_0$, 包络线上的点 $y_0$ 表达式为
 \[ y_0 = \mathop{\max}_t\left\{ 1+x_0 - (t+\frac{x_0}{t}) \right\} = 1 + x_0 - 2\sqrt{x_0} .\]
 
+
 ~
 
-另一种解法: 
+\noindent 根据交点求解: 
 
 注意到从上到下两个相邻线段的交点一定位于包络线上. 设两个相邻线段与坐标轴的交点分别为 $(t,0), (0,1-t)$ 和 $(s, 0), (0, 1-s)$, 其中 $s = t+\Delta t$. 为了求出交点坐标, 需要联立直线方程, 解下面的方程组:
 \[ \begin{cases}
@@ -875,6 +876,44 @@ x &= t^2, \\
 y &= (1-t)^2 .
 \end{cases}\]
 
+
+~
+
+\noindent 根据切线关系求解:
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=5]
+\coordinate (O) at (0,0);
+\coordinate[] (A) at (0.4,0);
+\coordinate[] (B) at (0,0.6);
+\draw[line width=1pt,gray] (A)--(B);
+\draw[domain=0:1,range=0:1,color=red,line width=1pt,dashed] plot (\x,{(sqrt(\x)-1)^2}) ;
+\draw[-Stealth,line width=1pt] (0.0,0) -- (1.2,0) node[right] {$x$};
+\draw[-Stealth,line width=1pt] (0,0.0) -- (0,1.2) node[above] {$y$};
+\node [anchor=north] at (A) {$t$};
+\node [anchor=east] at (B) {$1-t$};
+%\draw pic["",draw,line width=1pt, angle eccentricity=1.0, angle radius=0.4cm] {angle=B--A--O};
+\foreach \p in {A,B}
+	\fill[fill=black,draw=black,thick] (\p) circle (0.2pt);
+\end{tikzpicture}
+\end{figure*}
+
+包络线上的点也一定位于某个线段上, 即存在一个参数 $t$, 满足约束:
+\[ \frac{x}{t}+\frac{y}{1-t} = 1 ,\]
+或写成
+\[ \frac{1-t}{t}\cdot x + y = 1-t \tag{1}\]
+
+这个线段同时也是包络线的切线, 满足斜率关系:
+\[ \frac{\mathrm{d}y}{\mathrm{d}x} = \frac{t-1}{t} \tag{2} \]
+
+对 (1) 式两边求全微分:
+\[ (\frac{1}{t}-1)\mathrm{d}x - \frac{x}{t^2}\mathrm{d}t  + \mathrm{d} y = -\mathrm{d}t .\]
+再根据 (2) 把 $\mathrm{d}y$ 替换掉, 然后两边约去 $\mathrm{d}t$, 得 $ x = t^2$ , 再代入 (1) 式可得 $ y = (1-t)^2 $ .
+所以参数方程为
+\[ \begin{cases}
+x &= t^2, \\
+y &= (1-t)^2 .
+\end{cases}\]
 
 \newpage
 %------------------------------------------------------------------------------%
