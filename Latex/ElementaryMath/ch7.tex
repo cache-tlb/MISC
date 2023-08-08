@@ -915,6 +915,29 @@ y &= (1-t)^2 .
 或者写成
 \[x^{\frac{2}{3}} + y^{\frac{2}{3}} = 1.\]
 
+~
+
+\noindent 另一种解法:
+
+假设$(x,y)$是曲线的一点，那么它一定在某一时刻位于棍子上，设此时棍子与地面夹角为$\theta\in[0,\dfrac{\pi}{2}]$，则$(x,y)$满足棍子的直线方程约束
+$$ \frac{x}{\cos\theta} + \frac{y}{\sin\theta} = 1 ,$$
+或写成
+$$ \tan\theta\cdot x + y = \sin\theta \qquad \cdots (1)$$
+曲线上每一点的切线对应棍子的某一时刻的状态, 即:
+$$
+\frac{\mathrm{d}y}{\mathrm{d}x}= -\tan\theta \qquad \cdots (2)
+$$
+将它代入上面的式子得微分方程:
+$$-x y' +y=\sqrt{\frac{(y')^2}{(y')^2+1}} $$
+这样的形式不是很好求解. 还是从直线方程入手. 对 (1) 式求全微分:
+$$  \frac{x}{\cos^2\theta}\ \mathrm{d}\theta + \tan\theta\ \mathrm{d}x + \mathrm{d}y  = \cos\theta\ \mathrm{d}\theta  $$
+由 (2) 式可得 
+$$ \mathrm{d}y = -\tan\theta\ \mathrm{d}x ,$$
+代入上式可得
+$$ x = \cos^3\theta ,$$
+代回 (1) 式得
+$$ y = \sin^3\theta .$$
+这就是包络线的参数方程.
 
 \newpage
 %------------------------------------------------------------------------------%
