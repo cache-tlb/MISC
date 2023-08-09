@@ -961,11 +961,11 @@ y &= (1-t)^2 .
 假设$(x,y)$是曲线的一点，那么它一定在某一时刻位于棍子上，设此时棍子与地面夹角为$\theta\in[0,\dfrac{\pi}{2}]$，则$(x,y)$满足棍子的直线方程约束
 $$ \frac{x}{\cos\theta} + \frac{y}{\sin\theta} = 1 ,$$
 或写成
-$$ \tan\theta\cdot x + y = \sin\theta \qquad \cdots (1)$$
+\[ \tan\theta\cdot x + y = \sin\theta \tag{1} \]
 曲线上每一点的切线对应棍子的某一时刻的状态, 即:
-$$
-\frac{\mathrm{d}y}{\mathrm{d}x}= -\tan\theta \qquad \cdots (2)
-$$
+\[
+\frac{\mathrm{d}y}{\mathrm{d}x}= -\tan\theta \tag{2}
+\]
 将它代入上面的式子得微分方程:
 $$-x y' +y=\sqrt{\frac{(y')^2}{(y')^2+1}} $$
 这样的形式不是很好求解. 还是从直线方程入手. 对 (1) 式求全微分:
@@ -985,7 +985,7 @@ $$ y = \sin^3\theta .$$
 一个喷泉有一个小的半球形喷嘴, 位于水池中水的表面. 喷嘴上由很多均匀分布的小洞, 通过这些小洞, 水以相同的速度向不同的方向喷出. 求喷泉形成的水钟的形状.
 \begin{figure*}[htbp]
 \centering
-\begin{tikzpicture}[scale=10,domain=0:1]
+\begin{tikzpicture}[scale=15,domain=0:1]
 \coordinate (O) at (0,0);
 \draw[domain=0:0.433,range=0:1,color=green,line width=1pt] plot (\x,{\x*0.57735-\x^2/0.75}) ;
 \draw[domain=0:0.5,range=0:1,color=green,line width=1pt] plot (\x,{\x*1-\x^2/0.5}) ;
@@ -1000,8 +1000,8 @@ $$ y = \sin^3\theta .$$
 
 解: 设水的初速度为 $v_0$, 与地面夹角为 $\theta$, 重力加速度为 $g$. 其轨迹的参数方程为:
 \begin{align*}
-x &= v_0\cos\theta\cdot t \qquad\qquad\quad \cdots (1) \\
-y &= v_0\sin\theta\cdot t - \frac{1}{2}gt^2 \qquad \cdots (2) 
+x &= v_0\cos\theta\cdot t \tag{1} \\
+y &= v_0\sin\theta\cdot t - \frac{1}{2}gt^2 \tag{2} 
 \end{align*}
 将 (1) 式代入 (2) 式可得轨迹的标准方程为:
 \[ y = \tan\theta\cdot x - \frac{g}{2v_0^2\cos^2\theta}\cdot x^2 \]
