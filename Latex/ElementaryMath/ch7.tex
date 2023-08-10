@@ -1013,4 +1013,22 @@ y &= v_0\sin\theta\cdot t - \frac{1}{2}gt^2 \tag{2}
 \[ y = -\frac{g}{2v_0^2}\cdot x^2 + \frac{v_0^2}{2g} .\]
 是一个对称轴在 $y$ 轴上的抛物线.
 
+~
+
+\noindent 根据切线求解
+
+令 $(x, y)$ 是包络线上一点, 则一定存在一个抛物线 $C_\theta$ 经过该点, 并且包络线和抛物线在该点处的切线相同. 根据抛物线约束关系得:
+\[ y = \tan\theta\cdot x - \frac{g}{2v_0^2\cos^2\theta}\cdot x^2 \tag{1} \]
+根据切线斜率关系可得
+\[ \frac{\mathrm{d}y}{\mathrm{d}x} = \tan\theta - \frac{gx}{v_0^2\cos^2\theta} \tag{2} \]
+
+对 (1) 式求全微分:
+\[ \mathrm{d}y = \frac{x\ \mathrm{d}\theta}{\cos^2\theta} + \tan\theta\ \mathrm{d}x - \frac{gx\ \mathrm{d}x}{v_0^2\cos^2\theta} - \frac{gx^2\tan\theta\ \mathrm{d}\theta}{v_0^2\cos^2\theta} \tag{3} \]
+将 (2) 式代入 (3) 式可得 
+\[ x = \frac{v_0^2}{g\tan\theta} ,\]
+再将这个结果代入 (1) 式, 消去 $\theta$, 可得包络线得标准方程为:
+\[ y = \frac{v_0^2}{2g} - \frac{g}{2v_0^2} \cdot x^2 \]
+
+
+
 
