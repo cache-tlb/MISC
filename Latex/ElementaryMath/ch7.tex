@@ -813,6 +813,42 @@ I &= \frac{2}{B^2-4AC}\left(\frac{D(B + 2C) - E(2A+B)}{\sqrt{A+B+C}} - \frac{2CD
 \newpage
 %------------------------------------------------------------------------------%
 \section{包络线问题}
+
+\noindent 一般结论
+
+假设有一族曲线 $F(x,y,t)=0$, 其中 $t$ 为参数, 如何求与这一族曲线都相切的曲线方程.
+
+考虑曲线族的其中两条曲线 $F(x,y,t)=0$ 和 $F(x,y,t+\Delta t)=0$. 联立这两个曲线方程, 求出它们的交点:
+\begin{align*}
+F(x,y,t) &= 0 \tag{1} \\
+F(x,y,t+\Delta t) &= 0 \tag{2}
+\end{align*}
+当 $\Delta t\to 0$ 时, 
+\[ F(x,y,t+\Delta t) = F(x,y,t) + F'_t(x,y,t)\Delta t  \tag{3} \] 
+代入 (2), 并根据 (1) 得
+\[ F'_t(x,y,t) = 0 \tag{4} \]
+再联立 (1), (4) 两个方程可以解出交点坐标 $(X_t, Y_t)$.
+
+既然 $(X_t, Y_t)$ 位于曲线 $F(x,y,t)=0$ 上, 那么可以求出该点处切线斜率. 固定 $t$, 变化 $x,y$, 使 $(X_t+\Delta x, Y_t + \Delta y)$ 仍然位于 $F(x,y,t)=0$ 上, 令 $\Delta x, \Delta y\to 0$, 则
+\[ F(X_t,Y_t,t) + F'_x(X_t,Y_t,t)\Delta x + F(X_t,Y_t,t) + F'_y(X_t,Y_t,t)\Delta y = 0 .\]
+将 $F(X_t,Y_t,t)=0$ 代入, 得切线斜率为
+\[ \frac{\Delta y}{\Delta x} = -\frac{ F'_x(X_t,Y_t,t)}{ F'_y(X_t,Y_t,t)}  \tag{5}\]
+
+另一方面, 当 $t$ 变化时, 交点坐标 $(X_t, Y_t)$ 也构成一条曲线. 当 $t$ 变化到 $t+\Delta t$ 时, $(X_t, Y_t)$ 的变化量为 
+\[ \Delta X_t = X_{t+\Delta t} - X_t, \qquad \Delta Y_t =Y_{t+\Delta t} - Y_t .\]
+$(X_t+\Delta X_t, Y_t+\Delta Y_t)$ 同样满足方程 (1): 
+\[ F(X_t+\Delta X_t, Y_t+\Delta Y_t, t+\Delta t) = 0 \tag{6} \]
+再令 $\Delta t \to 0$, 有 $\Delta X_t, \Delta Y_t\to 0$, 再根据 $F(X_t,Y_t,t)=0$ 可得
+\[ F'_x(X_t, Y_t, t) \Delta X_t + F'_y(X_t, Y_t, t) \Delta Y_t +  F'_t(X_t, Y_t, t)\Delta t = 0.\]
+而 $(X_t,Y_t)$ 同时也满足 (4), 于是
+\[\frac{\Delta Y_t}{\Delta X_t} = -\frac{ F'_x(X_t,Y_t,t)}{ F'_y(X_t,Y_t,t)} \tag{7} \]
+
+可见参数为 $t$ 的曲线 $(X_t, Y_t)$ 的切线斜率与 $F(x,y,t)=0$ 在 $(X_t, Y_t)$ 处的切线斜率一样, 故它们相切. 因此所求的曲线方程就是对于不同的参数 $t$ 满足 (1) 和 (4) 的点构成的曲线.
+
+
+\newpage
+%------------------------------------------------------------------------------%
+
 平面直角坐标系中, 原点为$O$, $x,y$ 轴上各有一点 $A(1,0), B(0,1)$, 将 $OA,OB$分别分成 $N$ 份, 对应得到 $N$ 个端点 (原点除外), 每个轴上第 $i$ 个端点从小到大依次记为 $A_i, B_i$. 连接 $A_1B_N, A_2B_{N-1}, \cdots A_NB_1$, 得到一些线段. 当 $N\to\infty$ 时, 求这些线段的包络线.
 \begin{figure*}[htbp]
 \centering
