@@ -1,0 +1,26 @@
+tikz:
+交点
+\coordinate[] (C) at (intersection of A--B and E--G);
+
+tikz plot: 一般来说, \x 需要加括号, 例如, \x=-5时, \x^2 = -5^2=-25, 而 (\x)^2 = (-5)^2 = 25.
+
+批量画线段:
+\foreach \x in {1,...,10}
+	\draw[line width=1pt,gray] ({3*cos(\x*5)}, {3*sin(\x*5)}) -- ({3*cos(\x*10)}, {3*sin(\x*10)});
+
+参数曲线
+\draw[red,domain=0:360,samples=100,line width=1pt] plot ({2*cos(\x)+cos(2*\x)},{2*sin(\x)+sin(2*\x)});
+
+公式:
+
+标签: \tag{1}, 似乎不能在 $$...$$ 内用, 但可以在 \[ ... \] 内用.
+
+cases:
+\begin{equation}    
+P_{r - j} =
+ \begin{cases}
+    0   &  \text{if $r - j$ is odd,} \\
+    r! \, (-1)^{(r - j)/2}
+        &  \text{if $r - j$ is even.}
+ \end{cases}                
+\end{equation}
