@@ -1032,6 +1032,78 @@ AC^2 - AD^2 &= (AP^2 + CP^2) - (AP^2 + DP^2) \\
 %------------------------------------------------------------------------------%
 \newpage
 \section {格点角}
+
+\noindent 角元塞瓦定理的推广
+
+如下图, 多边形顶点依次为 $P_1P_2\cdots P_n$. 多边形内部有一点 $O$, 连接 $O$ 与各个顶点, 这些线段将对应的顶角分成两个较小的角, 依次为 $\alpha_1, \alpha_2, \alpha_{2n}$. 则如下关系成立:
+\[
+\frac{\sin\alpha_1}{\sin\alpha_2}\cdot \frac{\sin\alpha_3}{\sin\alpha_4}\cdots \frac{\sin\alpha_{2n-1}}{\sin\alpha_{2n}} = 1.
+\]
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[cap=round,scale=1.2]
+\tikzstyle{axes}=[line width=1pt]
+\coordinate[label=below:$O$] (O) at (0.0,0.0);
+\coordinate[label=below:$P_n$] (A) at (-1,-2);
+\coordinate[label=below:$P_1$] (B) at (2,-2);
+\coordinate[label=right:$P_2$] (C) at (3,1);
+\coordinate[label=above:$P_3$] (D) at (1,3);
+\coordinate[label=left:$\cdots$] (E) at (-2,2);
+\coordinate[label=left:$P_{n-1}$] (F) at (-3,0);
+\draw[line width=1pt] (A) -- (B) -- (C) -- (D) -- (E) -- (F) -- cycle;
+\draw[line width=1pt] (A) -- (O) -- (B);
+\draw[line width=1pt] (C) -- (O) -- (D);
+\draw[line width=1pt] (E) -- (O) -- (F);
+\foreach \p in {A,B,C,D,E,F,O}
+	\fill[fill=black,draw=black,thick] (\p) circle (1pt);
+\draw pic["$\alpha_1$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.6cm] {angle=O--B--A};
+\draw pic["$\alpha_2$", draw,line width=1pt, angle eccentricity=1.5,angle radius=0.5cm] {angle=C--B--O};
+\draw pic["$\alpha_3$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.6cm] {angle=O--C--B};
+\draw pic["$\alpha_4$", draw,line width=1pt, angle eccentricity=1.5,angle radius=0.5cm] {angle=D--C--O};
+\draw pic["$\alpha_{2n-1}$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.6cm] {angle=O--A--F};
+\draw pic["$\alpha_{2n}$", draw,line width=1pt, angle eccentricity=1.6,angle radius=0.5cm] {angle=B--A--O};
+\end{tikzpicture}
+\end{figure*}
+
+证明: $\triangle OP_1P_2$ 中, 由正弦定理可得:
+\[ \frac{\sin\alpha_2}{\sin\alpha_3} = \frac{OP_1}{OP_2} .\]
+类似的, 还有
+\begin{align*} 
+\frac{\sin\alpha_4}{\sin\alpha_5} &= \frac{OP_2}{OP_3} \\
+\cdots & \\
+\frac{\sin\alpha_{2n}}{\sin\alpha_1} &= \frac{OP_n}{OP_1}
+\end{align*}
+两边分别相乘即可得证. 当 $N = 3$ 时, 就是角元塞瓦定理.
+
+这个结论可以用来解决一些格点角问题, 例如下图.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[] (A) at (0,0);
+\coordinate[] (B) at (0,5);
+\coordinate[] (C) at (4.924,4.132);
+\coordinate[] (D) at (6.634,1.17);
+\draw [line width=1pt] (A) --(D) -- (C) -- (B) -- cycle;
+\draw [line width=1pt] (A) -- (C);
+\draw [line width=1pt] (B) -- (D);
+\foreach \p in {A,B,C,D}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\draw pic["$60\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=A--B--D};
+\draw pic["$20\degree$",draw,line width=1pt, angle eccentricity=2.2, angle radius=0.6cm] {angle=D--B--C};
+\draw pic["$30\degree$",draw,line width=1pt, angle eccentricity=2.2, angle radius=0.6cm] {angle=D--A--C};
+\draw pic["$50\degree$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=C--A--B};
+\draw pic["$\alpha$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.5cm] {angle=C--D--B};
+\end{tikzpicture}
+\end{figure*}
+
+根据结论有 
+\[\frac{\sin 60\degree}{\sin 20\degree}\cdot\frac{\sin 30\degree}{\sin 50\degree}\cdot\frac{\sin\alpha}{\sin 40\degree}\cdot\frac{\sin 50\degree}{\sin(110\degree - \alpha)} = 1 .\]
+
+从而解得 $\alpha=30\degree$.
+
+%------------------------------------------------------------------------------%
+\newpage
+
 \noindent 来自每日数学打卡
 
 在 $ \triangle ABC $ 中, $ \angle C = 40\degree $, $\angle DAC = 60\degree$, $BD = AC$, 求 $\angle B$ 的度数.
