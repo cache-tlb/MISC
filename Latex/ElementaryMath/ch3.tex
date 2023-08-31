@@ -510,10 +510,8 @@ C'D' &= \sqrt{AC'^2 + AD'^2 - 2AC'\cdot AD'\cos\angle CAD}\\
 \draw [line width=1pt] (A) -- (B) -- (C) -- (D) -- cycle;
 \draw [line width=1pt] (A) -- (C);
 \draw [line width=1pt] (B) -- (D);
-\begin{scope}[style=axes]
-    \draw[->] (-3,0) -- (3,0) node[right] {$x$};
-    \draw[->] (0,-3) -- (0,3) node[above] {$y$};
-\end{scope}
+\draw[-Stealth,line width=1pt] (-3,0) -- (3,0) node[right] {$x$};
+\draw[-Stealth,line width=1pt] (0,-3) -- (0,3) node[above] {$y$};
 \foreach \p in {A,B,C,D,O}
 	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
 \end{tikzpicture}
@@ -964,7 +962,7 @@ c &= 2r\sin(\alpha+\beta)
 \draw [line width=1pt] (F) to (P);
 \draw [dashed,line width=1pt] (M) to (N);
 \foreach \p in {A,B,C,D,E,F,G,P}
-	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+	\fill[fill=black,draw=black,thick] (\p) circle (0.8pt);
 \end{tikzpicture}
 \end{figure*}
 
@@ -984,7 +982,7 @@ c &= 2r\sin(\alpha+\beta)
 \draw [line width=1pt] (C) to (D);
 \draw [line width=1pt] (A) -- (C) -- (B) -- (D) -- cycle;
 \foreach \p in {A,B,C,D,P}
-	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+	\fill[fill=black,draw=black,thick] (\p) circle (0.8pt);
 \end{tikzpicture}
 \end{figure*}
 
@@ -1023,7 +1021,7 @@ AC^2 - AD^2 &= (AP^2 + CP^2) - (AP^2 + DP^2) \\
 \draw [line width=1pt] (A) -- (B) -- (C) -- cycle;
 \draw [dashed,line width=1pt,red] (O) circle (2cm);
 \foreach \p in {A,B,C,D,E,F,G,H,I,O}
-	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+	\fill[fill=black,draw=black,thick] (\p) circle (1.2pt);
 \end{tikzpicture}
 \end{figure*}
 
@@ -1123,6 +1121,8 @@ AC^2 - AD^2 &= (AP^2 + CP^2) - (AP^2 + DP^2) \\
 \draw pic["?", draw, angle eccentricity=1.5] {angle=D--B--A};
 \draw (-1.5, 0) node {$||$} ;
 \draw (1.5,0.95) node[rotate=-40] {$||$};
+\foreach \p in {A,B,C,D}
+	\fill[fill=black,draw=black,thick] (\p) circle (0.8pt);
 \end{tikzpicture}
 \end{figure*}
 
@@ -1137,7 +1137,6 @@ AC^2 - AD^2 &= (AP^2 + CP^2) - (AP^2 + DP^2) \\
 \coordinate[] (C) at (2.64,0.0);
 \coordinate[] (E) at (0.34,0.0);
 \draw[line width=1pt] (B) -- (A) -- (D);
-
 \draw pic["$40\degree$", draw, angle eccentricity=1.5] {angle=A--C--D};
 \draw pic["$\alpha$", draw, angle eccentricity=1.5] {angle=D--B--A};
 \draw pic["$100\degree$", draw, angle eccentricity=1.5] {angle=A--D--B};
@@ -1151,6 +1150,8 @@ AC^2 - AD^2 &= (AP^2 + CP^2) - (AP^2 + DP^2) \\
 \draw pic["$50\degree$", draw, angle eccentricity=1.5] {angle=E--A--C};
 %\draw pic["$80\degree$", draw, angle eccentricity=1.0] {angle=C--D--A};
 \tkzMarkRightAngle[line width=1pt](C,E,A);
+\foreach \p in {A,B,C,D,E}
+	\fill[fill=black,draw=black,thick] (\p) circle (0.8pt);
 \end{tikzpicture}
 \end{figure*}
 
@@ -1204,7 +1205,7 @@ AC^2 - AD^2 &= (AP^2 + CP^2) - (AP^2 + DP^2) \\
 \draw (1.5,0.95) node[rotate=-40] {$||$};
 \draw (1.22,-0.5) node[rotate=20] {$||$};
 \foreach \p in {A,B,C,D,E,F}
-	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+	\fill[fill=black,draw=black,thick] (\p) circle (0.8pt);
 \end{tikzpicture}
 \end{figure*}
 
@@ -1240,7 +1241,7 @@ $\angle CEF= \angle CEA + \angle DEF = 60\degree + 20\degree = 80\degree = \angl
 \draw [line width=1pt] (B) -- (P);
 \draw [line width=1pt] (C) -- (P);
 \foreach \p in {A,B,C,P}
-	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+	\fill[fill=black,draw=black,thick] (\p) circle (0.6pt);
 \draw pic["$60\degree$",draw,line width=1pt, angle eccentricity=1.6, angle radius=0.5cm] {angle=C--A--P};
 \draw pic[draw,line width=1pt, angle eccentricity=2.0, angle radius=0.75cm] {angle=P--A--B};
 \draw pic[draw,line width=1pt, angle eccentricity=2.0, angle radius=1.0cm] {angle=A--B--P};
@@ -1271,7 +1272,7 @@ $\angle CEF= \angle CEA + \angle DEF = 60\degree + 20\degree = 80\degree = \angl
 \draw [dashed,line width=1pt] (B) -- (D) -- (E);
 \draw [dashed,line width=1pt] (C) -- (D) -- (P);
 \foreach \p in {A,B,C,D,E,F,P}
-	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+	\fill[fill=black,draw=black,thick] (\p) circle (0.6pt);
 \draw pic["$60\degree$",draw,line width=1pt, angle eccentricity=1.6, angle radius=0.5cm] {angle=C--A--P};
 \draw pic[draw,line width=1pt, angle eccentricity=2.0, angle radius=0.75cm] {angle=P--A--B};
 \draw pic[draw,line width=1pt, angle eccentricity=2.0, angle radius=1.0cm] {angle=A--B--P};
@@ -2694,7 +2695,7 @@ $\angle CDO' = \angle BDC - \angle BDO' = (90\degree + \alpha) - (90\degree - \a
 \draw [gray,dashed,line width=1pt] (F) -- (O) -- (C);
 \draw [gray,dashed,line width=1pt] (O) -- (A);
 \foreach \p in {A,B,C,D,E,F,G,H,I,O}
-	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+	\fill[fill=black,draw=black,thick] (\p) circle (1.2pt);
 \end{tikzpicture}
 \end{figure*}
 
@@ -2730,7 +2731,7 @@ $\angle CDO' = \angle BDC - \angle BDO' = (90\degree + \alpha) - (90\degree - \a
 \draw [dashed,line width=1pt] (B) to [edge label = $R$] (2,0.5);
 \draw [dashed,line width=1pt] (A) to (B);
 \foreach \p in {M,A,B,C,D,H,Q}
-	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+	\fill[fill=black,draw=black,thick] (\p) circle (1pt);
 \end{tikzpicture}
 \end{figure*}
 
@@ -2763,10 +2764,10 @@ u^2 + (v+H)^2 &= (R+w)^2
 \begin{figure*}[htbp]
 \centering
 \begin{tikzpicture}[scale=1.2]
-\coordinate[label=left:$M$] (M) at (0,0);
-\coordinate[label=above left:$A$] (A) at (0,1);
-\coordinate[label=above left:$B$] (B) at (0,-1);
-\coordinate[label=above left:$C$] (C) at (-1.13,2.19);
+\coordinate[label=right:$M$] (M) at (0,0);
+\coordinate[label=above right:$A$] (A) at (0,1);
+\coordinate[label=above right:$B$] (B) at (0,-1);
+\coordinate[label=right:$C$] (C) at (-1.13,2.19);
 \coordinate[label=left:$T$] (T) at (-0.73,1.43);
 \coordinate[label=above left:$S$] (S) at (-1.52,2.96);
 %\coordinate[label=left:$D$] (D) at (-1.94,1.34);
@@ -2785,7 +2786,7 @@ u^2 + (v+H)^2 &= (R+w)^2
 \draw [dashed,line width=1pt] (B) to (C);
 \draw [dashed,line width=1pt] (M) to (S);
 \foreach \p in {M,A,B,C,S,T}
-	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+	\fill[fill=black,draw=black,thick] (\p) circle (1pt);
 \end{tikzpicture}
 \end{figure*}
 
@@ -2834,7 +2835,7 @@ MS\cdot MT &= (MC+r)\cdot(MC-r) = MC^2-r^2 \\
 \draw [line width=1pt,gray] (F) circle (1.908cm);
 \draw [dashed,line width=1pt,red] (M) circle (2.435cm);
 \foreach \p in {A,B,C,D,E,F,H,A1,A2,B1,B2,C1,C2}
-	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+	\fill[fill=black,draw=black,thick] (\p) circle (1pt);
 \end{tikzpicture}
 \end{figure*}
 
@@ -2865,7 +2866,7 @@ MS\cdot MT &= (MC+r)\cdot(MC-r) = MC^2-r^2 \\
 \draw [line width=1pt] (E)-- (B);
 \draw [line width=1pt] (E)-- (C);
 \foreach \p in {A,B,C,D,E}
-	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+	\fill[fill=black,draw=black,thick] (\p) circle (0.8pt);
 \draw pic[draw,line width=1pt, angle eccentricity=1.5, angle radius=0.5cm] {angle=B--A--E};
 \draw pic[draw,line width=1pt, angle eccentricity=1.5, angle radius=0.5cm] {angle=B--E--C};
 \tkzMarkRightAngle[line width=1pt](E,D,C);
@@ -3902,34 +3903,24 @@ S_C &= \frac{1}{2}(a-y+x+z)\cdot (a-z)\frac{\sqrt{3}}{2} = 56\\
 %\clip(-5.36,-3.5) rectangle (12.2,4.5);
 \coordinate[label=below right:$B$] (B) at (0,0);
 \coordinate[label=below left:$C$] (C) at (3,0);
-\coordinate[label=left:$A$] (A) at (2,2);
+\coordinate[label=above:$A$] (A) at (2,2);
 \coordinate[label=above:$D$] (D) at (0,4);
 \coordinate[label=left:$E$] (E) at (-2,2);
 \coordinate[label=below:$F$] (F) at (0,-3);
 \coordinate[label=below:$G$] (G) at (3,-3);
 \coordinate[label=right:$P$] (P) at (5,1);
 \coordinate[label=right:$Q$] (Q) at (4,3);
-\draw [line width=1.5pt] (B) to [edge label = $c$] (A);
-\draw [line width=1.5pt] (C) to [edge label = $a$] (B);
-\draw [line width=1.5pt] (A) to [edge label = $b$] (C);
-\draw [line width=1.5pt] (A) -- (D) -- (Q) -- cycle;
-\draw [line width=1.5pt] (B) -- (E) -- (F) -- cycle;
-\draw [line width=1.5pt] (C) -- (P) -- (G) -- cycle;
-\draw [line width=1.5pt] (D) -- (E);
-\draw [line width=1.5pt] (F) -- (G);
-\draw [line width=1.5pt] (P) -- (Q);
-
-\begin{scriptsize}
-\draw [fill=uuuuuu] (2,2) circle (2pt);
-\draw [fill=uuuuuu] (0,0) circle (2pt);
-\draw [fill=uuuuuu] (3,0) circle (2pt);
-\draw [fill=uuuuuu] (0,4) circle (2pt);
-\draw [fill=uuuuuu] (-2,2) circle (2pt);
-\draw [fill=uuuuuu] (5,1) circle (2pt);
-\draw [fill=uuuuuu] (4,3) circle (2pt);
-\draw [fill=uuuuuu] (0,-3) circle (2pt);
-\draw [fill=uuuuuu] (3,-3) circle (2pt);
-\end{scriptsize}
+\draw [line width=1pt] (B) to [edge label = $c$] (A);
+\draw [line width=1pt] (C) to [edge label = $a$] (B);
+\draw [line width=1pt] (A) to [edge label = $b$] (C);
+\draw [line width=1pt] (A) -- (D) -- (Q) -- cycle;
+\draw [line width=1pt] (B) -- (E) -- (F) -- cycle;
+\draw [line width=1pt] (C) -- (P) -- (G) -- cycle;
+\draw [line width=1pt] (D) -- (E);
+\draw [line width=1pt] (F) -- (G);
+\draw [line width=1pt] (P) -- (Q);
+\foreach \p in {A,B,C,D,E,F,G,P,Q}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.2pt);
 \end{tikzpicture}
 \end{figure*}
 
@@ -4561,7 +4552,7 @@ f(w) &= -\frac{(a-b)(w-a)(w-b)+(b-c)(w-b)(w-c)+(c-a)(w-c)(w-a)}{(a-b)(b-c)(c-a)}
 \draw[line width=1pt,dashed] (F1)--(P);
 \draw[line width=1pt] (F2)--(F1);
 \foreach \p in {O,F1,F2,P,Q,F11}
-	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+	\fill[fill=black,draw=black,thick] (\p) circle (0.8pt);
 \end{tikzpicture}
 \end{figure*}
 
@@ -4612,7 +4603,7 @@ $$QF_1 + QF_2 > PF_1'+PF_2 > QF_1'+QF_2 = QF_1+QF_2.$$
 \draw[line width=1pt,dashed] (F2) -- (R) --(F1);
 \draw[line width=1pt,dashed] (O) -- (R);
 \foreach \p in {O,F1,F2,A,Q,F11,P,B,S,F22,R}
-	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+	\fill[fill=black,draw=black,thick] (\p) circle (0.8pt);
 \end{tikzpicture}
 \end{figure*}
 
