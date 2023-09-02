@@ -329,8 +329,8 @@ X_2 > X_1
 \coordinate[] (D) at (0,2.5);
 \coordinate[] (E) at (2.5,5);
 \coordinate[] (F) at (1.66667,3.3333);
-\draw[->,line width=1pt] (-1,0) -- (6.2,0) node[right] {$X_1$};
-\draw[->,line width=1pt] (0,-1.0) -- (0,6.2) node[above] {$X_2$};
+\draw[-Stealth,line width=1pt] (-1,0) -- (6.2,0) node[right] {$X_1$};
+\draw[-Stealth,line width=1pt] (0,-1.0) -- (0,6.2) node[above] {$X_2$};
 \fill [fill=red!30] (O)--(F)--(D)--cycle;
 \fill [fill=green!30] (C)--(E)--(F)--cycle;
 \fill [fill=blue!30] (O)--(F)--(C)--cycle;
@@ -401,13 +401,13 @@ P_3 &= \mathrm{Prob}(X_1,X_2\text{互为最近邻,且处于(3)区域}) \\
 \coordinate (I) at (9,-1);
 \coordinate (J) at (10,0);
 \coordinate (K) at (11,1);
-\draw[->,line width=1pt] (-1,0) -- (12,0) node[right] {$x$};
-\draw[->,line width=1pt] (0,-4) -- (0,4) node[above] {$y$};
+\draw[-Stealth,line width=1pt] (-1,0) -- (12,0) node[right] {$x$};
+\draw[-Stealth,line width=1pt] (0,-4) -- (0,4) node[above] {$y$};
 \draw[line width=1pt,red] (O)--(A)--(B)--(C)--(D)--(E)--(F)--(G)--(H);
 \draw[line width=1pt] (H)--(I)--(J)--(K);
 \draw[line width=1pt,blue,dashed] (O)--(AA)--(BB)--(CC)--(DD)--(EE)--(FF)--(GG)--(H);
 \foreach \p in {O,A,B,C,D,E,F,G,H,I,J,K,AA,BB,CC,DD,EE,FF,GG}
-	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+	\fill[fill=black,draw=black,thick] (\p) circle (1.2pt);
 \end{tikzpicture}
 \end{figure*}
 
@@ -970,26 +970,21 @@ L_1 &= L.
 
 \begin{figure*}[htbp]
 \centering
-\definecolor{ududff}{rgb}{0.30196078431372547,0.30196078431372547,1}
-\definecolor{uuuuuu}{rgb}{0.26666666666666666,0.26666666666666666,0.26666666666666666}
 \begin{tikzpicture}[scale=2]
 \tikzstyle{axes}=[line width=1pt]
-\clip(-1.5,-1.45) rectangle (1.6,1.6);
 \draw [line width=1pt] (0,0) circle (1cm);
 \draw (0.75,0.92) node[anchor=north] {$\Delta r$};
 \draw (0.85,-0.05) node[anchor=north] {$2$};
 \draw (0.0,-0.1) node[anchor=north] {$1$};
 \draw [line width=1pt] (0,0) circle (1.2cm);
 \draw [line width=1pt] (-1,0)-- (0.4,0.5);
-\begin{scope}[style=axes]
-    \draw[->] (-1.4,0) -- (1.4,0) node[right] {$x$};
-    \draw[->] (-1,-1.4) -- (-1,1.4) node[above] {$y$};
-\end{scope}
+\draw[-Stealth,line width=1pt] (-1.4,0) -- (1.6,0) node[right] {$x$};
+\draw[-Stealth,line width=1pt] (-1,-1.4) -- (-1,1.4) node[above] {$y$};
 \begin{scriptsize}
-\draw [fill=uuuuuu] (0,0) circle (1pt);
-\draw [fill=uuuuuu] (1,0) circle (1pt);
-\draw [fill=ududff] (-1,0) circle (1pt);
-\draw [fill=ududff] (0.4,0.5) circle (1pt);
+\draw [fill=black] (0,0) circle (0.6pt);
+\draw [fill=black] (1,0) circle (0.6pt);
+\draw [fill=blue] (-1,0) circle (0.6pt);
+\draw [fill=blue] (0.4,0.5) circle (0.6pt);
 \end{scriptsize}
 \end{tikzpicture}
 \end{figure*}
