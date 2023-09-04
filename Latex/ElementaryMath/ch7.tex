@@ -256,11 +256,9 @@ I_1 &= \int_0^{\pi/2}\left(\frac{1}{\sin x} - \frac{1}{x}\right)\cdot\sin (2n+1)
 \coordinate (C) at (3.4855555555555555,1.944112448982997);
 \coordinate (D) at (3.73,2.305416047938065);
 \coordinate (E) at (4.67,1.944112448982997);
-\draw
-    pic["$\theta$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.5cm] {angle=E--C--D};
-
-\draw[->,line width=1pt] (0.0,0) -- (6.2,0) node[right] {$x$};
-\draw[->,line width=1pt] (0,-1.0) -- (0,5.2) node[above] {$y$};
+\draw pic["$\theta$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.5cm] {angle=E--C--D};
+\draw[-Stealth,line width=1pt] (0.0,0) -- (6.2,0) node[right] {$x$};
+\draw[-Stealth,line width=1pt] (0,-1.0) -- (0,5.2) node[above] {$y$};
 \draw[color=orange,line width=1pt] plot (\x,{0.5*(exp(0.5*\x) + exp(-0.5*\x))-1}) ;
 
 \draw [-latex,line width=1pt] (B) -- (2.27311111111111,0.4668888888889078) node[anchor=north west] {$T_2$};
@@ -269,7 +267,7 @@ I_1 &= \int_0^{\pi/2}\left(\frac{1}{\sin x} - \frac{1}{x}\right)\cdot\sin (2n+1)
 \draw [line width=1pt,dash pattern=on 3pt off 3pt] (C) -- (E);
 \draw [-latex,line width=1pt] (O) -- (A);
 \foreach \p in {O,B,C,D}
-	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+	\fill[fill=black,draw=black,thick] (\p) circle (0.8pt);
 \end{tikzpicture}
 \end{figure*}
 
@@ -375,22 +373,22 @@ u &= \frac{V_1}{V_2}\ln{(L+V_2t)} + C
 %  \draw (-1,0) -- (1,0) (0,-1) -- (0,1);
 %\end{scope}
 \coordinate (O) at (0,0,0);
-\draw[->,line width=1pt] (O)--(1.75,0,0)node[left,fill opacity=1,black]{$z$};	% old x
-\draw[->,line width=1pt] (O)--(0,1.75,0)node[right,fill opacity=1,black]{$x$}; % old y
-\draw[->,line width=1pt] (O)--(0,0,1.75)node[above,fill opacity=1,black]{$y$}; % old z
+\draw[-Stealth,line width=1pt] (O)--(1.75,0,0)node[left,fill opacity=1,black]{$z$};	% old x
+\draw[-Stealth,line width=1pt] (O)--(0,1.75,0)node[right,fill opacity=1,black]{$x$}; % old y
+\draw[-Stealth,line width=1pt] (O)--(0,0,1.75)node[above,fill opacity=1,black]{$y$}; % old z
 \draw[dashed,line width=1pt] (O)--(-1,0,0);
-\fill[fill=black,draw=black,thick,fill opacity=1] (-1,0,0) circle (0.6pt);
-\fill[fill=black,draw=black,thick,fill opacity=1] (0,0,0) circle (0.6pt);
-\fill[fill=black,draw=black,thick,fill opacity=1] (0,0,1) circle (0.6pt);
-\fill[fill=black,draw=black,thick,fill opacity=1] (0,1,0) circle (0.6pt);
-\fill[fill=black,draw=black,thick,fill opacity=1] (1,0,0) circle (0.6pt);
+\fill[fill=black,draw=black,thick,fill opacity=1] (-1,0,0) circle (0.4pt);
+\fill[fill=black,draw=black,thick,fill opacity=1] (0,0,0) circle (0.4pt);
+\fill[fill=black,draw=black,thick,fill opacity=1] (0,0,1) circle (0.4pt);
+\fill[fill=black,draw=black,thick,fill opacity=1] (0,1,0) circle (0.4pt);
+\fill[fill=black,draw=black,thick,fill opacity=1] (1,0,0) circle (0.4pt);
 \coordinate (P) at (-1,0.9,0.1);
 \coordinate (Q) at (-0.6,0.9,0.1);
 \coordinate (R) at (-0.7236,0.6512,0.0723);
-\fill[fill=black,draw=black,thick,fill opacity=1] (P) circle (0.6pt);
-\fill[fill=red,draw=red,thick,fill opacity=1] (R) circle (0.6pt);
+\fill[fill=black,draw=black,thick,fill opacity=1] (P) circle (0.4pt);
+\fill[fill=red,draw=red,thick,fill opacity=1] (R) circle (0.4pt);
 \draw[dashed,red,line width=1pt] (O) -- (P)node[above right,fill opacity=1,black]{$P=(x,y,-1)$};
-\draw[->,blue,line width=1pt] (P)--(Q)node[below right,fill opacity=1,blue]{$\vec{n}$};
+\draw[-Stealth,blue,line width=1pt] (P)--(Q)node[below right,fill opacity=1,blue]{$\vec{n}$};
 \draw pic[draw,line width=1pt, angle eccentricity=1.8, angle radius=0.5cm] {angle=O--P--Q};
 \end{tikzpicture}
 \end{figure*}
@@ -454,8 +452,8 @@ f(s,t) &= \int_0^\frac{t}{\sqrt{s^2+t^2+1}} {\frac{s(1-v^2)}{v^2s^2+1}\cdot\frac
 \draw [line width=1pt] (0,0,0) circle (\R);
 \foreach \angle/\linecolor[count=\n from 1] in {-5/red,225/green,290/blue} {
 	\begin{scope}[rotate=\angle]
-		\path[draw,\linecolor,line width=0.5pt,dashed,name path global=d\n] (2,0) arc [start angle=0, end angle=180, x radius=2cm, y radius=1cm] ;
-		\path[draw,\linecolor,line width=0.5pt,name path global=s\n] (-2,0) arc [start angle=180, end angle=360, x radius=2cm, y radius=1cm] ;
+		\path[draw,\linecolor,line width=0.8pt,dashed,name path global=d\n] (2,0) arc [start angle=0, end angle=180, x radius=2cm, y radius=1cm] ;
+		\path[draw,\linecolor,line width=0.8pt,name path global=s\n] (-2,0) arc [start angle=180, end angle=360, x radius=2cm, y radius=1cm] ;
 	\end{scope}
 }
 \InterSec{s1}{s2}{I3};
