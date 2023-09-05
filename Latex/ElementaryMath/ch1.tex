@@ -494,9 +494,9 @@ $$ z = x\cdot y = (a+bi)(c+di) = (ac-bd)+i(ad+bc), $$ 则 $$ \bar{z} = (ac-bd)-i
 现定义一个正整数上的函数 $ \chi(n) $ : 
 \begin{equation*}
 \chi(n) = \begin{cases}
-0,\ \ if \ n \equiv 0 \pmod{2}\\
-1,\ \ if \ n \equiv 1 \pmod{4}\\
--1,\ \ if \ n \equiv 3 \pmod{4}
+0,\ \ \textrm{if} \ n \equiv 0 \pmod{2}\\
+1,\ \ \textrm{if} \ n \equiv 1 \pmod{4}\\
+-1,\ \ \textrm{if} \ n \equiv 3 \pmod{4}
 \end{cases}
 \end{equation*}
 不难验证 $ \chi(mn) = \chi(m)\chi(n) $ 对任意正整数 $ m, n $ 都成立.
@@ -620,9 +620,6 @@ Wallis 乘积公式: \[ \frac{\pi}{2} = \frac{2}{1}\cdot\frac{2}{3}\cdot\frac{4}
 \[ P = \frac{||A-x_1||}{||B-x_1||} \frac{||A-x_{-1}||}{||B-x_{-1}||} \cdot \frac{||A-x_2||}{||B-x_2||} \frac{||A-x_{-2}||}{||B-x_{-2}||} \cdots \]
 
 \begin{figure*}[htbp]
-\definecolor{qqwuqq}{rgb}{0,0.39215686274509803,0}
-\definecolor{ududff}{rgb}{0.30196078431372547,0.30196078431372547,1}
-\definecolor{uuuuuu}{rgb}{0.26666666666666666,0.26666666666666666,0.26666666666666666}
 \centering
 \begin{tikzpicture}[cap=round,scale=3.0]
 \coordinate[] (O) at (0,0);
@@ -633,19 +630,18 @@ Wallis 乘积公式: \[ \frac{\pi}{2} = \frac{2}{1}\cdot\frac{2}{3}\cdot\frac{4}
 \coordinate[label=right:$x_{-1}$] (E) at (3.978087581473093,-0.4181138530706139);
 \coordinate[label=right:$x_{-2}$] (F) at (3.9125904029352223,-0.8316467632710373);
 \clip(-0.1,-1.0) rectangle (4.1,1.0);
-\draw [line width=1.5pt] (O) circle (4cm);
-\draw [line width=1.5pt] (O) -- (A);
-\draw [dashed,line width=1.5pt] (O) -- (B);
-\draw [fill=uuuuuu] (O) circle (0.75pt);
-\draw [fill=ududff] (A) circle (0.75pt);
-\draw [fill=ududff] (B) circle (0.75pt);
-\draw [fill=ududff] (C) circle (0.75pt);
-\draw [fill=ududff] (D) circle (0.75pt);
-\draw [fill=ududff] (E) circle (0.75pt);
-\draw [fill=ududff] (F) circle (0.75pt);
-\draw (2.5,-0.1) node[anchor=north west] {$\theta = \frac{1}{2}\omega=\frac{\pi}{N}$};
-\draw
-    pic["$\theta$",draw,line width=1pt, angle eccentricity=1.5, angle radius=5.5cm] {angle=A--O--B};
+\draw [line width=1pt] (O) circle (4cm);
+\draw [line width=1pt] (O) -- (A);
+\draw [dashed,line width=1pt] (O) -- (B);
+\draw [fill=black] (O) circle (0.4pt);
+\draw [fill=blue] (A) circle (0.4pt);
+\draw [fill=blue] (B) circle (0.4pt);
+\draw [fill=blue] (C) circle (0.4pt);
+\draw [fill=blue] (D) circle (0.4pt);
+\draw [fill=blue] (E) circle (0.4pt);
+\draw [fill=blue] (F) circle (0.4pt);
+\draw (2.5,-0.1) node[anchor=north west] {$\theta = \dfrac{1}{2}\omega=\dfrac{\pi}{N}$};
+\draw pic["$\theta$",draw,line width=1pt, angle eccentricity=1.5, angle radius=5.5cm] {angle=A--O--B};
 
 \end{tikzpicture}
 \end{figure*}
@@ -942,11 +938,11 @@ Q &= \frac{1}{1-\frac{1}{4}}\cdot\frac{1}{1-\frac{1}{9}}\cdot\frac{1}{1-\frac{1}
 \coordinate[] (B) at (0.0,1.0);
 \coordinate[] (C) at (0.5,0.866);
 \coordinate[] (D) at (0.5,0.0);
-\draw[line width=1.25pt] (A) -- (O) -- (B);
-\draw[line width=1.25pt] (A) arc (0:90:1);
-\draw[line width=1.25pt] (O) -- (C) -- (D);
+\draw[line width=1pt] (A) -- (O) -- (B);
+\draw[line width=1pt] (A) arc (0:90:1);
+\draw[line width=1pt] (O) -- (C) -- (D);
 \foreach \p in {O,A,B,C,D}
-	\fill[fill=black,draw=black,thick] (\p) circle (0.5pt);
+	\fill[fill=black,draw=black,thick] (\p) circle (0.25pt);
 \draw[font=\Large] (-0.1, -0.1) node {$0$};
 \draw[font=\Large] (1.0, -0.1) node {$1$};
 \draw[font=\Large] (0.5, -0.1) node {$\frac{1}{2}$};
@@ -962,11 +958,11 @@ Q &= \frac{1}{1-\frac{1}{4}}\cdot\frac{1}{1-\frac{1}{9}}\cdot\frac{1}{1-\frac{1}
 \coordinate[] (B) at (1.0,1.0);
 \coordinate[] (C) at (0.5,0.866);
 \coordinate[] (D) at (0.5,0.0);
-\draw[line width=1.25pt] (O) -- (A) -- (B);
-\draw[line width=1.25pt] (B) arc (90:180:1);
-\draw[line width=1.25pt] (A) -- (C) -- (D);
+\draw[line width=1pt] (O) -- (A) -- (B);
+\draw[line width=1pt] (B) arc (90:180:1);
+\draw[line width=1pt] (A) -- (C) -- (D);
 \foreach \p in {O,A,B,C,D}
-	\fill[fill=black,draw=black,thick] (\p) circle (0.5pt);
+	\fill[fill=black,draw=black,thick] (\p) circle (0.25pt);
 \draw[font=\Large] (-0.0, -0.1) node {$0$};
 \draw[font=\Large] (1.0, -0.1) node {$\frac{1}{2}$};
 \draw[font=\Large] (0.5, -0.1) node {$\frac{1}{4}$};
@@ -984,7 +980,7 @@ Q &= \frac{1}{1-\frac{1}{4}}\cdot\frac{1}{1-\frac{1}{9}}\cdot\frac{1}{1-\frac{1}
 \pi = 12\left[ -\frac{\sqrt{3}}{8} + \frac{1}{2}-\frac{1}{6}(\frac{1}{2})^3-\frac{1}{40}(\frac{1}{2})^5 - \frac{1}{112}(\frac{1}{2})^7 - \frac{5}{1152}(\frac{1}{2})^9 - \cdots \right]
 \]
 
-另一种减小积分上限的方法是考虑圆的方程是 $ x^2 - x + y^2 = 0 $, 它的圆心在 $ (\dfrac{1}{2}, 0) $, 半径为 $ \dfrac{1}{2} $. 积分区间是 $ [0,\frac{1}{4} ]$, 被积函数是 $ y = \sqrt(x - x^2) $, 面积关系为:
+另一种减小积分上限的方法是考虑圆的方程是 $ x^2 - x + y^2 = 0 $, 它的圆心在 $ (\dfrac{1}{2}, 0) $, 半径为 $ \dfrac{1}{2} $. 积分区间是 $ [0,\dfrac{1}{4} ]$, 被积函数是 $ y = \sqrt{(x - x^2)} $, 面积关系为:
 \begin{align*}
 \frac{\pi}{24} - \frac{\sqrt{3}}{32} &= \int_0^\frac{1}{4}{x^\frac{1}{2}(1-x)^\frac{1}{2} dx} \\
 		&= \int_0^\frac{1}{4}{ x^\frac{1}{2}\left[ 1-\frac{1}{2}x - \frac{1}{8}x^2-\frac{1}{16}x^3-\frac{5}{128}x^4-\cdots \right] dx} \\
