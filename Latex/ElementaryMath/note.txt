@@ -2,6 +2,9 @@ tikz:
 交点
 \coordinate[] (C) at (intersection of A--B and E--G);
 
+线段上斜向的label: 
+\draw [line width=1pt] (A) -- (C) node [midway,above,sloped] {$\sin\alpha$};
+
 tikz plot: 一般来说, \x 需要加括号, 例如, \x=-5时, \x^2 = -5^2=-25, 而 (\x)^2 = (-5)^2 = 25.
 
 批量画线段:
