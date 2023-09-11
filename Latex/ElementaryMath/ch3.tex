@@ -4728,6 +4728,45 @@ $$OR = \dfrac{1}{2} F_1F_2 = c.$$
 \end{tikzpicture}
 \end{figure*}
 
+%------------------------------------------------------------------------------%
+\newpage
+
+三角函数和角公式的无字证明(之三).
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[] (A) at (0,0);
+\coordinate[] (B) at (8,0);
+\coordinate[] (C) at (8,6);
+\coordinate[] (D) at (8, 2);
+\coordinate[] (E) at (7.158, 5.368);
+\coordinate[] (F) at (8, 5.368);
+\coordinate[] (G) at (7.158, 0);
+\draw [line width=1pt] (A) -- (G);
+\draw [line width=1pt] (B) --(C) -- (E);
+\draw [line width=1pt,dashed] (E)--(G);
+\draw [line width=1pt,blue] (A) -- (E) node [midway,above] {$1$};
+\draw [line width=1pt] (A) -- (D) node [midway,above,sloped] {$\cos\alpha$}; 
+\draw [line width=1pt] (D) -- (E) node [near start,below,sloped] {$\sin\alpha$};
+\node [anchor=west,red] at (F) {$\sin\alpha\sin\beta$};
+\foreach \p in {A,B,C,D,E,F,G}
+	\fill[fill=black,draw=black,thick] (\p) circle (0.8pt);
+\draw pic["$\alpha$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.6cm] {angle=D--A--E};
+\draw pic["$\beta$",draw,line width=1pt, angle eccentricity=1.8, angle radius=1cm] {angle=B--A--D};
+\draw pic["$\beta$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.9cm] {angle=C--D--E};
+\tkzMarkRightAngle[line width=1pt](A,G,E);
+\tkzMarkRightAngle[line width=1pt](A,B,C);
+\tkzMarkRightAngle[line width=1pt](A,D,E);
+\tkzMarkRightAngle[line width=1pt](E,F,D);
+\draw [line width=1pt,red] (E) -- (F) ;
+\draw [line width=1pt,red] (G) -- (B) ;
+\draw [line width=1pt,decorate,decoration={brace,mirror,amplitude=5pt}] (0,-1) -- (7.158,-1) node[pos=0.5,below=0.1]{$\cos(\alpha+\beta)=\cos\alpha\cos\beta-\sin\alpha\sin\beta$};
+\draw [line width=1pt,decorate,decoration={brace,mirror,amplitude=5pt}] (0,-0.2) -- (8,-0.2) node[pos=0.5,below=0.1]{$\cos\alpha\cos\beta$};
+\end{tikzpicture}
+\end{figure*}
+
+
+
 
 
 
