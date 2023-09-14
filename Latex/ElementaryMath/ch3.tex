@@ -4766,6 +4766,49 @@ $$OR = \dfrac{1}{2} F_1F_2 = c.$$
 \end{figure*}
 
 
+%------------------------------------------------------------------------------%
+\newpage
+
+三角函数和角公式的无字证明(之四).
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[] (A) at (0,0);
+\coordinate[] (B) at (8,0);
+\coordinate[] (C) at (8,5);
+\coordinate[] (D) at (8, -3);
+\coordinate[] (E) at (6.125, 0);
+\coordinate[] (F) at (5.37, -2.014);
+\fill[fill=orange!20] (C)--(D)--(F)--cycle;
+\fill[fill=green!20] (A)--(E)--(F)--cycle;
+\draw [line width=1pt] (A) -- (C);
+\draw [line width=1pt] (D) -- (F);
+\draw [line width=1pt,blue,dashed] (A) --(E)node [midway,above,sloped] {$1-\tan\alpha\tan\beta$};
+\draw [line width=1pt] (E) --(B) node [midway,below,sloped] {$\tan\alpha\tan\beta$};
+\draw [line width=1pt,blue] (D) --(B) node [midway,below,sloped] {$\tan\beta$};
+\tkzMarkRightAngle[line width=1pt](A,B,C);
+\tkzMarkRightAngle[line width=1pt](A,F,E);
+\tkzMarkRightAngle[line width=1pt](C,F,D);
+\draw [line width=1pt,blue] (B) --(C) node [midway,below,sloped] {$\tan\alpha$};
+\draw [line width=1pt,red] (C)--(F);
+\draw [line width=1pt,red,dashed] (A) --(F);
+\foreach \p in {A,B,C,D,E,F}
+	\fill[fill=black,draw=black,thick] (\p) circle (0.8pt);
+\draw pic["$\alpha$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.6cm] {angle=B--A--C};
+\draw pic["$\beta$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.8cm] {angle=F--A--E};
+\draw pic["$\beta$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.6cm] {angle=E--C--B};
+\draw [line width=1pt,decorate,decoration={brace,mirror,amplitude=5pt,raise=5pt}] (0,-3) -- (8,-3) node[pos=0.5,anchor=north,below=0.3]{$1$};
+\draw [line width=1pt,decorate,decoration={brace,mirror,amplitude=5pt,raise=5pt}] (A) -- (F) node[pos=0.47,below=0.4,anchor=north]{$x$};
+\draw [line width=1pt,decorate,decoration={brace,mirror,amplitude=5pt,raise=10pt}] (C) -- (F) node[pos=0.43,left=1,anchor=north]{$y$};
+\end{tikzpicture}
+\end{figure*}
+\[ \cos\beta = \frac{x}{1-\tan\alpha\tan\beta} = \frac{y}{\tan\alpha+\tan\beta} \]
+\[\tan(\alpha+\beta) = \frac{y}{x} = \frac{\tan\alpha+\tan\beta}{1-\tan\alpha\tan\beta}\]
+
+
+
+
+
 
 
 
