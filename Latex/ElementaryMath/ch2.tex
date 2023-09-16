@@ -1728,6 +1728,49 @@ $b_ib_j < 0,(x_i,x_j) < 0$, 所以得出 $(V,V) < 0$, 矛盾.
 
 \newpage
 %------------------------------------------------------------------------------%
+$n$ 个复数 $z_1, z_2, \cdots, z_n$ 满足 
+\[ |z_1| + |z_2| + \cdots + |z_n| = 1. \]
+
+证明: 这些复数中存在一个子集, 使得子集中的复数之和的模长大于或等于 $\dfrac{1}{6}.$
+
+~
+
+解: 用三条两两夹角为 $120\degree$ 的射线将复平面分成三个区域, 如下图所示.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[] (O) at (0,0);
+\coordinate[] (A) at (-4,0);
+\coordinate[] (B) at (2, 3.464);
+\coordinate[] (C) at (2, -3.464);
+\coordinate[] (D) at (4,0);
+\coordinate[] (E) at (2.84618,1.80087);
+\coordinate[] (F) at (2.84618,0);
+\draw [line width=1pt,red] (O) --(A);
+\draw [line width=1pt,red] (O) --(B);
+\draw [line width=1pt,red] (O) --(C);
+\draw [-Stealth,line width=1pt] (O) --(E);
+\draw [line width=1pt,dashed] (F) --(D);
+\draw [-Stealth,line width=1pt,dashed] (O) --(F);
+\draw [line width=1pt,dashed] (E) --(F);
+\draw[anchor=west] (E) node {$\vec{w}_i$};
+\draw[anchor=west] (D) node {$\vec{l}$};
+\foreach \p in {O}
+	\fill[fill=black,draw=black,thick] (\p) circle (0.8pt);
+\draw pic["$<60\degree$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.9cm] {angle=D--O--E};
+\end{tikzpicture}
+\end{figure*}
+
+因为 $z_i$ 的模长之和为 $1$, 所以一定存在一个区域, 其中的复数模长之和大于等于 $\dfrac{1}{3}$. 设这些复数对应的向量为 $\vec{w}_1, \vec{w}_2,\cdots,\vec{w}_m$. 下面证明 $\sum \vec{w}_i$ 的模长大于等于 $\dfrac{1}{6}$.
+
+取该区域的角平分线, 其方向上的单位向量为 $\vec{l}$, 则 $\vec{w}_i$ 与 $\vec{l}$ 的夹角均不超过 $60\degree$. 这样 $\vec{w}_i$ 投影到 $\vec{l}$ 上的长度为
+\[ (\vec{w}_i, \vec{l}) = |\vec{w}_i|\cdot|\vec{l}|\cdot\cos\langle\vec{w_i},\vec{l}\rangle \ge |\vec{w}_i|\cdot\cos 60\degree = \frac{|\vec{w}_i|}{2} .\]
+
+而向量 $\sum\vec{w}_i$ 的长度是不小于向量 $\sum\vec{w}_i$ 投影到 $\vec{l}$ 上的长度. 因而有
+\[|\sum\vec{w}_i| \ge (\sum\vec{w}_i, \vec{l}) = \sum(\vec{w}_i,\vec{l}) \ge \frac{\sum|\vec{w}_i|}{2}\ge \frac{1}{6} .\]
+
+\newpage
+%------------------------------------------------------------------------------%
 
 \noindent 光栅化线段的像素个数
 
