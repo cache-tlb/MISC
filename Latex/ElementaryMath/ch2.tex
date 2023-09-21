@@ -188,6 +188,45 @@ S &=\frac{1}{2}\sqrt{(ab)^2-\frac{(7-4c^2)^2}{4}}\\
 \[2CD^2+\frac{7}{2}c^2 \ge 2\sqrt{7}CD\cdot c\ge 2\sqrt{7}h_c\cdot c.\]
 所以 $S=\dfrac{1}{2}h_c\cdot c \le \dfrac{1}{2}\cdot\dfrac{7}{2\sqrt{7}}=\dfrac{\sqrt{7}}{4}.$
 
+\newpage
+%------------------------------------------------------------------------------%
+
+已知 $a,b,c > 0$, 且 $a+b+c=8$, 求 $\sqrt{a^2+1}+\sqrt{b^2+4}+\sqrt{c^2+9}$ 的最小值.
+
+~
+
+解: 如下图, 矩形边长分别为 $a+b+c=8$ 和 $1+2+3=6$, $\sqrt{a^2+1}+\sqrt{b^2+4}+\sqrt{c^2+9}$ 为三段折线的长度之和, 最小值就是矩形对角线长, 为 $10$.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[] (O) at (0,0);
+\coordinate[] (A) at (0,1);
+\coordinate[] (B) at (0,3);
+\coordinate[] (C) at (0,6);
+\coordinate[] (D) at (4,0);
+\coordinate[] (E) at (6,0);
+\coordinate[] (F) at (8,0);
+\coordinate[] (G) at (4,1);
+\coordinate[] (H) at (6,3);
+\coordinate[] (I) at (8,6);
+\draw [line width=1pt] (O) --(A) node [midway,left] {$1$};
+\draw [line width=1pt] (A) --(B) node [midway,left] {$2$};
+\draw [line width=1pt] (B) --(C)node [midway,left] {$3$};
+\draw [line width=1pt] (C) --(I) -- (F);
+\draw [line width=1pt] (O) --(D) node [midway,below] {$a$};
+\draw [line width=1pt] (D) --(E) node [midway,below] {$b$};
+\draw [line width=1pt] (E) --(F)node [midway,below] {$c$};
+\draw [line width=1pt,dashed] (A) --(G) -- (D);
+\draw [line width=1pt,dashed] (B) --(H) -- (E);
+\draw [line width=1pt,red] (O) --(G) node [near end,below,sloped] {$\sqrt{a^2+1}$};
+\draw [line width=1pt,green] (G) --(H) node [midway,above,sloped] {$\sqrt{b^2+4}$};
+\draw [line width=1pt,blue] (H) --(I) node [midway,below,sloped] {$\sqrt{c^2+9}$};
+\draw [line width=1pt,dashed,gray] (O) --(I);
+\foreach \p in {O,A,B,C,D,E,F,G,H,I}
+	\fill[fill=black,draw=black,thick] (\p) circle (0.8pt);
+\end{tikzpicture}
+\end{figure*}
+
 
 \newpage
 %------------------------------------------------------------------------------%
