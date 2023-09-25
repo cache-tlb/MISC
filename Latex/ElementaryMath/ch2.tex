@@ -1685,13 +1685,13 @@ a_t\sin\alpha &= \cos(t\alpha)\sin\alpha - \cos\alpha\sin(t\alpha)\\
 %------------------------------------------------------------------------------%
 \noindent 齐次坐标下的重心坐标插值
 
-已知空间中一个三角形的三个顶点为 $A,B,C$, 经过投影矩阵到 NDC 空间下的齐次坐标是 $(A_x, A_y, A_z, A_w)$, $(B_x, B_y, B_z, B_w)$, $(C_x, C_y, C_z, C_w)$, 这里 $A_w, B_w, C_w$ 就是对应的顶点在相机空间下的实际深度. 三角形 $ABC$ 投影到屏幕上仍然是一个三角形, 各顶点的屏幕空间坐标分别是 
-$$A'=(\dfrac{A_x}{A_w},\dfrac{A_y}{A_w}), \qquad B'=(\dfrac{B_x}{B_w},\dfrac{B_y}{B_w}),\qquad C'=(\dfrac{C_x}{C_w},\dfrac{C_y}{C_w}). $$
-对屏幕上的三角形进行光栅化, 得到一组像素坐标. 对于其中的每个像素, 假设其屏幕空间的二维坐标是 $P'=(u,v)$, 需要求出此处 $A,B,C$ 三个顶点的权重, 以便对顶点属性进行插值. 假设像素 $P'$ 对应于三维空间三角形 $ABC$ 上的点为 $P$, 它的齐次坐标为 $(P_x, P_y, P_z, P_w)$, 由 $P$ 点在三角形 $ABC$ 内可得
+已知空间中一个三角形的三个顶点为 $A,B,C$, 经过投影矩阵到 NDC 空间下的齐次坐标是 $(X_A, Y_A, Z_A, W_A)$, $(X_B, Y_B, Z_B, W_B)$, $(X_C, Y_C, Z_C, W_C)$, 这里 $W_A, W_B, W_C$ 就是对应的顶点在相机空间下的实际深度. 三角形 $ABC$ 投影到屏幕上仍然是一个三角形, 各顶点的屏幕空间坐标分别是 
+$$A'=(\dfrac{X_A}{W_A},\dfrac{Y_A}{W_A}), \qquad B'=(\dfrac{X_B}{W_B},\dfrac{Y_B}{W_B}),\qquad C'=(\dfrac{X_C}{W_C},\dfrac{Y_C}{W_C}). $$
+对屏幕上的三角形进行光栅化, 得到一组像素坐标. 对于其中的每个像素, 假设其屏幕空间的二维坐标是 $P'=(u,v)$, 需要求出此处 $A,B,C$ 三个顶点的权重, 以便对顶点属性进行插值. 假设像素 $P'$ 对应于三维空间三角形 $ABC$ 上的点为 $P$, 它的齐次坐标为 $(X_P, Y_P, Z_P, W_P)$, 由 $P$ 点在三角形 $ABC$ 内可得
 \begin{align*}
-P_x &= a\cdot A_x + b\cdot B_x + c\cdot C_x \tag{1} \\
-P_y &= a\cdot A_y + b\cdot B_y + c\cdot C_y \tag{2} \\
-P_w &= a\cdot A_w + b\cdot B_w + c\cdot C_w \tag{3}
+X_P &= a\cdot X_A + b\cdot X_B + c\cdot X_C \tag{1} \\
+Y_P &= a\cdot Y_A + b\cdot Y_B + c\cdot Y_C \tag{2} \\
+W_P &= a\cdot W_A + b\cdot W_B + c\cdot W_C \tag{3}
 \end{align*}
 这里 $a,b,c$ 为 $P$ 的重心坐标, 满足$0\le a,b,c \le 1$, 且
 \[a+b+c=1 \tag{4} \]
@@ -1742,31 +1742,31 @@ $a,b,c$ 均为未知量, 需要根据 $P$ 点的屏幕坐标 $P'$ 求出. $A',B'
 \[P' = r\cdot A' + s\cdot B' + t\cdot C'.\]
 展开可得
 \begin{align*}
-u &= r\cdot\frac{A_x}{A_w} + s\cdot\frac{B_x}{B_w} + t\cdot\frac{C_x}{C_w} \tag{5}\\
-v &= r\cdot\frac{A_y}{A_w} + s\cdot\frac{B_y}{B_w} + t\cdot\frac{C_y}{C_w} \tag{6}
+u &= r\cdot\frac{X_A}{W_A} + s\cdot\frac{X_B}{W_B} + t\cdot\frac{X_C}{W_C} \tag{5}\\
+v &= r\cdot\frac{Y_A}{W_A} + s\cdot\frac{Y_B}{W_B} + t\cdot\frac{Y_C}{W_C} \tag{6}
 \end{align*}
 这里 $r,s,t$ 是 $P'$ 在三角形 $A'B'C'$的重心坐标, 满足 $0\le r,s,t\le 1$, 且
 \[r+s+t=1 \tag{7} \]
 通过求解 $(5),(6),(7)$ 可以求出 $r,s,t$ .事实上求解重心坐标的标准方法是通过面积比, 但本质都一样. 因此实质上 $r,s,t$ 的值也是已知的.
 
 一般情况下, $r,s,t$ 的值与 $a,b,c$ 并不相等, 因为它们满足的关系不同. 由 $P$ 和 $P'$ 的投影关系有
-$$u=\dfrac{P_x}{P_w},\qquad v=\dfrac{P_y}{P_w}$$ 并结合 $(1)(2)$ 可得
+$$u=\dfrac{X_P}{W_P},\qquad v=\dfrac{Y_P}{W_P}$$ 并结合 $(1)(2)$ 可得
 \begin{align*}
-a\cdot A_x + b\cdot B_x + c\cdot C_x &= u\cdot P_w\\
-a\cdot A_y + b\cdot B_y + c\cdot C_y &= v\cdot P_w 
+a\cdot X_A + b\cdot X_B + c\cdot X_C &= u\cdot W_P\\
+a\cdot Y_A + b\cdot Y_B + c\cdot Y_C &= v\cdot W_P 
 \end{align*}
-两式分别除以$P_w$, 得
+两式分别除以$W_P$, 得
 \begin{align*}
-a\cdot\frac{A_w}{P_w}\cdot \frac{A_x}{A_w} + b\cdot\frac{B_w}{P_w}\cdot \frac{B_x}{B_w}+ c\cdot\frac{C_w}{P_w}\cdot \frac{C_x}{C_w} &= u \\
-a\cdot\frac{A_w}{P_w}\cdot \frac{A_y}{A_w} + b\cdot\frac{B_w}{P_w}\cdot \frac{B_y}{B_w}+ c\cdot\frac{C_w}{P_w}\cdot \frac{C_y}{C_w} &= v 
+a\cdot\frac{W_A}{W_P}\cdot \frac{X_A}{W_A} + b\cdot\frac{W_B}{W_P}\cdot \frac{X_B}{W_B}+ c\cdot\frac{W_C}{W_P}\cdot \frac{X_C}{W_C} &= u \\
+a\cdot\frac{W_A}{W_P}\cdot \frac{Y_A}{W_A} + b\cdot\frac{W_B}{W_P}\cdot \frac{Y_B}{W_B}+ c\cdot\frac{W_C}{W_P}\cdot \frac{Y_C}{W_C} &= v 
 \end{align*}
 观察到只要令 
-$$r = \frac{a\cdot A_w}{P_w}, \qquad s = \frac{b\cdot B_w}{P_w},\qquad t = \frac{c\cdot C_w}{P_w}, $$
+$$r = \frac{a\cdot W_A}{W_P}, \qquad s = \frac{b\cdot W_B}{W_P},\qquad t = \frac{c\cdot W_C}{W_P}, $$
 则 $(5)(6)(7)$ 都是满足的. 将:
-\[ a = \frac{r\cdot P_w}{A_w}, \qquad b = \frac{s\cdot P_w}{B_w}, \qquad c = \frac{t\cdot P_w}{C_w} \]
+\[ a = \frac{r\cdot W_P}{W_A}, \qquad b = \frac{s\cdot W_P}{W_B}, \qquad c = \frac{t\cdot W_P}{W_C} \]
 代入 $(4)$, 可得
-\[P_w = \left( \frac{r}{A_w}+ \frac{s}{B_w} + \frac{t}{C_w} \right)^{-1} .\]
-将 $P_w$ 代回去就能求出 $a,b,c$ 的值了.
+\[W_P = \left( \frac{r}{W_A}+ \frac{s}{W_B} + \frac{t}{W_C} \right)^{-1} .\]
+将 $W_P$ 代回去就能求出 $a,b,c$ 的值了.
 
 
 \newpage
