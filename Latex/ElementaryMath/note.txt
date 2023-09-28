@@ -2,6 +2,10 @@ tikz:
 交点
 \coordinate[] (C) at (intersection of A--B and E--G);
 
+坐标轴
+\draw[-Stealth,line width=1pt] (-4,0) -- (4.5,0) node[right] {$x$};
+\draw[-Stealth,line width=1pt] (0,-1) -- (0,4.5) node[above] {$y$};
+
 线段上斜向的label: 
 \draw [line width=1pt] (A) -- (C) node [midway,above,sloped] {$\sin\alpha$};
 
