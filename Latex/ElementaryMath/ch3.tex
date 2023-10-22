@@ -2707,6 +2707,112 @@ $\angle CDO' = \angle BDC - \angle BDO' = (90\degree + \alpha) - (90\degree - \a
 
 %------------------------------------------------------------------------------%
 \newpage
+
+三个圆交于一点, 半径都是 $r$, 除了三个圆的公共点之外, 每两个点还有另外一个交点.
+
+求证: 这三个另外的交点构成的三角形外接圆半径也是 $r$.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=0.8]
+\coordinate[] (A) at (0,0);
+\coordinate[] (B) at (-2.624, 1.453);
+\coordinate[] (C) at (1.892, 2.328);
+\coordinate[] (D) at (0.958, -2.843);
+\coordinate[] (E) at (-0.732, 3.781);
+\coordinate[] (F) at (2.85, -0.515);
+\coordinate[] (G) at (-1.667, -1.39);
+\coordinate[] (H) at (0.225, 0.938);
+\draw [line width=1pt] (B) circle (3);
+\draw [line width=1pt] (C) circle (3);
+\draw [line width=1pt] (D) circle (3);
+\draw [line width=1pt,blue] (H) circle (3);
+\draw [line width=1pt,gray] (E) -- (F) -- (G) -- cycle;
+\foreach \p in {B,C,D,E,F,G}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+\end{figure*}
+
+解: 设三个圆的圆心分别是 $B,C,D$, 公共交点为 $A$, 每两个圆另外的交点分别为 $E,F,G$. 找到 $A$ 分别关于 $B,C,D$ 对称的点 $I,J,K$.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=0.8]
+\coordinate[label=below:$A$] (A) at (0,0);
+\coordinate[label=below:$B$] (B) at (-2.624, 1.453);
+\coordinate[label=below:$C$] (C) at (1.892, 2.328);
+\coordinate[label=right:$D$] (D) at (0.958, -2.843);
+\coordinate[label=above:$E$] (E) at (-0.732, 3.781);
+\coordinate[label=right:$F$] (F) at (2.85, -0.515);
+\coordinate[label=below left:$G$] (G) at (-1.667, -1.39);
+\coordinate[] (H) at (0.225, 0.938);
+\coordinate[label=above left:$I$] (I) at (-5.249, 2.907);
+\coordinate[label=above right:$J$] (J) at (3.784, 4.656);
+\coordinate[label=below right:$K$] (K) at (1.915, -5.686);
+\draw [line width=1pt] (B) circle (3);
+\draw [line width=1pt] (C) circle (3);
+\draw [line width=1pt] (D) circle (3);
+\draw [line width=1pt,blue] (H) circle (3);
+\draw [line width=1pt,gray] (E) -- (F) -- (G) -- cycle;
+\draw [line width=1pt,dashed] (I) -- (J) -- (K) -- cycle;
+\draw [line width=1pt,dashed] (A) -- (I);
+\draw [line width=1pt,dashed] (A) -- (J);
+\draw [line width=1pt,dashed] (A) -- (K);
+\foreach \p in {B,C,D,E,F,G,I,J,K}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\end{tikzpicture}
+\end{figure*}
+
+则 $AI, AJ, AK$ 是三个圆的直径, $\triangle IJK$ 的外接圆半径为 $2r$. 
+
+另一方面, 因为 $AI, AJ$ 是直径, 所以 $\angle AEI = \angle AEJ = 90\degree$. 进而可得 $\triangle AEI\cong\triangle AEJ$, 于是 $E$ 是 $IJ$ 的中点. 同理可得 $F,G$ 分别是 $JK$ 和 $KI$ 的中点.
+
+所以 $\triangle EFG$ 的外接圆半径是 $\triangle IJK$ 外接圆半径的一半, 为 $r$.
+
+~
+
+\noindent 另一种证法:
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=0.8]
+\coordinate[label=below:$A$] (A) at (0,0);
+\coordinate[label=below:$B$] (B) at (-2.624, 1.453);
+\coordinate[label=below:$C$] (C) at (1.892, 2.328);
+\coordinate[label=right:$D$] (D) at (0.958, -2.843);
+\coordinate[label=above:$E$] (E) at (-0.732, 3.781);
+\coordinate[label=right:$F$] (F) at (2.85, -0.515);
+\coordinate[label=below left:$G$] (G) at (-1.667, -1.39);
+\coordinate[label=below:$P$] (P) at (1.131, -5.838);
+\coordinate[] (H) at (0.225, 0.938);
+\draw [line width=1pt] (B) circle (3);
+\draw [line width=1pt] (C) circle (3);
+\draw [line width=1pt] (D) circle (3);
+\draw [line width=1pt,blue] (H) circle (3);
+\draw [line width=1pt,gray] (E) -- (F) -- (G) -- cycle;
+\draw [line width=1pt] (A) -- (E);
+\draw [line width=1pt] (A) -- (F);
+\draw [line width=1pt] (A) -- (G);
+\draw [line width=1pt,gray] (F) -- (P) -- (G);
+\foreach \p in {B,C,D,E,F,G,P}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\draw pic["$\alpha$",draw,red,line width=1pt, angle eccentricity=1.5, angle radius=0.4cm] {angle=A--E--F};
+\draw pic["$\alpha$",draw,red,line width=1pt, angle eccentricity=1.5, angle radius=0.5cm] {angle=F--G--A};
+\draw pic["$\beta$",draw,orange,line width=1pt, angle eccentricity=1.8, angle radius=0.6cm] {angle=A--F--G};
+\draw pic["$\beta$",draw,orange,line width=1pt, angle eccentricity=1.8, angle radius=0.6cm] {angle=G--E--A};
+\draw pic["$\alpha+\beta$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.6cm] {angle=F--P--G};
+\end{tikzpicture}
+\end{figure*}
+
+考虑弦 $AF$, 由正弦定理, 在圆 $C$ 中有 $AF = 2r\sin\angle AEF$, 在圆 $D$ 中有 $AF = 2r\sin\angle AGF$, 由此可得 $\angle AEF = \angle AGF$. 同理在 $AG$ 上由正弦定理可得 $\angle AEG = \angle AFG$.
+
+作 $E$ 关于 $FG$ 对称的点 $P$. 下面证明 $P$ 在圆 $D$ 上. 首先根据对称关系有 $\triangle EFG\cong \triangle PFG$, 所以 
+$$\angle FPG = \angle FEG = \angle AEF + \angle AEG = \angle AGF + \angle AFG .$$
+两边加上 $\angle FAG$ 得  
+$$\angle FPG + \angle FAG = \angle AGF + \angle AFG + \angle FAG = 180\degree .$$
+所以 $AFGP$ 四点共圆. $\triangle FPG$ 的外接圆也就是 $\triangle AFG$ 的外接圆, 也就是圆 $D$, 半径为 $r$. 由$\triangle EFG\cong \triangle PFG$, 可知 $\triangle EFG$ 的外接圆半径也是 $r$.
+
+
+%------------------------------------------------------------------------------%
+\newpage
+
 \noindent 来自每日数学打卡
 
 两圆 $A,B$ 的半径均为 $R$, 并且有两个交点, 如图所示. 另有两个小圆均与 $A$ 内切而与 $B$ 外切, 且两个小圆也相交. 证明两个小圆的公共弦的延长线一定经过 $AB$ 的中点 $M$.
