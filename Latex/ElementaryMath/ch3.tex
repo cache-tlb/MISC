@@ -2809,6 +2809,67 @@ $$\angle FPG = \angle FEG = \angle AEF + \angle AEG = \angle AGF + \angle AFG .$
 $$\angle FPG + \angle FAG = \angle AGF + \angle AFG + \angle FAG = 180\degree .$$
 所以 $AFGP$ 四点共圆. $\triangle FPG$ 的外接圆也就是 $\triangle AFG$ 的外接圆, 也就是圆 $D$, 半径为 $r$. 由$\triangle EFG\cong \triangle PFG$, 可知 $\triangle EFG$ 的外接圆半径也是 $r$.
 
+%------------------------------------------------------------------------------%
+\newpage
+\noindent 密克定理(Miquel's theorem)
+
+三角形三边(或其延长线)上各有任意一点, 每个顶点和邻接的两边上的点构成一组, 共有三组, 每组三个点能确定一个外接圆. 密克定理指出: 这三个外接圆交于同一个点.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[label=above:$A$] (A) at (0,3);
+\coordinate[label=left:$B$] (B) at (-3,0);
+\coordinate[label=below:$C$] (C) at (4,-2);
+\coordinate[label=left:$D$] (D) at (-2,1);
+\coordinate[label=above right:$E$] (E) at (0.756, -1.073);
+\coordinate[label=right:$F$] (F) at (1.079, 1.651);
+\coordinate[] (O) at (-0.497, 1.497);
+\coordinate[] (P) at (-1.198, -0.802);
+\coordinate[] (Q) at (2.834, 0.061);
+\coordinate[] (M) at (0.474, 0.245);
+\draw [line width=1pt] (O) circle (1.583);
+\draw [line width=1pt] (P) circle (1.972);
+\draw [line width=1pt] (Q) circle (2.368);
+\draw [line width=1pt] (A) -- (B) -- (C) -- cycle;
+\foreach \p in {A,B,C,D,E,F,O,P,Q,M}
+	\fill[fill=red,draw=red,thick] (\p) circle (1.2pt);
+\end{tikzpicture}
+\end{figure*}
+
+~
+
+证明: 如图, 设 $A$ 所在的外接圆和 $B$ 所在的外接圆相相交于 $D$ 和 $M$, 下面证明 $CEFM$ 四点共圆.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[label=above:$A$] (A) at (0,3);
+\coordinate[label=left:$B$] (B) at (-3,0);
+\coordinate[label=below:$C$] (C) at (4,-2);
+\coordinate[label=left:$D$] (D) at (-2,1);
+\coordinate[label=above right:$E$] (E) at (0.756, -1.073);
+\coordinate[label=right:$F$] (F) at (1.079, 1.651);
+\coordinate[] (O) at (-0.497, 1.497);
+\coordinate[] (P) at (-1.198, -0.802);
+\coordinate[] (Q) at (2.834, 0.061);
+\coordinate[label=right:$M$] (M) at (0.474, 0.245);
+\draw [line width=1pt] (O) circle (1.583);
+\draw [line width=1pt] (P) circle (1.972);
+\draw [line width=1pt,dashed] (Q) circle (2.368);
+\draw [line width=1pt] (A) -- (B) -- (C) -- cycle;
+\draw [line width=1pt] (D) -- (M);
+\draw [line width=1pt] (E) -- (M);
+\draw [line width=1pt] (F) -- (M);
+\foreach \p in {A,B,C,D,E,F,O,P,Q,M}
+	\fill[fill=red,draw=red,thick] (\p) circle (1.2pt);
+\end{tikzpicture}
+\end{figure*}
+
+事实上, 由 $ADMF$ 共圆得 $\angle BAC + \angle DMF = 180\degree$, 由 $BDME$ 共圆得 $\angle ABC + \angle DME = 180\degree$. 而另外还有
+\begin{align*}
+\angle BAC + \angle ABC + \angle ACB &= 180\degree \\
+\angle DMF + \angle EMF + \angle DME &= 360\degree
+\end{align*}
+所以有 $\angle ACB + \angle EMF = 180\degree$, 故 $CEFM$ 共圆, 说明 $\triangle CEF$ 的外接圆也经过 $M$ 点. 从而三个外接圆都交于 $M$点.
 
 %------------------------------------------------------------------------------%
 \newpage
