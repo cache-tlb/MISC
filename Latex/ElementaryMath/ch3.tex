@@ -2874,6 +2874,116 @@ $$\angle FPG + \angle FAG = \angle AGF + \angle AFG + \angle FAG = 180\degree .$
 %------------------------------------------------------------------------------%
 \newpage
 
+
+%------------------------------------------------------------------------------%
+\newpage
+\noindent Carnot's theorem
+
+任意 $\triangle ABC$, 设外接圆圆心为 $O$, $O$ 到三边的垂足分别为 $D,E,F$, 则 $O$ 到三边的带符号距离之和等于三角形外接圆和内切圆的半径之和:
+$$ OD + OE + OF = R+r .$$
+带符号距离指的是若 $OD, OE, OF$ 中的某一条完全落在 $\triangle ABC$ 之外, 则对应的距离就是负的. 
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=0.8]
+\coordinate[label=left:$A$] (A) at (0,3);
+\coordinate[label=below:$B$] (B) at (4,-1);
+\coordinate[label=right:$C$] (C) at (7,1);
+\coordinate[label=below:$D$] (D) at (2,1);
+\coordinate[label=right:$E$] (E) at (5.5,0);
+\coordinate[label=below left:$F$] (F) at (3.5,2);
+\coordinate[label=above:$O$] (O) at (3.7,2.7);
+\coordinate[label=above:$P$] (P) at (4.154, 0.556);
+\coordinate[label=below:$I$] (I) at (3.077, -1.615);
+\coordinate[label=below:$G$] (G) at (4.5, -1.5);
+\coordinate[label=above:$H$] (H) at (4.755, 1.642);
+\draw [line width=1pt] (O) circle (3.712);
+\draw [line width=1pt] (P) circle (1.209);
+\draw [line width=1pt] (A) -- (B) -- (C) -- cycle;
+\draw [line width=1pt] (O) -- (D);
+\draw [line width=1pt] (O) -- (E);
+\draw [line width=1pt,dashed,green] (A) -- (I) -- (B);
+\draw [line width=1pt,dashed,green] (B) -- (G) -- (C);
+\draw [line width=1pt,dashed,green] (B) -- (H);
+\draw [line width=1pt,dashed] (O) -- (F);
+\draw [line width=1pt,red] (A) to [edge label=$R$ ](O);
+\draw [line width=1pt,blue] (P) to [edge label=$r$ ](3.3,-0.3);
+\foreach \p in {A,B,C,D,E,F,G,H,I,O,P}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.2pt);
+\end{tikzpicture}
+\end{figure*}
+
+证明: 分别过三个顶点作对边的垂线, 垂足分别为 $G,H,I$. 下面的证明中的长度和面积均表示绝对值. 
+
+由内切圆可知
+$$ r(AB+BC+CA) = 2S_{\triangle ABC} .$$
+另一方面, 考虑面积关系:
+$$ S_{\triangle ABC} = S_{\triangle AOB} + S_{\triangle BOC} - S_{\triangle COA}, $$
+所以
+\[ r(AB+BC+CA) = AB\cdot OD + BC\cdot OE - CA\cdot OF \tag{1} \]
+
+弦 $AB$ 对的圆周角为 $\angle ACB$, 圆心角为 $\angle AOB$, 所以 $\angle AOD = \angle ACB$. 分别在直角三角形 $\triangle AOD$, $\triangle BCH$, $\triangle ACI$ 中求上述角的余弦, 可得 
+$$\dfrac{OD}{R} = \dfrac{CH}{BC} = \dfrac{CI}{AC}, $$
+进而得
+\[ R\cdot(CH+CI) = OD\cdot(BC+AC) \tag{2} \]
+类似的还有 $\angle BAC = \angle COE$, 求余弦得
+$$\dfrac{OE}{R} = \dfrac{AG}{AC} = \dfrac{AH}{AB}, $$
+进而得
+\[R\cdot(AG+AH) = OE\cdot(AC+AB)  \tag{3} \]
+对 $\angle ABC = \angle AOF = \pi - \angle ABI = \pi - \angle CBG$, 求余弦得
+$$ \dfrac{OF}{R} = \dfrac{BI}{AB} = \dfrac{BG}{BC} $$
+进而得
+\[ R\cdot(BI+BG) = OF\cdot(AB+BC) \tag{4} \]
+将 $(2)+(3)-(4)$ 与 $(1)$ 相加得
+\[ (r+R)(AB+BC+CA) = (OD+OE-OF)(AB+BC+CA) \]
+所以 $OD+OE-OF = r+R$ 成立.
+
+~
+
+另一种证法: 
+
+设$BC=a, CA=b, AB=c$, 外接圆到三边的距离分别为 $x,y,z$, $\triangle ABC$ 外接圆圆心为 $O$.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=0.8]
+\coordinate[label=above:$A$] (A) at (0,5);
+\coordinate[label=below left:$B$] (B) at (-2,0);
+\coordinate[label=right:$C$] (C) at (5,0);
+\coordinate[label=below:$D$] (D) at (1.5,0);
+\coordinate[label=above right:$E$] (E) at (2.5,2.5);
+\coordinate[label=above left:$F$] (F) at (-1,2.5);
+\coordinate[label=above:$O$] (O) at (1.5,1.5);
+%\draw [line width=1pt] (O) circle (3.808);
+\draw [line width=1pt] (A) -- (B) -- (C) -- cycle;
+\draw [line width=1pt] (O) to [edge label=$x$] (D);
+\draw [line width=1pt] (O)  to [edge label'=$y$] (E);
+\draw [line width=1pt] (O) to [edge label=$z$](F);
+\tkzMarkRightAngle[line width=1pt](B,F,O);
+\tkzMarkRightAngle[line width=1pt](C,D,O);
+\tkzMarkRightAngle[line width=1pt](A,E,O);
+\foreach \p in {A,B,C,D,E,F,O}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.2pt);
+\end{tikzpicture}
+\end{figure*}
+
+易知 $D,E,F$ 分别是所在边的中点, 且 $AEOF$ 四点共圆, 由托勒密定理得 
+\[ AE\cdot OF + AF\cdot OE = AO\cdot EF \]
+即
+\[ \frac{b}{2}\cdot z + \frac{c}{2}\cdot y = R\cdot \frac{a}{2} \]
+同理还有
+\begin{align*}
+\frac{c}{2}\cdot x + \frac{a}{2}\cdot z &= R\cdot \frac{b}{2}\\
+\frac{a}{2}\cdot y + \frac{b}{2}\cdot x &= R\cdot \frac{c}{2}
+\end{align*}
+三个式子相加, 并令 $2s=a+b+c$:
+\begin{align*}
+&\quad x(b+c)+y(c+a)+z(a+b)=R(a+b+c)  \\
+\Leftrightarrow &\quad x(2s-a)+y(2s-b)+z(2s-c)=2sR \\
+\Leftrightarrow &\quad 2s(x+y+z) - (ax+by+cz)=2sR \\
+\Leftrightarrow &\quad 2s(x+y+z)-2S_{\triangle ABC}=2sR \\
+\Leftrightarrow &\quad 2s(x+y+z) - 2sr=2sR \\
+\Leftrightarrow &\quad x+y+z = r+R
+\end{align*}
+
 \noindent 来自每日数学打卡
 
 两圆 $A,B$ 的半径均为 $R$, 并且有两个交点, 如图所示. 另有两个小圆均与 $A$ 内切而与 $B$ 外切, 且两个小圆也相交. 证明两个小圆的公共弦的延长线一定经过 $AB$ 的中点 $M$.
