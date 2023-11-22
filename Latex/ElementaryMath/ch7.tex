@@ -814,6 +814,22 @@ I &= \frac{2}{B^2-4AC}\left(\frac{D(B + 2C) - E(2A+B)}{\sqrt{A+B+C}} - \frac{2CD
 \noindent 曲率与密切圆
 
 设曲线的参数方程为 $(x(t), y(t))$, 在曲线上任意一点 $(x,y)$ 附近取三个点 $(x_i, y_i), i=1,2,3$, 当三个点逐渐逼近 $(x,y)$ 时, 它们的外接圆趋近于曲线在 $(x,y)$ 处的密切圆. 密切圆半径的倒数定义为曲线在该点的曲率.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=4,domain=-0.5:1.6,samples=100]
+\coordinate (A) at (1.268, -0.837);
+\coordinate (B) at (1.132, -0.963);
+\coordinate (C) at (1.355, -0.704);
+\coordinate (D) at (0.731, -0.393);
+\draw[line width=1pt,gray] (D) circle (0.696);
+\draw[color=red,line width=1pt] plot (\x,{(\x)^3-(\x)^2-(\x)}) ;
+\foreach \p in {A,B,C}
+	\fill[fill=black,draw=black,thick] (\p) circle (0.25pt);
+\draw (A) node[right] {$(x_1,y_1)$};
+\draw (B) node[below right] {$(x_2,y_2)$};
+\draw (C) node[right] {$(x_3,y_3)$};
+\end{tikzpicture}
+\end{figure*}
 
 若已知三点坐标, 可以求出其外接圆半径的解析表达. 这里略去推导过程, 而是直接用 WolframAlpha 网站贴出的结论:
 \[r = \frac{\sqrt{b_x^2+b_y^2-4ac}}{2|a|} .\]
