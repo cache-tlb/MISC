@@ -844,7 +844,7 @@ x_1^2 + y_1^2& x_1 & y_1 \\
 x_2^2 + y_2^2& x_2 & y_2 \\ 
 x_3^2 + y_3^2& x_3 & y_3
 \end{vmatrix}, 
-b_x = \begin{vmatrix}
+b_x = -\begin{vmatrix}
 x_1^2 + y_1^2& y_1 & 1 \\ 
 x_2^2 + y_2^2& y_2 & 1 \\ 
 x_3^2 + y_3^2& y_3 & 1
@@ -864,12 +864,18 @@ y(t+\Delta t) &= y(t) + \dot{y}(t)\Delta t + \frac{1}{2}\ddot{y}(t)\Delta t^2 + 
 \begin{align*}
 a &= \frac{1}{2}\cdot P\cdot(\ddot{x}\dot{y}-\dot{x}\ddot{y}) \\
 c &= \frac{1}{2}\cdot P\cdot(-2\dot{x}^3y + 2\dot{x}^2\dot{y}x - 2\dot{x}\dot{y}^2y - \dot{x}\ddot{y}x^2 - \dot{x}\ddot{y}y^2 + \ddot{x}\dot{y}x^2 + \ddot{x}\dot{y}y^2 + 2\dot{y}^3x)\\
-b_x &= P(\dot{x}^2\dot{y} - \dot{x}\ddot{y}x + \ddot{x}\dot{y}x + \dot{y}^3)\\
+b_x &= -P(\dot{x}^2\dot{y} - \dot{x}\ddot{y}x + \ddot{x}\dot{y}x + \dot{y}^3)\\
 b_y &= -P(-\dot{x}^3 - \dot{x}\dot{y}^2 - \dot{x}\ddot{y}y + \ddot{x}\dot{y}y)
 \end{align*}
 其中 $\displaystyle P = \Delta s^3\prod_{i<j}(k_i - k_j) = (k_1-k_2)(k_1-k_3)(k_2-k_3)\Delta s^3$. 这表明进行三阶泰勒展开是有必要的. 外接圆的表达式中, 分子分母都可以约去 $P$, 最终可得曲率为:
 \[ \kappa = \frac{1}{r} = \frac{2|a|}{\sqrt{b_x^2+b_y^2-4ac}} = \frac{|\ddot{x}\dot{y}-\dot{x}\ddot{y}|}{\sqrt{(\dot{x}^2+\dot{y}^2)^{3}}} .\]
 
+给定曲线和曲线上一点, 该点处的密切圆圆心(也称为曲率中心)有解析表达:
+\begin{align*}
+x_0 &= -\frac{b_x}{2a} = x + \frac{(\dot{x}^2+\dot{y}^2)\dot{y}}{\ddot{x}\dot{y}-\dot{x}\ddot{y}} \\
+y_0 &= -\frac{b_y}{2a} = y - \frac{(\dot{x}^2+\dot{y}^2)\dot{x}}{\ddot{x}\dot{y}-\dot{x}\ddot{y}}
+\end{align*}
+当 $t$ 变化时, 曲率中心的运动轨迹 $(x_0,y_0)$ 也形成一条曲线, 称为渐屈线 (evolute) 或渐开线 (evolvent). 
 
 \newpage
 %------------------------------------------------------------------------------%
