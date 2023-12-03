@@ -877,6 +877,23 @@ y_0 &= -\frac{b_y}{2a} = y - \frac{(\dot{x}^2+\dot{y}^2)\dot{x}}{\ddot{x}\dot{y}
 \end{align*}
 当 $t$ 变化时, 曲率中心的运动轨迹 $(x_0,y_0)$ 也形成一条曲线, 称为渐屈线 (evolute) 或渐开线 (evolvent). 
 
+~
+
+曲率的另一个等价定义. 给定曲线上一点, 沿着曲线移动一段长度, 曲线的法线方向会发生变化. 取单位法线, 则单位法线与单位圆周上的一点对应(即单位圆周上一点到圆心的向量可以唯一确定一个单位向量). 随着在曲线上移动的过程, 与单位法线对应的单位圆周上的点会扫过一段圆弧. 当曲率很大时, 只要移动很小的距离, 法线就会发生巨大变化, 从而扫过更大的圆弧. 因此曲率可以定义为扫过的圆弧长度与曲线上点移动长度之比.
+
+当参数从 $t$ 变到 $t+\Delta t$ 时, 法线变化的角度也就是切线变化的角度, 令$\Delta t\to 0$, 得
+\begin{align*}
+\mathrm{d}\theta &= \mathrm{d}\left(\arctan\frac{\dot{y}}{\dot{x}}\right) = \frac{1}{1+(\frac{\dot{y}}{\dot{x}})^2}\cdot\mathrm{d}\left(\frac{\dot{y}}{\dot{x}}\right)\\
+&= \frac{\dot{x}^2}{\dot{x}^2+\dot{y}^2}\cdot\frac{\dot{x}\cdot\mathrm{d}\dot{y} - \dot{y}\cdot\mathrm{d}\dot{x}}{\dot{x}^2}\\
+&= \frac{\dot{x}\ddot{y}-\dot{y}\ddot{x}}{\dot{x}^2+\dot{y}^2}\cdot\mathrm{d}t
+\end{align*}
+
+另一方面, 曲线上的点移动的距离为 
+\[ \mathrm{d}s = \sqrt{(\mathrm{d}x)^2 + (\mathrm{d}y)^2} = \sqrt{\dot{x}^2+\dot{y}^2}\cdot\mathrm{d}t .\]
+
+所以曲率就是
+\[\kappa = \frac{\mathrm{d}\theta}{\mathrm{d}s} = \frac{\dot{x}\ddot{y}-\dot{y}\ddot{x}}{\sqrt{(\dot{x}^2+\dot{y}^2)^3}} .\]
+
 \newpage
 %------------------------------------------------------------------------------%
 \section{包络线问题}
