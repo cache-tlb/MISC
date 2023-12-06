@@ -887,12 +887,26 @@ y_0 &= -\frac{b_y}{2a} = y - \frac{(\dot{x}^2+\dot{y}^2)\dot{x}}{\ddot{x}\dot{y}
 &= \frac{\dot{x}^2}{\dot{x}^2+\dot{y}^2}\cdot\frac{\dot{x}\cdot\mathrm{d}\dot{y} - \dot{y}\cdot\mathrm{d}\dot{x}}{\dot{x}^2}\\
 &= \frac{\dot{x}\ddot{y}-\dot{y}\ddot{x}}{\dot{x}^2+\dot{y}^2}\cdot\mathrm{d}t
 \end{align*}
-
 另一方面, 曲线上的点移动的距离为 
 \[ \mathrm{d}s = \sqrt{(\mathrm{d}x)^2 + (\mathrm{d}y)^2} = \sqrt{\dot{x}^2+\dot{y}^2}\cdot\mathrm{d}t .\]
-
 所以曲率就是
 \[\kappa = \frac{\mathrm{d}\theta}{\mathrm{d}s} = \frac{\dot{x}\ddot{y}-\dot{y}\ddot{x}}{\sqrt{(\dot{x}^2+\dot{y}^2)^3}} .\]
+
+~
+
+曲率的第三个等价定义. 过曲线上两点 $(x(t),y(t)) = (x_1,y_1)$ 和 $(x(t+\Delta t), y(t+\Delta t)) = (x_2,y_2)$ 分别作法线, 会产生一个交点. 当 $\Delta t\to 0$ 时, 交点的极限位置就是曲率中心. 可以列出两条法线的方程分别为
+\begin{align*}
+\dot{x}_1 x + \dot{y}_1 y &= \dot{x}_1 x_1 + \dot{y}_1 y_1 \\
+\dot{x}_2 x + \dot{y}_2 y &= \dot{x}_2 x_2 + \dot{y}_2 y_2 
+\end{align*}
+只需要分别对$(x,y)$ 和 $(\dot{x},\dot{y})$ 做一阶近似:
+\begin{align*}
+x(t+\Delta t) &= x(t) + \dot{x}(t)\Delta t + o(\Delta t), \quad y(t+\Delta t) = y(t) + \dot{y}(t)\Delta t + o(\Delta t)\\
+\dot{x}(t+\Delta t) &= \dot{x}(t) + \ddot{x}(t)\Delta t + o(\Delta t), \quad \dot{y}(t+\Delta t) = \dot{y}(t) + \ddot{y}(t)\Delta t + o(\Delta t)
+\end{align*}
+令 $\Delta t \to 0$, 可以解得两条法线的交点坐标为:
+\[ x_0 = x - \frac{\dot{x}^2+\dot{y}^2}{\ddot{y}\dot{x}-\ddot{x}\dot{y}}\cdot\dot{y}, \quad y_0 = y + \frac{\dot{x}^2+\dot{y}^2}{\ddot{y}\dot{x}-\ddot{x}\dot{y}}\cdot{x} .\]
+结果跟曲线上三点外接圆圆心的极限情况一致.
 
 \newpage
 %------------------------------------------------------------------------------%
