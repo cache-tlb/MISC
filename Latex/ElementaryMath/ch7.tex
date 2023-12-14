@@ -908,6 +908,54 @@ x(t+\Delta t) &= x(t) + \dot{x}(t)\Delta t + o(\Delta t), \quad y(t+\Delta t) = 
 \[ x_0 = x - \frac{\dot{x}^2+\dot{y}^2}{\ddot{y}\dot{x}-\ddot{x}\dot{y}}\cdot\dot{y}, \quad y_0 = y + \frac{\dot{x}^2+\dot{y}^2}{\ddot{y}\dot{x}-\ddot{x}\dot{y}}\cdot{x} .\]
 结果跟曲线上三点外接圆圆心的极限情况一致.
 
+
+%------------------------------------------------------------------------------%
+\newpage
+\noindent 凸几何
+
+有一个湖, 湖岸相当于封闭的曲线. 但是因为湖岸曲折蜿蜒, 有些凹进湖中的部分, 岸边树木建筑等遮挡, 导致我们在相应位置无法一览湖中全部的景色.
+
+如果我们在湖水中泛舟, 来到 $A$ 点, 可以发现在此处环顾, 能够看到湖上所有的风景. 然后我们又来到了 $B$ 点, 发现那里也同样可以一览所有风景.
+
+现在您是否能够证明: 在 $AB$ 之间的连线上的每一点, 都能让我们看到湖上的全部风景.
+
+~
+
+证明: 建立合适的坐标系, 使 $A,B$ 分别落在 $(0,0)$ 和 $(0,1)$. 曲线以 $t$ 为参数, 逆时针为正向, $P=(x(t),y(t))$ 为曲线上任一点, 先不妨假设 $x(t), y(t)$ 都满足一阶连续. $Q = (0, q)$ 为 $AB$ 之间一点, $0\le q \le 1$.
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}
+\coordinate[label=below left:$A$] (A) at (0,0);
+\coordinate[label=left:$B$] (B) at (0,2);
+\coordinate[label=left:$Q$] (C) at (0,0.8);
+\coordinate[] (D) at (3,0.8);
+\coordinate[] (P) at (2,3);
+\coordinate[label=right:$x$] (X) at (4, 0);
+\coordinate[label=above:$y$] (Y) at (0, 4);
+\draw[-Stealth,line width=1pt] (-4,0)--(X) ;
+\draw[-Stealth,line width=1pt] (0,-4)--(Y) ;
+\draw[line width=1pt] (3,0) to[closed, curve through = { (2,3) (0,3) (-3,2) (-3,0) (-2,-3) (0,-2) }] (3,-2);
+\draw[-Stealth,line width=1pt,dashed] (C) -- (P);
+\draw[line width=1pt,dashed] (C) -- (D);
+\foreach \p in {A,B,C,P}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.2pt);
+\draw pic["$\theta$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.3cm] {angle=D--C--P};
+%\draw pic["$\phi$",draw,line width=1pt, angle eccentricity=2.0, angle radius=0.4cm] {angle=P--A--Y};
+\draw[] (P) node[above right] {$P=(x(t),y(t))$};
+\end{tikzpicture}
+\end{figure*}
+
+由条件可知, 曲线只会从左到右和从右到左各穿过 $y$ 轴一次, 否则从 $A,B$ 沿 $y$ 轴方向看会发生遮挡. 于是 $y$ 轴将曲线分成了两段. 设 $Q$ 到 $P$ 的向量辐角为 $\theta_q$, 则 
+\[ \tan\theta_q = \frac{y(t) - q}{x(t)} .\]
+
+对于 $y$ 轴右侧的半边曲线来说, $\theta_q$ 的范围是 $(-\dfrac{\pi}{2}, \dfrac{\pi}{2})$. 当 $Q$ 点在 $A$ 或 $B$ 上时, 因为没有遮挡, 所以当 $t$ 增大时, $\theta_q$ 单调递增, $\tan\theta_q$ 也单调递增, 所以:
+\[\frac{\mathrm{d}}{\mathrm{d}t}\tan\theta_q = \frac{\mathrm{d}}{\mathrm{d}t}\frac{y(t) - q}{x(t)} = \frac{y'x - x'(y-q)}{x^2} > 0 ,\]
+于是可得 $y'x - x'y + qx' > 0$ 对 $q=0$ 和 $q=1$ 成立.
+
+设 $f(q) = y'x - x'y + qx' = (1-q)f(0) + qf(1)$, 而 $f(0) > 0, f(1) > 0, 0\le q\le 1$, 所以 $f(q)$ 也是恒大于 $0$. 说明 $\tan\theta_q$ 也是随着 $t$ 增加而单调递增的. 进而可得当 $Q$ 位于 $AB$ 之间任意一点时, 从 $Q$ 看向 $y$ 轴右侧的半边曲线也不会发生遮挡.
+
+对于 $y$ 轴左侧的半边曲线, $\theta_q$ 的范围是 $(\dfrac{\pi}{2}, \dfrac{3\pi}{2})$, 类似的也可以推出从 $Q$ 看向 $y$ 轴左侧的半边曲线也不会发生遮挡.
+
 \newpage
 %------------------------------------------------------------------------------%
 \section{包络线问题}
