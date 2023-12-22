@@ -867,7 +867,9 @@ c &= \frac{1}{2}\cdot P\cdot(-2\dot{x}^3y + 2\dot{x}^2\dot{y}x - 2\dot{x}\dot{y}
 b_x &= -P(\dot{x}^2\dot{y} - \dot{x}\ddot{y}x + \ddot{x}\dot{y}x + \dot{y}^3)\\
 b_y &= -P(-\dot{x}^3 - \dot{x}\dot{y}^2 - \dot{x}\ddot{y}y + \ddot{x}\dot{y}y)
 \end{align*}
-其中 $\displaystyle P = \Delta s^3\prod_{i<j}(k_i - k_j) = (k_1-k_2)(k_1-k_3)(k_2-k_3)\Delta s^3$. 这表明进行三阶泰勒展开是有必要的. 外接圆的表达式中, 分子分母都可以约去 $P$, 最终可得曲率为:
+其中 $\displaystyle P = \Delta s^3\prod_{i<j}(k_i - k_j) = (k_1-k_2)(k_1-k_3)(k_2-k_3)\Delta s^3$. 这表明进行三阶泰勒展开是足够的, 事实上, 只要做二阶展开就足够了. 用二阶展开近似, 曲线局部是一个抛物线, 取三点还是可以确定外接圆. 但如果只用一阶展开, 局部是一条直线, 取三点无法算出外接圆.
+
+外接圆的表达式中, 分子分母都可以约去 $P$, 最终可得曲率为:
 \[ \kappa = \frac{1}{r} = \frac{2|a|}{\sqrt{b_x^2+b_y^2-4ac}} = \frac{|\ddot{x}\dot{y}-\dot{x}\ddot{y}|}{\sqrt{(\dot{x}^2+\dot{y}^2)^{3}}} .\]
 
 给定曲线和曲线上一点, 该点处的密切圆圆心(也称为曲率中心)有解析表达:
