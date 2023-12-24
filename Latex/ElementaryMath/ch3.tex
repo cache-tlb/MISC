@@ -5082,7 +5082,90 @@ $$OR = \dfrac{1}{2} F_1F_2 = c.$$
 \[ \cos\beta = \frac{x}{1-\tan\alpha\tan\beta} = \frac{y}{\tan\alpha+\tan\beta} \]
 \[\tan(\alpha+\beta) = \frac{y}{x} = \frac{\tan\alpha+\tan\beta}{1-\tan\alpha\tan\beta}\]
 
+%------------------------------------------------------------------------------%
+\newpage
+\noindent 等周问题的 Steiner 四连杆法证明
 
+证明: 相同周长的闭曲线中, 圆的面积最大.
+
+~
+
+解: 假设已经得到了一个面积最大的闭曲线 $l$, 下面研究这个曲线具有怎样的性质. 在曲线上取两点 $A,B$, 将曲线分成长度相等的两段. 不妨设 $AB$ 是水平的, $AB$ 将 $l$ 分成上下两部分, 面积分别为 $S_1, S_2$. 若两部分面积不等, 例如 $S_1 > S_2$, 那么可以将 $S_1$ 沿直线 $AB$ 翻折下去, 替换掉 $S_2$, 得到一个新的封闭曲线, 周长不变但面积更大了. 
+
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[label=above left:$A$] (A) at (-3,0);
+\coordinate[label=above right:$B$] (B) at (3,0);
+\fill[draw=red,line width=1pt,fill=red!20] (A) to[curve through = { (-2,2) (-1,2.5) (0,2.5) (1,2.5) (2,2) }] (B);
+\fill[draw=blue,line width=1pt,fill=blue!20] (A) to[curve through = { (-2.5,-1) (-1,-2) (0,-3) (1,-2) (2.5,-1) }] (B);
+\draw[line width=1pt,red,dashed] (A) to[curve through = { (-2,-2) (-1,-2.5) (0,-2.5) (1,-2.5) (2,-2) }] (B);
+\draw[line width=1pt,dashed] (-4,0) -- (4,0);
+\foreach \p in {A,B}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.0pt);
+\draw[] (0,1.5) node {$S_1$};
+\draw[] (0,-1.5) node {$S_2$};
+\end{tikzpicture}
+\end{figure*}
+
+所以面积最大的闭曲线满足等分周长的两点连线也要等分面积. 继续考虑 $l$ 和 $AB$, 仍然将 $S_1$ 沿 $AB$ 翻折得到 $S_1'$. $S_1$ 和 $S_1'$ 拼成一条新的曲线 $l'$, 它与 $l$ 的周长和面积均相等, 因此也是面积最大的. 
+\begin{figure*}[htbp]
+\centering
+\begin{minipage}[c]{0.49\linewidth}
+\begin{tikzpicture}[scale=0.6]
+\coordinate[] (NX) at (-4,0);
+\coordinate[] (PX) at (6,0);
+\coordinate[label=above left:$A$] (A) at (-3,0);
+\coordinate[label=above right:$B$] (B) at (5,0);
+\coordinate[label=above:$C$] (C) at (0,4);
+\coordinate[label=below:$D$] (D) at (0,-4);
+\fill [fill=blue!20] (A)-- (C) -- (B) -- (D) -- cycle;
+\draw [line width=1pt,dashed] (NX)-- (PX);
+\draw [line width=1pt] (A)-- (C) -- (B) -- (D) -- cycle;
+\fill [shift={(1.9641016151377546,-0.5980762113533173)},draw=black,line width=1pt,fill=red!20]  plot[domain=1.97449276919821:3.0216903203948076,variable=\t]({1*5*cos(\t r)+0*5*sin(\t r)},{0*5*cos(\t r)+1*5*sin(\t r)}) --cycle;
+\fill [shift={(1.9641016151377546,0.5980762113533173)},draw=black,line width=1pt,fill=red!20]  plot[domain=1.97449276919821:3.0216903203948076,variable=\t]({1*5*cos(\t r)+0*5*sin(\t r)},{0*5*cos(\t r)+-1*5*sin(\t r)}) -- cycle;
+\fill [shift={(-0.9641016151377559,-2.3301270189221928)},draw=black,line width=1pt,fill=red!20]  plot[domain=0.37245660897304494:1.4196541601696426,variable=\t]({1*6.403124237432849*cos(\t r)+0*6.403124237432849*sin(\t r)},{0*6.403124237432849*cos(\t r)+1*6.403124237432849*sin(\t r)}) -- cycle;
+\fill [shift={(-0.9641016151377559,2.3301270189221928)},draw=black,line width=1pt,fill=red!20]  plot[domain=0.37245660897304494:1.4196541601696426,variable=\t]({1*6.403124237432849*cos(\t r)+0*6.403124237432849*sin(\t r)},{0*6.403124237432849*cos(\t r)+-1*6.403124237432849*sin(\t r)}) -- cycle;
+\foreach \p in {A,B,C,D}
+	\fill[fill=black,draw=black,thick] (\p) circle (2.0pt);
+\draw[] (0,1.5) node {$S_5$};
+\draw[] (-2.5,2.5) node {$S_3$};
+\draw[] (3.5,3) node {$S_4$};
+\draw[] (0,-1.5) node {$S_5'$};
+\draw[] (-2.5,-2.5) node {$S_3'$};
+\draw[] (3.5,-3) node {$S_4'$};
+\end{tikzpicture}
+\end{minipage}
+\begin{minipage}[c]{0.49\linewidth}
+\begin{tikzpicture}[scale=0.6]
+\coordinate[] (NX) at (-5,0);
+\coordinate[] (PX) at (6.5,0);
+\coordinate[label=above left:$A$] (A) at (-4,0);
+\coordinate[label=above right:$B$] (B) at (5.657,0);
+\coordinate[label=above:$C$] (C) at (0,3);
+\coordinate[label=below:$D$] (D) at (0,-3);
+\fill [fill=blue!20] (A)-- (C) -- (B) -- (D) -- cycle;
+\draw [line width=1pt,dashed] (NX)-- (PX);
+\draw [line width=1pt] (A)-- (C) -- (B) -- (D) -- cycle;
+\fill [shift={(0.5980762113533151,-1.9641016151377555)},draw=black,line width=1pt,fill=red!20]  plot[domain=1.6906986599898821:2.7378962111864795,variable=\t]({1*5*cos(\t r)+0*5*sin(\t r)},{0*5*cos(\t r)+1*5*sin(\t r)}) -- cycle;
+\fill [shift={(0.5980762113533151,1.9641016151377555)},draw=black,line width=1pt,fill=red!20]  plot[domain=1.6906986599898821:2.7378962111864795,variable=\t]({1*5*cos(\t r)+0*5*sin(\t r)},{0*5*cos(\t r)+-1*5*sin(\t r)}) -- cycle;
+\fill [shift={(0.22991261925239193,-3.398220337846384)},draw=black,line width=1pt,fill=red!20]  plot[domain=0.5595171601172517:1.6067147113138494,variable=\t]({1*6.402349826752878*cos(\t r)+0*6.402349826752878*sin(\t r)},{0*6.402349826752878*cos(\t r)+1*6.402349826752878*sin(\t r)}) -- cycle;
+\fill [shift={(0.22991261925239193,3.398220337846384)},draw=black,line width=1pt,fill=red!20]  plot[domain=0.5595171601172517:1.6067147113138494,variable=\t]({1*6.402349826752878*cos(\t r)+0*6.402349826752878*sin(\t r)},{0*6.402349826752878*cos(\t r)+-1*6.402349826752878*sin(\t r)}) -- cycle;
+\foreach \p in {A,B,C,D}
+	\fill[fill=black,draw=black,thick] (\p) circle (2.0pt);
+\draw[] (0,1.5) node {$S_5$};
+\draw[] (-2.5,2.5) node {$S_3$};
+\draw[] (3.6,2.7) node {$S_4$};
+\draw[] (0,-1.5) node {$S_5'$};
+\draw[] (-2.5,-2.5) node {$S_3'$};
+\draw[] (3.6,-2.7) node {$S_4'$};
+\end{tikzpicture}
+\end{minipage}
+\end{figure*}
+
+因为 $l'$ 关于 $AB$ 对称, 在 $l'$ 上再任取一点 $C$, 设 $C$ 关于 $AB$ 对称的点为 $D$, 则 $D$ 也在 $l'$ 上. 连接 $AC, CB, BD, DA$, 则 $S_1$ 的面积被分成了三部分: 弦 $AC$ 与弧 $AC$ 围成的面积 $S_3$, 弦 $CB$ 与弧 $CB$ 围成的面积 $S_4$, $\triangle ABC$ 的面积 $S_5$. $S_1'$ 也一样被分成了$S_3',S_4', S_5'$ 三部分. 沿 $AB$ 放一根滑杆, 在 $AC, CB, BD, DA$ 位置上分别放一个连杆, 将 $S_3, S_4, S_3', S_4'$ 的形状画在硬纸板上剪下来, 并粘在对应的连杆上. $A,B$ 可以沿着滑杆左右移动拉伸, 并带动 $C,D$ 上下移动. 在这个过程中, 四个硬纸板面积都不变, 只有 $S_5, S_5'$ 面积发生变化. 而
+$$S_5 = \frac{1}{2}AC\cdot CB\cdot \sin\angle ACB ,$$
+$AC, CB$ 的长度固定, 所以只有当 $\angle ACB = 90\degree$ 时, $S_5$ 面积最大. 对于任选的 $C$ 点都要满足 $\angle ACB = 90\degree$, 说明曲线 $l'$ 只能是圆.
 
 
 
