@@ -963,6 +963,51 @@ $$f(q) = y'x - x'y + qx' = (1-q)f(0) + qf(1),$$
 
 \newpage
 %------------------------------------------------------------------------------%
+\noindent 凸几何之二
+
+对于一个凸的 $n$ 边形, 设顶点为 $A_1, A_2, \cdots, A_n$. 假如多边形内部存在一点 $P$, 使每个顶点 $A_i$ 到 $P$ 延长线 $A_iP$ 恰好与各边有一个交点, 则 $n$ 是奇数.
+
+或者等价的命题, 当 $n$ 为偶数时, 多边形内部任意一点 $O$, 总有两个顶点到 $O$ 的连线, 交于同一边上.
+
+~
+
+解: 证明等价命题. 取凸 $2n$ 边形任意的相对的两个点连线, 会将原来的多边形分成两个凸的 $n+1$ 边形. 设为 $X$ 和 $Y$. 点 $O$ 一定落在某一半 (不妨设为 $X$) 的内部或边界. 取另一半的 $n+1$ 个顶点分别与 $O$ 连线并延长, 每条线会先由 $XY$ 的公共边进入$X$, 再由 $X$ 的另一边(共 $n$ 种可能)离开. 由抽屉原理, 必然有两条线在同一条边上离开 $X$.
+
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[] (A) at (-4,2);
+\coordinate[] (B) at (-3,4);
+\coordinate[] (C) at (-1,5);
+\coordinate[] (D) at (2,4);
+\coordinate[] (E) at (3,2);
+\coordinate[] (F) at (2,-1);
+\coordinate[] (G) at (-1,-2);
+\coordinate[] (H) at (-3,-1);
+\coordinate[] (I) at (-2,1.5);
+\coordinate[] (J) at (-3.517,0.522);
+\coordinate[] (K) at (-3.774, 1.323);
+\coordinate[] (L) at (-3.714, 2.571);
+\coordinate[] (M) at (-2.75, -1.125);
+\coordinate[] (N) at (-0.647, -1.882);
+\draw[line width=1pt] (B) -- (C) -- (D) -- (E) -- (F);
+\draw[line width=1pt,gray] (F) -- (G) -- (H) -- (A) -- (B);
+\draw[line width=1pt,gray,dashed] (B)-- (F);
+\draw[line width=1pt,cyan!30] (B)-- (N);  
+\draw[line width=1pt,blue!30] (D)-- (J); 
+\draw[line width=1pt,green!30] (E)-- (K); 
+\draw[line width=1pt,orange!30] (F)-- (L); 
+\draw[line width=1pt,magenta!30] (C)-- (M); 
+\foreach \p in {A,B,C,D,E,F,G,H,I,J,K,L,M,N}
+	\fill[fill=black,draw=black,thick] (\p) circle (1pt);
+\draw[] (1,2) node {$Y$};
+\draw[] (-1,0) node {$X$};
+\draw[anchor=north] (I) node {$O$};
+\end{tikzpicture}
+\end{figure*}
+
+\newpage
+%------------------------------------------------------------------------------%
 \section{包络线问题}
 
 \noindent 一般结论
