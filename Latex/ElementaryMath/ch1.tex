@@ -1736,6 +1736,84 @@ $p+r$与$q+s$的整数倍线性组合能得到$1$, 由裴蜀定理可得$p+r$与
 
 
 
+\newpage
+%------------------------------------------------------------------------------%
+\section{几则追及问题}
+\subsection {多边形迭代}
+
+画个随机多边形, 连接各条边的中点, 形成新的多边形, 重复这一过程, 最后会收敛成一个椭圆.
+
+~
+
+设原多边形有 $n$ 个顶点, 坐标分别是 $(x_0,y_0), (x_1,y_1), \cdots, (x_{n-1},y_{n-1})$. 仅考虑 $x$ 坐标, 设 $x_k$ 经过 $t$ 步迭代变成了 $x_k^{(t)}$, 则有如下关系:
+\[ \begin{bmatrix} x_0^{(t+1)}\\x_1^{(t+1)}\\ \vdots \\x_{n-2}^{(t+1)} \\x_{n-1}^{(t+1)} \end{bmatrix} =  \frac{1}{2}\begin{bmatrix} 1 & 1 & 0 & \cdots & 0 & 1\\ 0 & 1 & 1 & \cdots & 0 & 0\\ & & & \ddots & & \\ 0 & 0 & 0 & \cdots & 1 & 1 \\ 1 & 0 & 0 & \cdots & 0 & 1\end{bmatrix} \begin{bmatrix} x_0^{(t)}\\x_1^{(t)}\\ \vdots \\x_{n-2}^{(t)} \\x_{n-1}^{(t)} \end{bmatrix} \]
+记变换矩阵为 $A$, 并记
+\[ \bold{x}^{(t)} =  [x_0^{(t)},x_1^{(t)},\cdots,x_{n-1}^{(t)}]^\mathrm{T} ,\]
+则 
+\[ \bold{x}^{(t)} = A^t \bold{x}^{(0)} .\]
+对 $A$ 进行特征值分解, 特征方程为
+\[ \begin{vmatrix} \dfrac{1}{2} - \lambda & \dfrac{1}{2} & 0 & \cdots & 0 & 0\\ 0 & \dfrac{1}{2} - \lambda & \dfrac{1}{2} & \cdots & 0 & 0\\ & & & \ddots & & \\ 0 & 0 & 0 & \cdots & \dfrac{1}{2} - \lambda & \dfrac{1}{2} \\ \dfrac{1}{2} & 0 & 0 & \cdots & 0 & \dfrac{1}{2} - \lambda\end{vmatrix} = 0.\]
+依次将第 $k$ 行乘以 $\dfrac{1}{(2\lambda-1)^k}$ 加到最后一行, 可以化简为
+\[ (\lambda - \frac{1}{2})^n = \frac{1}{2} ,\]
+于是特征值为 $\lambda_k = \dfrac{1+\xi^k}{2}$, $0\le k\le n-1$. 这里 $\xi$ 为 $n$ 次单位根: $\xi = e^{\frac{2\pi i}{n}}$. $\lambda_k$ 对应的特征向量为
+\[ \bold{u}_k = [1, \xi^k, \xi^{2k}, \cdots, \xi^{(n-1)k}]^\mathrm{T} .\]
+对 $A$ 进行对角化得 $A = P^{-1}\Lambda P$, 其中 $\Lambda = \mathrm{diag}(\lambda_0,\cdots,\lambda_{n-1})$, $P$ 的第 $k$ 列是 $\bold{u}_k$, 它是一个特殊的范德蒙矩阵, 并且不难验证
+\[P^{-1} = \begin{bmatrix} 1 & 1 & \cdots & 1 \\ 1 & \xi & \cdots & \xi^{n-1} \\ 1 & \xi^2  & \cdots & \xi^{2(n-1)} \\ \vdots & \vdots & \ddots & \vdots \\ 1 & \xi^{n-1} & \cdots & \xi^{(n-1)(n-1)}\end{bmatrix} ^{-1} = \frac{1}{n} \begin{bmatrix} 1 & 1 & \cdots & 1 \\ 1 & \xi^{-1} & \cdots & \xi^{-(n-1)} \\ 1 & \xi^{-2}  & \cdots & \xi^{-2(n-1)} \\ \vdots & \vdots & \ddots & \vdots \\ 1 & \xi^{-(n-1)} & \cdots & \xi^{-(n-1)(n-1)}\end{bmatrix}  \]
+只要注意到 $\xi^{-k} = \xi^{n-k}$ 以及当 $1\le k\le n-1$ 时有 $1+\xi^k+\xi^{2k}+\cdots+\xi^{(n-1)k}=0$ 即可. 后者成立是因为 $\xi^k$ 满足 
+$$(\xi^k-1)(1+\xi^k+\xi^{2k}+\cdots+\xi^{(n-1)k}) = \xi^{nk}-1 = 0 .$$
+进一步, 因为 $\xi^{-1} = \bar{\xi}$, 所以矩阵 $P$ 和 $nP^{-1}$ 不仅都是对称矩阵, 而且对应的行(列)互为共轭.
+有了对角化结果, $ \bold{x}^{(t)}$ 的解析表达式可以直接求出: 
+\begin{align*} \bold{x}^{(t)} &= P^{-1}\cdot\Lambda^t\cdot P\cdot \bold{x}^{(0)}\\
+&=  \frac{1}{n}[\bar{\bold{u}}_0,\cdots,\bar{\bold{u}}_{n-1}] \cdot \Lambda^t\cdot [\bold{u}_0^\mathrm{T},\cdots,\bold{u}_{n-1}^\mathrm{T}]^\mathrm{T}\cdot  \bold{x}^{(0)} \\
+&= \frac{1}{n}[\lambda_0^t\bar{\bold{u}}_0,\cdots,\lambda_{n-1}^t\bar{\bold{u}}_{n-1}]\cdot[\bold{u}_0^\mathrm{T},\cdots,\bold{u}_{n-1}^\mathrm{T}]^\mathrm{T} \cdot \bold{x}^{(0)} \\
+&= \frac{1}{n}\left(\sum_{k=0}^{n-1}{\lambda_k^t\bar{\bold{u}}_k\cdot\bold{u}_k^\mathrm{T} }\right)\bold{x}^{(0)}
+\end{align*}
+这里每个 $\bar{\bold{u}}_k\cdot\bold{u}_k^\mathrm{T}$ 都是一个矩阵. 
+当 $t\to\infty$ 时, 求和式中除了 $k=0$ 一项以外其余的 $\lambda_k^t$都趋于 $0$, $\bar{\bold{u}}_0\cdot\bold{u}_0^\mathrm{T}$ 为全 $1$ 的矩阵, 而 $\lambda_0=1$, 表明最终每个点的 $x$ 坐标都会收敛到所有点 $x$ 坐标的均值.
+
+\begin{wrapfigure}{o}{6.0cm}
+\centering
+\vspace{-1em}
+\begin{tikzpicture}[cap=round,scale=2]
+\tikzstyle{axes}=[line width=1pt]
+\coordinate[] (A) at (0.811, 0.391);
+\coordinate[] (M) at (0.5,0);
+\coordinate (X) at (1,0);
+\coordinate[label=below left:$O$] (O) at (0,0);
+\draw [line width=1pt] (O) circle (0.9cm);
+\draw [line width=1pt] (O) to [edge label=$\lambda_1$] (A);
+\draw [line width=1pt,red] (M) -- (A);
+\draw[-Stealth,line width=1pt] (-1.1,0) -- (1.1,0) node[right] {$x$};
+\draw[-Stealth,line width=1pt] (0,-1.1) -- (0,1.1) node[above] {$y$};
+\draw[anchor=north] (0.25,0) node {$\frac{1}{2}$};
+\draw[anchor=south west] (A) node {$\lambda_1 = \frac{1+\xi}{2}$};
+\draw pic["$\omega$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.5cm] {angle=X--O--A};
+\draw pic["$2\omega$",draw,line width=1pt,red,angle eccentricity=2.0, angle radius=0.3cm] {angle=X--M--A};
+\end{tikzpicture}
+\end{wrapfigure}
+
+再考虑绝对值第二大的特征值 $\lambda_1$ 和 $\lambda_{n-1}$, 这两项决定了收敛过程的主要细节. 两个矩阵的第 $p$ 行第 $q$ 列元素分别为( $p$, $q$ 从 $0$ 开始):
+\begin{align*}
+\left[\lambda_1^t\bar{\bold{u}}_1\bold{u}_1^\mathrm{T}\right]_{p,q} &= \lambda_1^t\xi^{q-p} \\
+\left[\lambda_{n-1}^t\bar{\bold{u}}_{n-1}\bold{u}_{n-1}^\mathrm{T}\right]_{p,q} &= \bar{\lambda}_1^t\xi^{p-q} = \overline{\lambda_1^t\xi^{q-p}}
+\end{align*}
+而对于$\lambda_1$, 它的辐角 $\omega$ 和模长 $r$ 都可以求出来: 
+$$\lambda_1 = r\cdot e^{i\omega} = \cos(\dfrac{\pi}{n})\cdot e^{\frac{i\pi}{n}}.$$ 
+
+综上, 设所有点的 $x$ 坐标均值为 $X$, 则 $\bold{x}^{(t)}$ 第 $k$ 个元素偏离均值的量为
+\begin{align*}
+x_k^{(t)} - X &= \sum_{q=0}^{n-1}{ (\lambda_1^t\xi^{q-k} + \overline{\lambda_1^t\xi^{q-k}}) x_q } = \sum_{q=1}^{n-1}2\cdot\mathrm{Re}(\lambda_1^t\xi^{q-k} x_q) \\
+&= 2\cdot\mathrm{Re}\left(\sum_{q=1}^{n-1}\lambda_1^t\xi^{q-k} x_q\right) = 2\cdot\mathrm{Re}\left(\lambda_1^t\sum_{q=1}^{n-1}\xi^{q-k} x_q\right) \\
+&= 2r^t\cdot\mathrm{Re}\left( e^{i\omega t}\cdot\xi^{-k}\cdot\sum_{q=0}^{n-1}\xi^{q}x_q \right) 
+\end{align*}
+求和式内的复数与 $t$ 无关, 给定初始点坐标, 求和式的值其实也就确定了, 它其实就是对所有 $x$ 坐标进行离散傅里叶逆变换的第一项. 记求和式的值为 $\displaystyle \sum_{q=0}^{n-1}\xi^{q}x_q = r_x \cdot e^{i\phi_x}$, 则
+\[ x_k^{(t)} - X = 2r^t\mathrm{Re}\left( r_x \cdot e^{i(\phi_x+\omega t-\frac{2k\pi}{n})}\right)\\
+ = 2r^t\cdot r_x\cos(\phi_x+\omega t-\frac{2k\pi}{n}).
+\]
+
+类似的, 对于 $y$ 坐标, 也有如下关系:
+\[ y_k^{(t)} - Y = 2r^t\cdot r_y\cos(\phi_y+\omega t-\frac{2k\pi}{n}).\]
+可见每个点 $(x_k, y_k)$ 在迭代过程中围绕中心坐标 $(X,Y)$ 在 $x$ 和 $y$ 方向上分别做阻尼震荡, 振幅和相位由所有点的初始位置决定. 随着 $t$ 变化, $(x_k, y_k)$ 的运动轨迹是一条螺线, 如果不考虑半径的变化, 运动轨迹就是一个椭圆. 参数方程已由上面的式子给出.
 
 
 
