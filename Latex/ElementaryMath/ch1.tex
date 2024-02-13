@@ -1747,17 +1747,17 @@ $p+r$与$q+s$的整数倍线性组合能得到$1$, 由裴蜀定理可得$p+r$与
 
 设原多边形有 $n$ 个顶点, 坐标分别是 $(x_0,y_0), (x_1,y_1), \cdots, (x_{n-1},y_{n-1})$. 仅考虑 $x$ 坐标, 设 $x_k$ 经过 $t$ 步迭代变成了 $x_k^{(t)}$, 则有如下关系:
 \[ \begin{bmatrix} x_0^{(t+1)}\\x_1^{(t+1)}\\ \vdots \\x_{n-2}^{(t+1)} \\x_{n-1}^{(t+1)} \end{bmatrix} =  \frac{1}{2}\begin{bmatrix} 1 & 1 & 0 & \cdots & 0 & 1\\ 0 & 1 & 1 & \cdots & 0 & 0\\ & & & \ddots & & \\ 0 & 0 & 0 & \cdots & 1 & 1 \\ 1 & 0 & 0 & \cdots & 0 & 1\end{bmatrix} \begin{bmatrix} x_0^{(t)}\\x_1^{(t)}\\ \vdots \\x_{n-2}^{(t)} \\x_{n-1}^{(t)} \end{bmatrix} \]
-记变换矩阵为 $A$, 并记
+记变换矩阵为 $M$, 并记
 \[ \bold{x}^{(t)} =  [x_0^{(t)},x_1^{(t)},\cdots,x_{n-1}^{(t)}]^\mathrm{T} ,\]
 则 
-\[ \bold{x}^{(t)} = A^t \bold{x}^{(0)} .\]
-对 $A$ 进行特征值分解, 特征方程为
+\[ \bold{x}^{(t)} = M^t \bold{x}^{(0)} .\]
+对 $M$ 进行特征值分解, 特征方程为
 \[ \begin{vmatrix} \dfrac{1}{2} - \lambda & \dfrac{1}{2} & 0 & \cdots & 0 & 0\\ 0 & \dfrac{1}{2} - \lambda & \dfrac{1}{2} & \cdots & 0 & 0\\ & & & \ddots & & \\ 0 & 0 & 0 & \cdots & \dfrac{1}{2} - \lambda & \dfrac{1}{2} \\ \dfrac{1}{2} & 0 & 0 & \cdots & 0 & \dfrac{1}{2} - \lambda\end{vmatrix} = 0.\]
 依次将第 $k$ 行乘以 $\dfrac{1}{(2\lambda-1)^k}$ 加到最后一行, 可以化简为
 \[ (\lambda - \frac{1}{2})^n = \frac{1}{2} ,\]
 于是特征值为 $\lambda_k = \dfrac{1+\xi^k}{2}$, $0\le k\le n-1$. 这里 $\xi$ 为 $n$ 次单位根: $\xi = e^{\frac{2\pi i}{n}}$. $\lambda_k$ 对应的特征向量为
 \[ \bold{u}_k = [1, \xi^k, \xi^{2k}, \cdots, \xi^{(n-1)k}]^\mathrm{T} .\]
-对 $A$ 进行对角化得 $A = P^{-1}\Lambda P$, 其中 $\Lambda = \mathrm{diag}(\lambda_0,\cdots,\lambda_{n-1})$, $P$ 的第 $k$ 列是 $\bold{u}_k$, 它是一个特殊的范德蒙矩阵, 并且不难验证
+对 $M$ 进行对角化得 $M = P^{-1}\Lambda P$, 其中 $\Lambda = \mathrm{diag}(\lambda_0,\cdots,\lambda_{n-1})$, $P$ 的第 $k$ 列是 $\bold{u}_k$, 它是一个特殊的范德蒙矩阵, 并且不难验证
 \[P^{-1} = \begin{bmatrix} 1 & 1 & \cdots & 1 \\ 1 & \xi & \cdots & \xi^{n-1} \\ 1 & \xi^2  & \cdots & \xi^{2(n-1)} \\ \vdots & \vdots & \ddots & \vdots \\ 1 & \xi^{n-1} & \cdots & \xi^{(n-1)(n-1)}\end{bmatrix} ^{-1} = \frac{1}{n} \begin{bmatrix} 1 & 1 & \cdots & 1 \\ 1 & \xi^{-1} & \cdots & \xi^{-(n-1)} \\ 1 & \xi^{-2}  & \cdots & \xi^{-2(n-1)} \\ \vdots & \vdots & \ddots & \vdots \\ 1 & \xi^{-(n-1)} & \cdots & \xi^{-(n-1)(n-1)}\end{bmatrix}  \]
 只要注意到 $\xi^{-k} = \xi^{n-k}$ 以及当 $1\le k\le n-1$ 时有 $1+\xi^k+\xi^{2k}+\cdots+\xi^{(n-1)k}=0$ 即可. 后者成立是因为 $\xi^k$ 满足 
 $$(\xi^k-1)(1+\xi^k+\xi^{2k}+\cdots+\xi^{(n-1)k}) = \xi^{nk}-1 = 0 .$$
