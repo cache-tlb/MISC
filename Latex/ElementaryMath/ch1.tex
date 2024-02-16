@@ -1738,12 +1738,10 @@ $p+r$与$q+s$的整数倍线性组合能得到$1$, 由裴蜀定理可得$p+r$与
 
 \newpage
 %------------------------------------------------------------------------------%
-\section{几则追及问题}
-\subsection {多边形迭代}
-
+\section{封闭多边形的Laplacian平滑}
 画个随机多边形, 连接各条边的中点, 形成新的多边形, 重复这一过程, 最后会收敛成一个椭圆.
 
-~
+\subsection {从矩阵特征值求解}
 
 设原多边形有 $n$ 个顶点, 坐标分别是 $(x_0,y_0), (x_1,y_1), \cdots, (x_{n-1},y_{n-1})$. 仅考虑 $x$ 坐标, 设 $x_k$ 经过 $t$ 步迭代变成了 $x_k^{(t)}$, 则有如下关系:
 \[ \begin{bmatrix} x_0^{(t+1)}\\x_1^{(t+1)}\\ \vdots \\x_{n-2}^{(t+1)} \\x_{n-1}^{(t+1)} \end{bmatrix} =  \frac{1}{2}\begin{bmatrix} 1 & 1 & 0 & \cdots & 0 & 1\\ 0 & 1 & 1 & \cdots & 0 & 0\\ & & & \ddots & & \\ 0 & 0 & 0 & \cdots & 1 & 1 \\ 1 & 0 & 0 & \cdots & 0 & 1\end{bmatrix} \begin{bmatrix} x_0^{(t)}\\x_1^{(t)}\\ \vdots \\x_{n-2}^{(t)} \\x_{n-1}^{(t)} \end{bmatrix} \]
@@ -1815,8 +1813,42 @@ x_k^{(t)} - X &= \sum_{q=0}^{n-1}{ (\lambda_1^t\xi^{q-k} + \overline{\lambda_1^t
 \[ y_k^{(t)} - Y = 2r^t\cdot r_y\cos(\phi_y+\omega t-\frac{2k\pi}{n}).\]
 可见每个点 $(x_k, y_k)$ 在迭代过程中围绕中心坐标 $(X,Y)$ 在 $x$ 和 $y$ 方向上分别做阻尼震荡, 振幅和相位由所有点的初始位置决定. 随着 $t$ 变化, $(x_k, y_k)$ 的运动轨迹是一条螺线, 如果不考虑半径的变化, 运动轨迹就是一个椭圆. 参数方程已由上面的式子给出.
 
+\subsection{使用离散傅里叶变换}
+还可以从卷积的角度考虑这个问题. 两个离散序列 $\bold{a}=\{a_i\}, \bold{b}=\{b_i\}$ 之间的卷积运算定义为:
+$$ [\bold{a}*\bold{b}]_k = \sum_{j=-\infty}^{+\infty} {a_j\cdot b_{k-j}} .$$
 
+若令 
+$$\bold{b}^{(t)}=[x_0^{(t)}, \cdots, x_{n-1}^{(t)}], \qquad \bold{a}=\left[\dfrac{1}{2}, 0, \cdots, 0, \dfrac{1}{2}\right], $$
+则 
+\begin{align*}
+\bold{a}*\bold{b}^{(t)} &= [ \frac{1}{2} (x_0^{(t)} + x_1^{(t)}), \cdots, \frac{1}{2} (x_{n-1}^{(t)} + x_0^{(t)}) ] \\
+&= [x_0^{(t+1)}, \cdots, x_{n-1}^{(t+1)}] \\
+&= \bold{b}^{(t+1)} 
+\end{align*}
 
+迭代一次相当于用卷积核 $\bold{a}$ 作用于原序列. 又因为时(空)域的卷积对应于频域的乘积, 所以可以利用离散傅里叶变换(DFT)来计算任意次迭代之后的结果.
+
+记序列 $\bold{a}, \bold{b}$ 的离散傅里叶变换分别为花体的 $\mathcal{A}, \mathcal{B}$, 则
+\begin{align*}
+\mathcal{A}_k &= \sum_{j=0}^{n-1}{a_j \xi^{-kj}} = \frac{1}{2}(1+\xi^k) = r_k \cdot e^{i\omega_k} \\
+\mathcal{B}_k &= \sum_{j=0}^{n-1}{b_j \xi^{-kj}}
+\end{align*}
+其中 $\xi = e^{\frac{2\pi i}{n}}$ 依然是 $n$ 次单位根, $r_k=\cos(\omega_k)$, $\omega_k=\dfrac{k\pi}{n}$. 将 $\mathcal{A}$ 的每个元素自乘 $t$ 次, 就得到将序列 $\bold{a}$ 进行 $t$ 次卷积后的 DFT 结果:
+$$ \mathcal{A}_k^t =  r_k^t\cdot e^{i\omega_kt} $$
+将序列 $\mathcal{A}^t \mathcal{B}$ 进行离散傅里叶逆变换, 即可得到 $ \bold{b}^{(t)} = \bold{a}*\bold{a}*\cdots *\bold{b}$ 的结果:
+\[
+[\bold{b}^{(t)}]_k = \frac{1}{n}\sum_{j=0}^{n-1}{ \mathcal{A}_j^t\mathcal{B}_j\xi^{jk} } = \frac{1}{n}\sum_{j=0}^{n-1}{ r_j^t \cdot e^{i\omega_j (t+2k)} \cdot B_j } 
+\]
+观察 $t\to\infty$ 时, 求和式的每一项. 当 $j>0$ 时, $r_j < 1$, $r_j^t\to 0$, 而 $r_0 = 1$, $\omega_0=0$, $\mathcal{B}_0$ 就是 $\bold{b}$ 的各项之和. 说明 $\bold{b}^{(t)}$ 的每一项都会收敛于原来序列的均值.
+$j=1$ 和 $j=n-1$ 所对应的 $r_j$ 是第二大的, 又容易证明 $\mathcal{B}_1$ 与 $\mathcal{B}_{n-1}$ 互为共轭, $r_{n-1}=-r_1$, 以及 $\omega_{n-1} = \pi - \omega_1 $. 所以
+\begin{align*}
+& r_1^t\cdot e^{i\omega_1(t+2k)} \cdot \mathcal{B}_1 + r_{n-1}^t\cdot e^{i\omega_{n-1}(t+2k)} \cdot \mathcal{B}_{n-1}\\
+= & r_1^t\cdot e^{i(t+2k)\omega_1} \cdot \mathcal{B}_1 + (-1)^t r_1^t \cdot e^{i(t+2k)(\pi-\omega_1)} \cdot \mathcal{B}_{n-1} \\
+= & r_1^t\cdot e^{i(t+2k)\omega_1} \cdot \mathcal{B}_1 + r_1^t\cdot e^{-i(t+2k)\omega_1} \cdot \mathcal{B}_{n-1}\\
+=& r_1^t\cdot 2\mathrm{Re}\left( e^{i(t+2k)\omega_1} \cdot \mathcal{B}_1 \right)
+\end{align*}
+
+这与用矩阵对角化方法的结果是一致的.
 
 
 
