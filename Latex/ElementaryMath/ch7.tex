@@ -811,7 +811,7 @@ I &= \frac{2}{B^2-4AC}\left(\frac{D(B + 2C) - E(2A+B)}{\sqrt{A+B+C}} - \frac{2CD
 \newpage
 %------------------------------------------------------------------------------%
 \section{微分几何}
-\noindent 曲率与密切圆
+\noindent 曲线的曲率及其性质
 
 设曲线的参数方程为 $(x(t), y(t))$, 在曲线上任意一点 $(x,y)$ 附近取三个点 $(x_i, y_i), i=1,2,3$, 当三个点逐渐逼近 $(x,y)$ 时, 它们的外接圆趋近于曲线在 $(x,y)$ 处的密切圆. 密切圆半径的倒数定义为曲线在该点的曲率.
 \begin{figure*}[htbp]
@@ -909,6 +909,57 @@ x(t+\Delta t) &= x(t) + \dot{x}(t)\Delta t + o(\Delta t), \quad y(t+\Delta t) = 
 令 $\Delta t \to 0$, 可以解得两条法线的交点坐标为:
 \[ x_0 = x - \frac{\dot{x}^2+\dot{y}^2}{\ddot{y}\dot{x}-\ddot{x}\dot{y}}\cdot\dot{y}, \quad y_0 = y + \frac{\dot{x}^2+\dot{y}^2}{\ddot{y}\dot{x}-\ddot{x}\dot{y}}\cdot{x} .\]
 结果跟曲线上三点外接圆圆心的极限情况一致.
+
+~
+
+曲率还刻画了曲线上的点远离切线的程度. 考察曲线上的点 $\bold{p}(t) = (x(t),y(t))$, 其附近一点为 $\bold{p}(t+\Delta t)=\bold{p}(t)+\Delta\bold{p}$, 进行二阶泰勒展开:
+$$ \Delta{\bold{p}} = \dot{\bold{p}}\Delta t + \frac{1}{2}\ddot{\bold{p}}\Delta t^2 + o(\Delta t^2) $$
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[] (A) at (0,0);
+\coordinate[] (B) at (5,0);
+\coordinate[] (C) at (5,4);
+\coordinate[] (D) at (5,-2.5);
+\coordinate[] (E) at (4,3);
+\coordinate[] (F) at (5,3);
+\coordinate[] (G) at (4.5,1.5);
+\coordinate[] (M) at (3,0);
+\draw [line width=1pt,-Stealth] (D) -- (C);
+\draw [line width=1pt,-Stealth] (G) -- (E);
+\draw [line width=1pt,red] (E) to[edge label=$\Delta l$](F);
+\draw [line width=1pt] (E) -- (A);
+\draw [line width=1pt] (M) -- (A);
+\draw [line width=1pt,-Stealth] (B) -- (M);
+\draw [line width=1pt] (B) -- (G);
+\draw [line width=1pt,dashed] (A) -- (G);
+\draw [line width=1pt,gray] (B) arc(0:60:5);
+\draw [line width=1pt,gray] (B) arc(0:-30:5);
+\draw[anchor=west] (C) node {$\dot{\bold{p}}$};
+\draw[anchor=west] (B) node {$\bold{p}$};
+\draw[anchor=east] (E) node {$\bold{p} + \Delta\bold{p}$};
+\draw[anchor=north] (M) node {$\bold{n}$};
+\draw pic["$\alpha$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.6cm] {angle=C--B--E};
+\draw pic["$\alpha$",draw,line width=1pt, angle eccentricity=1.8, angle radius=0.6cm] {angle=B--A--G};
+\foreach \p in {A,B}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.0pt);
+\end{tikzpicture}
+\end{figure*}
+
+记 $\bold{p}(t)$ 点处切线为直线 $T$, 单位法向量为 $\displaystyle \bold{n} = \frac{(\dot{y}, -\dot{x})}{\sqrt{\dot{x}^2+\dot{y}^2}}$ , 则$\bold{p}(t+\Delta t)$ 到切线 $T$ 的距离 $\Delta l$ 就是 $\Delta\bold{p}$ 向量到 $\bold{n}$ 上的投影:
+\begin{align*}
+\Delta l &= \Delta\bold{p} \cdot \bold{n} = \frac{(-\dot{y},\dot{x})}{\sqrt{\dot{x}^2+\dot{y}^2}} \cdot \left( (\dot{x},\dot{y})\Delta t + \frac{1}{2}(\ddot{x},\ddot{y})\Delta t^2 + o(\Delta t^2)\right)\\
+&= \frac{\ddot{y}\dot{x}-\ddot{x}\dot{y}}{2\sqrt{\dot{x}^2+\dot{y}^2}} \cdot \Delta t^2 + o(\Delta t^2)
+\end{align*}
+随着 $\Delta t$ 变化, $\Delta l$ 也是变化的.
+从几何上看, 假设 $\bold{p}(t)$ 与 $\bold{p}(t+\Delta t)$ 位于半径为 $R$ 的圆周上, $T$ 为切线, $\Delta\bold{p}$ 为弦, 弦切角$\alpha$ 是弦所对圆心角的一半, 分别考虑弦切角和圆心角所在三角形, 满足:
+$$
+\frac{\Delta l}{|\Delta \bold{p}|} = \sin\alpha  = \frac{1}{2}\cdot\frac{|\Delta \bold{p}|}{R},
+$$
+故有
+$$
+\kappa = \frac{1}{R} = \lim_{\Delta t\to 0}\frac{2\Delta l}{| \Delta\bold{p} |^2} = \frac{\ddot{y}\dot{x}-\ddot{x}\dot{y}}{\sqrt{\dot{x}^2+\dot{y}^2}^3} 
+$$
 
 
 %------------------------------------------------------------------------------%
