@@ -811,6 +811,24 @@ I &= \frac{2}{B^2-4AC}\left(\frac{D(B + 2C) - E(2A+B)}{\sqrt{A+B+C}} - \frac{2CD
 \newpage
 %------------------------------------------------------------------------------%
 \section{微分几何}
+\noindent 单位方向必然垂直于它的微分方向.
+
+设 $\bold{n}$ 为任意单位向量, 即 
+$$\bold{n} = \frac{\bold{r}}{\sqrt{\bold{r}\cdot\bold{r}}} ,$$
+其中$\bold{r}$ 为任意向量, 且 $\bold{r}\neq\bold{0}$. 对 $\bold{r}$ 求微分:
+$$
+\mathrm{d}\bold{n} = \frac{1}{\bold{r}\cdot\bold{r}}\left( \mathrm{d}\bold{r}\cdot\sqrt{\bold{r}\cdot\bold{r}} - \bold{r}\cdot\frac{1}{2}\cdot\frac{2(\bold{r}\cdot\mathrm{d}\bold{r})}{\sqrt{\bold{r}\cdot\bold{r}}} \right)
+$$
+于是易得
+$$
+\bold{n}\cdot\mathrm{d}\bold{n} = 0.
+$$
+
+从几何上来看, 对球面上的两个点 $\bold{n}$ 和 $\bold{n}'$, 只要它们足够接近, 则 $\bold{n}'$ 到 $\bold{n}$ 的方向 $\mathrm{d}\bold{n}$ 总是在球面上 $\bold{n}$ 点的切平面上, 因此与$\bold{n}$ 是垂直的.
+
+
+\newpage
+%------------------------------------------------------------------------------%
 \noindent 曲线的曲率及其性质
 
 设曲线的参数方程为 $(x(t), y(t))$, 在曲线上任意一点 $(x,y)$ 附近取三个点 $(x_i, y_i), i=1,2,3$, 当三个点逐渐逼近 $(x,y)$ 时, 它们的外接圆趋近于曲线在 $(x,y)$ 处的密切圆. 密切圆半径的倒数定义为曲线在该点的曲率.
