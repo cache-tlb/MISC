@@ -2,6 +2,33 @@
 
 \section{积分问题}
 
+\noindent 积分与平均数
+
+考虑 $x$ 在 $(a,b)$ 区间上的加权平均, 其中 $a > 0$:
+$$ f(t) = \frac{\int_a^b x\cdot w_t(x)\ \mathrm{d}x}{\int_a^b w_t(x)\ \mathrm{d}x} = \frac{\int_a^b x^{t+1}\ \mathrm{d}x}{\int_a^b x^{t}\ \mathrm{d}x} ,$$
+这里权重函数就是 $w_t(x) = x^t$. 对于任意的 $x_2 > x_1$, 如果 $x_2$ 拥有更大的权重, 则加权平均结果就越大. 事实上, 随着 $t$ 增加, $(\dfrac{x_2}{x_1})^t$ 是增加的, 说明 $f(t)$ 是严格递增的函数.
+
+算术平均数 
+$$A(a,b) = f(0) = \frac{b^2-a^2}{a(b-a)} = \frac{a+b}{2} .$$
+
+几何平均数
+$$ G(a,b) = f(-\frac{3}{2}) = \frac{\sqrt{b}-\sqrt{a}}{\frac{1}{\sqrt{a}} - \frac{1}{\sqrt{b}} } = \sqrt{ab} .$$
+
+调和平均数
+$$ H(a,b) = f(-3) = \frac{\frac{1}{b}-\frac{1}{a}}{\frac{1}{2}(\frac{1}{b^2}-\frac{1}{a^2})} = \frac{2}{\frac{1}{b}+\frac{1}{a}}.$$
+
+对数平均数
+$$ L(a,b) = f(-1) = \frac{\ln b - \ln a}{b-a} .$$
+
+中心平均数
+$$ T(a,b) = f(1) = \frac{2(b^3-a^3)}{3(b^2-a^2)} = \frac{2(a^2+ab+b^2)}{3(a+b)} .$$
+
+希罗平均数
+$$ N(a,b) = f(-\frac{1}{2}) = \dfrac{\frac{2}{3}(b^\frac{3}{2} - a^\frac{3}{2})}{2(b^{\frac{1}{2}} - a^{\frac{1}{2}})} = \frac{a+\sqrt{ab}+b}{3} .$$
+\newpage
+%------------------------------------------------------------------------------%
+
+
 \noindent Frullani 积分
 
 设 $f(x)$ 在 $[0,+\infty)$ 连续, $a>0, b>0$, 证明:
