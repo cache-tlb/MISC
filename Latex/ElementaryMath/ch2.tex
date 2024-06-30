@@ -2038,6 +2038,33 @@ p^n &= q^{n-m}p^m - Nq^n
 $$ 5x + (1000-x) = 2500 ,$$
 解得 $x = 375$. 因此最多可能有 $625$ 人只会一种语言.
 
+
+\newpage
+%------------------------------------------------------------------------------%
+\section{数论}
+
+$p$ 为正奇数, $n$ 为正整数, 求证: $\displaystyle \sum_{k=1}^{n}{k^p}$ 是 $\displaystyle \sum_{k=1}^{n}{k}$ 的倍数.
+
+~
+
+解: 设$p=2m+1, m\in\mathbb{N}$, $\displaystyle S = \sum_{k=1}^{n}{k^p}$. 因为 $\displaystyle \sum_{k=1}^{n}{k} = \frac{n(n+1)}{2}$, 而 $n$ 与 $n+1$ 互素, 所以只要证明 $2S$ 分别是 $n$ 和 $n+1$ 的倍数即可.
+
+先证明 $2S$ 是 $n$ 的倍数. 在模 $n$ 下, 有
+\begin{align*}
+2S &= \sum_{k=1}^n\left( k^{2m+1} + (n-k)^{2m+1}\right) + n^{2m+1} \\
+ &= \sum_{k=1}^n\left( k^{2m+1} + (-k)^{2m+1}\right) \pmod{n} \\
+&= 0 \pmod{n}
+\end{align*}
+
+在模 $n+1$ 下, 有
+\begin{align*}
+2S &= \sum_{k=1}^n\left( k^{2m+1} + (n+1-k)^{2m+1}\right) \\
+&= \sum_{k=1}^n\left( k^{2m+1} + (-k)^{2m+1}\right) \pmod{n+1}\\
+&= 0 \pmod{n+1}
+\end{align*}
+
+这就证明了 $2S$ 可以同时被 $n$ 和 $n+1$ 整除.
+
 \newpage
 %------------------------------------------------------------------------------%
 \section{组合计数}
