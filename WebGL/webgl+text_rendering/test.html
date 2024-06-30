@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html>
+<head> <meta charset=utf-8 />
+<title>test</title>
+<script src='./m4.js'></script>
+<script src='./webgl-utils.js'></script>
+</head>
+
+<body>
+<canvas id="textureCanvas" style="display: none;"> </canvas>
+<canvas id="drawCanvas" width="1024" height="768"> </canvas>
+
+<script id="color-vertex-shader" type="x-shader/x-vertex">
+attribute vec3 a_position;
+attribute vec2 a_texcoord;
+
+uniform mat4 u_projection;
+uniform mat4 u_view;
+uniform mat4 u_world;
+
+varying vec2 v_texcoord;
+
+void main() {
+    gl_Position = u_projection * u_view * u_world * vec4(a_position, 1.0);
+    v_texcoord = a_texcoord;
+}
+</script>
+
+<script id="color-fragment-shader" type="x-shader/x-fragment">
+#extension GL_OES_standard_derivatives : enable
+
+precision mediump float;
+
+varying vec2 v_texcoord;
+
+uniform sampler2D u_texture;
+uniform int u_useMaxFilter;
+uniform vec4 u_textureSize;
+
+vec4 get_text_sample(vec2 uv) {
+    vec4 ret = texture2D(u_texture, uv);
+    ret.xyz = ret.aaa;
+    ret.a = 1.0;
+    return ret;
+}
+
+void main() {
+    if (u_useMaxFilter > 0)
+    {
+        vec2 UV = v_texcoord.xy;
+        vec2 dim = u_textureSize.xy;
+        float dx = dFdx(UV.x);
+        float dy = dFdy(UV.y);
+        vec3 color = vec3(0.,0.,0.);
+        int Nx = int(max(0., ceil(dim.x*dx*0.5)));
+        int Ny = int(max(0., ceil(dim.y*dy*0.5)));
+        vec4 sum_x = vec4(0.), sum_y = vec4(0.);
+        vec4 max_x = vec4(0.), max_y = vec4(0.);
+        vec2 inv_dim = u_textureSize.zw;
+
+        const int max_iter = 128;
+        for (int i = 0; i <= max_iter; i++) {
+            if (i > Nx) break;
+            vec4 sample = get_text_sample(clamp(UV + float(i)*vec2(inv_dim.x, 0.0), 0.0, 1.0));
+            max_x = max(sum_x, sample);
+            sum_x += sample;
+            sample = get_text_sample(clamp(UV + float(-i)*vec2(inv_dim.x, 0.0), 0.0, 1.0));
+            max_x = max(sum_x, sample);
+            sum_x += sample;
+        }
+        for (int i = 0; i <= max_iter; i++) {
+            if (i > Ny) break;
+
+            vec4 sample = get_text_sample(clamp(UV + float(i)*vec2(0.0, inv_dim.y), 0.0, 1.0));
+            max_y = max(sum_y, sample);
+            sum_y += sample;
+            sample = get_text_sample(clamp(UV + float(-i)*vec2(0.0, inv_dim.y), 0.0, 1.0));
+            max_y = max(sum_y, sample);
+            sum_y += sample;
+        }
+        vec4 color_max = max(max_x, max_y);
+        vec4 color_avg = (sum_x+sum_y)/float(Nx+Ny+2);
+        vec4 ret_color = mix(color_avg, color_max, 1.0);
+        vec4 ret_missive = color_avg;
+        if (color_avg.r < 0.33) 
+            discard;
+        gl_FragColor = vec4(color_max.xyz, 1.0);
+    } else {
+        gl_FragColor = get_text_sample(v_texcoord.xy);            
+    }
+}
+
+</script>
+
+<script id="sky-vertex-shader" type="x-shader/x-vertex">
+attribute vec3 a_position;
+
+uniform mat4 u_projection;
+uniform mat4 u_view;
+
+varying vec3 v_texcoord;
+
+void main() {
+    vec3 positionVS = mat3(u_view) * (a_position);
+    gl_Position = u_projection * vec4(positionVS, 1.0);
+    // gl_Position = u_projection * u_view * u_world * vec4(a_position, 1.0);
+    v_texcoord = a_position;
+}
+</script>
+<script id="sky-fragment-shader" type="x-shader/x-fragment">
+precision mediump float;
+varying vec3 v_texcoord;
+
+#define Gamma 1.4
+
+#define Rayleigh 1.
+#define Mie 1.
+#define RayleighAtt 1.
+#define MieAtt 1.2
+const float g = -0.93;
+
+#if 1
+vec3 _betaR = vec3(1.95e-2, 1.1e-1, 2.94e-1); 
+vec3 _betaM = vec3(4e-2, 4e-2, 4e-2);
+#else
+vec3 _betaR = vec3(6.95e-2, 1.18e-1, 2.44e-1); 
+vec3 _betaM = vec3(4e-2, 4e-2, 4e-2);
+#endif
+
+vec3 calcAtmosphericScattering( float sR, float sM, out vec3 extinction, float cosine, float g1)
+{
+    extinction = exp(-(_betaR * sR + _betaM * sM));
+
+    // scattering phase
+    float g2 = g1 * g1;
+    float fcos2 = cosine * cosine;
+    float miePhase = Mie * pow(1. + g2 + 2. * g1 * cosine, -1.5) * (1. - g2) / (2. + g2);
+    //g = 0;
+    float rayleighPhase = Rayleigh;
+
+    vec3 inScatter = (1. + fcos2) * vec3(rayleighPhase + _betaM / _betaR * miePhase);
+    
+    return inScatter;
+}
+vec3 ACESFilm( vec3 x ) {
+    float tA = 2.51;
+    float tB = 0.03;
+    float tC = 2.43;
+    float tD = 0.59;
+    float tE = 0.14;
+    return clamp((x*(tA*x+tB))/(x*(tC*x+tD)+tE),0.0,1.0);
+}
+vec3 getSkyColor(in vec3 rd, vec3 light1) {
+    float sundot = clamp(dot(rd,light1),0.0,1.0);
+    
+    vec3 extinction;
+
+    // optical depth -> zenithAngle
+    float zenithAngle = max(0., rd.y); //abs( rd.y);
+    float sR = RayleighAtt / zenithAngle ;
+    float sM = MieAtt / zenithAngle ;
+
+    vec3 inScatter = calcAtmosphericScattering(sR, sM, extinction, sundot, g);
+    vec3 skyCol = inScatter*(1.0-extinction);
+
+    // sky  
+    vec3 col = skyCol; // *vec3(1.6,1.4,1.0)
+    // sun
+    col += 0.47*vec3(1.6,1.4,1.0)*pow( sundot, 350.0 ) * extinction;
+    // sun haze
+    col += 0.4*vec3(0.8,0.9,1.0)*pow( sundot, 2.0 ) * extinction;
+    
+    // sun scatter
+    col += 0.3*vec3(1.0,0.7,0.3)*pow( sundot, 8.0 );
+
+    // gamma
+    //col = sqrt(col);
+            
+    col = ACESFilm(col);
+    col = pow(col, vec3(Gamma));
+    return col;
+}
+void main() {
+    vec3 rd = normalize(v_texcoord.xyz);
+    vec3 light_dir = vec3(1.0, 10.0, 1.0);
+    vec3 color = getSkyColor(rd, normalize(light_dir));
+    gl_FragColor = vec4(color, 1.0);
+}
+</script>
+
+
+<script>
+function degreeToRad(degree) { return degree*Math.PI/180.0; }
+
+class Camera {
+    constructor() {
+        this.forward = [0,0,-1];    // -z
+        this.right = [1,0,0];       // x
+        this.position = [0,0,0];
+    }
+    moveForward(distance) {
+        this.position = m4.addVectors( this.position, m4.scaleVector(this.forward, distance) );
+    }
+    moveRight(distance) {
+        this.position = m4.addVectors( this.position, m4.scaleVector(this.right, distance) );
+    }
+    getViewMatrix() {
+        var target = m4.addVectors(this.position, this.forward);
+        var transform = m4.lookAt(this.position, target, [0,1,0]);
+        return m4.inverse(transform);
+    }
+}
+
+class UECameraControl {
+    constructor(camera) {
+        this.camera = camera;
+        this.moveSpeed = 2;
+        this.rotateSpeed = 1;
+        this.isMoveForward = false;
+        this.isMoveBackward = false;
+        this.isMoveLeft = false;
+        this.isMoveRight = false;
+        this.yaw = 0;
+        this.pitch = 0;
+        this.maxPitch = 88;
+        this.isLocked = true;
+    }
+    update(delta_t) {
+        this.updateCameraPosition(delta_t);
+        this.updateCameraRotation(delta_t);
+    }
+    updateCameraPosition(delta_t){
+        var distance = delta_t * this.moveSpeed;
+        if (this.isMoveForward && !this.isMoveBackward) {
+            this.camera.moveForward(distance);
+        }
+        if (!this.isMoveForward && this.isMoveBackward) {
+            this.camera.moveForward(-distance);
+        }
+        if (this.isMoveLeft && !this.isMoveRight) {
+            this.camera.moveRight(-distance);
+        }
+        if (!this.isMoveLeft && this.isMoveRight) {
+            this.camera.moveRight(distance);
+        }
+    }
+    updateCameraRotation(delta_t){
+        // yaw, pitch to forward & right
+        var sin_pitch = Math.sin(degreeToRad(this.pitch));
+        var sin_yaw = Math.sin(degreeToRad(this.yaw));
+        var cos_yaw = Math.cos(degreeToRad(this.yaw));
+        var xz_len = Math.sqrt(1.0 - sin_pitch*sin_pitch);
+        var fwd = [-xz_len*sin_yaw, sin_pitch, -xz_len*cos_yaw];
+        var right = [cos_yaw, 0, -sin_yaw];
+        camera.forward = fwd;
+        camera.right = right;
+    }
+
+    onKeyDown ( event ) {
+        if (this.isLocked) return;
+        switch ( event.code ) {
+            case 'ArrowUp':
+            case 'KeyW': this.isMoveForward = true; break;
+            case 'ArrowLeft':
+            case 'KeyA': this.isMoveLeft = true; break;
+            case 'ArrowDown':
+            case 'KeyS': this.isMoveBackward = true; break;
+            case 'ArrowRight':
+            case 'KeyD': this.isMoveRight = true; break;
+        }
+    };
+    onKeyUp ( event ) {
+        switch ( event.code ) {
+            case 'ArrowUp':
+            case 'KeyW': this.isMoveForward = false; break;
+            case 'ArrowLeft':
+            case 'KeyA': this.isMoveLeft = false; break;
+            case 'ArrowDown':
+            case 'KeyS': this.isMoveBackward = false; break;
+            case 'ArrowRight':
+            case 'KeyD': this.isMoveRight = false; break;
+        }
+    };
+    onPointerMove( event ) {
+        if (this.isLocked) return;
+        const movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
+        const movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+
+        this.yaw -= movementX * 0.05 * this.rotateSpeed;
+        this.yaw = this.yaw % 360;
+        this.pitch -= movementY * 0.05 * this.rotateSpeed;
+        this.pitch = Math.max( -this.maxPitch, Math.min( this.maxPitch, this.pitch ) );
+    }
+    onPointerDown(event) {
+        if (event.button == 2) {
+            this.isLocked = false;
+        }
+    }
+    onPointerUp(event) {
+        if (event.button == 2) {
+            this.isLocked = true;
+        }
+    }
+    onContextmenu( event ) {
+        event.preventDefault();
+    }
+
+    registerEventHandlers(domElement) {
+        domElement.addEventListener( 'mouseup', this.onPointerUp.bind(this) );
+        domElement.addEventListener( 'mousemove', this.onPointerMove.bind(this) );
+        domElement.addEventListener( 'mousedown', this.onPointerDown.bind(this) );
+        domElement.addEventListener( 'contextmenu', this.onContextmenu.bind(this) );
+        window.addEventListener( 'keydown', this.onKeyDown.bind(this) );
+        window.addEventListener( 'keyup', this.onKeyUp.bind(this) );
+    }
+}
+
+function nextPowerOfTwo(value, pow) {
+    var pow = pow || 1;
+    while(pow<value) {
+        pow *= 2;
+    }
+    return pow;
+}
+
+function measureText(ctx, text) {
+    var ret = ctx.measureText(text).width;
+    // console.log('text:', text, ' width: ', ret);
+    return ret;
+}
+
+function createMultilineTextEN(ctx, textToWrite, maxWidth, text) {
+    textToWrite = textToWrite.replace("\n"," ");
+    var currentText = textToWrite;
+    var futureText;
+    var subWidth = 0;
+    var maxLineWidth = 0;
+
+    var wordArray = textToWrite.split(" ");
+    var wordsInCurrent, wordArrayLength;
+    wordsInCurrent = wordArrayLength = wordArray.length;
+
+    // Reduce currentText until it is less than maxWidth or is a single word
+    // futureText var keeps track of text not yet written to a text line
+    while (measureText(ctx, currentText) > maxWidth && wordsInCurrent > 1) {
+        wordsInCurrent--;
+        var linebreak = false;
+
+        currentText = futureText = "";
+        for(var i = 0; i < wordArrayLength; i++) {
+            if (i < wordsInCurrent) {
+                currentText += wordArray[i];
+                if (i+1 < wordsInCurrent) { currentText += " "; }
+            }
+            else {
+                futureText += wordArray[i];
+                if(i+1 < wordArrayLength) { futureText += " "; }
+            }
+        }
+    }
+    text.push(currentText); // Write this line of text to the array
+    maxLineWidth = measureText(ctx, currentText);
+
+    // If there is any text left to be written call the function again
+    if(futureText) {
+        subWidth = createMultilineText(ctx, futureText, maxWidth, text);
+        if (subWidth > maxLineWidth) {
+            maxLineWidth = subWidth;
+        }
+    }
+
+    // Return the maximum line width
+    return maxLineWidth;
+}
+
+function processSingleLine(ctx, textToWrite, maxWidth, text) {
+    var remainWordNum = textToWrite.length;
+    var remainText = textToWrite;
+    while (remainWordNum > 0) {
+        var words = 0;
+        var currentText = "";
+        var exceed = false;
+        for (var i = 1; i < remainWordNum; i++) {
+            var tryText = remainText.substring(0, i);
+            var currentWidth = measureText(ctx, tryText);
+            if (currentWidth > maxWidth) {
+                currentText = remainText.substring(0, i - 1);
+                remainText = remainText.substring(i - 1);
+                exceed = true;
+                break;
+            }
+        }
+        if (!exceed) {
+            currentText = remainText;
+            remainText = "";
+        }
+        text.push(currentText);
+        remainWordNum = remainText.length;
+    }
+}
+
+function createMultilineTextCN(ctx, textToWrite, maxWidth, text) {
+    var lineArray = textToWrite.split("\n");
+    for (var i = 0; i < lineArray.length; i++) {
+        var lineTexts = [];
+        processSingleLine(ctx, lineArray[i], maxWidth, lineTexts);
+        for (var j = 0; j < lineTexts.length; j++) {
+            text.push(lineTexts[j]);
+        }
+    }
+    return maxWidth;
+}
+
+// 道，其犹张弓与？ 高者抑之，下者举之；有余者损之，不足者补之。 天之道，损有余而补不足。 人之道则不然，损不足以奉有余。 孰能有余以奉天下？唯有道者。 是以圣人为而不恃，功成而不处，其不欲见贤。
+const drawCanvas = document.getElementById('drawCanvas');
+const gl = drawCanvas.getContext("webgl");
+
+function initTextCanvas() {
+    var canvas = document.getElementById('textureCanvas');
+    var ctx = canvas.getContext('2d');
+
+    var text = [];
+    var textToWrite = "道，其犹张弓与？高者抑之，下者举之；有余者损之，不足者补之。\n天之道，损有余而补不足。人之道则不然，损不足以奉有余。\n孰能有余以奉天下？唯有道者。\n是以圣人为而不恃，功成而不处，其不欲见贤。";
+    var textHeight = 32;
+    var maxWidth = 512;
+
+    ctx.fillStyle = "#000000";  // This determines the text colour, it can take a hex value or rgba value (e.g. rgba(255,0,0,0.5))
+    // ctx.textAlign = "center";   // This determines the alignment of text, e.g. left, center, right
+    ctx.textBaseline = "middle";    // This determines the baseline of the text, e.g. top, middle, bottom
+    ctx.font = "bold " + textHeight + "px serif";     // Set the font of the text before measuring the width!
+    var maxWidth = createMultilineTextCN(ctx, textToWrite, maxWidth, text);
+
+    canvasX = nextPowerOfTwo(maxWidth);
+    canvasY = nextPowerOfTwo(textHeight * (text.length + 1));
+    var max_dim = Math.max(canvasX, canvasY);
+    canvas.width = max_dim;
+    canvas.height = max_dim;
+    canvasX = canvasY = max_dim;
+
+    var textX = 0;
+    var offset = (canvasY - textHeight*(text.length+1)) * 0.5;
+
+    for(var i = 0; i < text.length; i++) {
+        var textY = (i + 1) * textHeight + offset;
+        ctx.fillStyle = "#000000";  // This determines the text colour, it can take a hex value or rgba value (e.g. rgba(255,0,0,0.5))
+        // ctx.textAlign = "center";   // This determines the alignment of text, e.g. left, center, right
+        ctx.textBaseline = "middle";    // This determines the baseline of the text, e.g. top, middle, bottom
+        ctx.font = "bold " + textHeight + "px serif";
+        ctx.fillText(text[i], textX,  textY);
+    }
+
+    // ctx.font = "bold " + textHeight + "px serif";     // Set the font of the text before measuring the width!
+    // ctx.fillText("HTML5 Rocks!", canvas.width/2, canvas.height/2);
+
+    initTexture();
+}
+
+var canvasTexture = null;
+var planeBufferInfo = null;
+var cubeBufferInfo = null;
+var colorProgramInfo = null;
+var skyProgramInfo = null;
+var camera = null;
+var cameraControl = null;
+var useMipmap = false;
+var useMaxFilter = true;
+
+function initTexture() {
+    if (canvasTexture != null) {
+        gl.deleteTexture(canvasTexture);
+    }
+    canvasTexture = gl.createTexture();
+    handleLoadedTexture(canvasTexture, document.getElementById('textureCanvas'), useMipmap);
+}
+
+function handleLoadedTexture(texture, textureCanvas, genMipmap) {
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textureCanvas); // This is the important line!
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    if (genMipmap) {
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+        gl.generateMipmap(gl.TEXTURE_2D);
+    } else {
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);        
+    }
+
+    gl.bindTexture(gl.TEXTURE_2D, null);
+}
+
+function initScene() {
+    gl.getExtension('OES_standard_derivatives');
+    gl.clearColor(0, 0, 0, 1);
+    gl.clearDepth(1.0);
+
+    initTextCanvas();
+    initTexture();
+    planeBufferInfo = webglUtils.createBufferInfoFromArrays(gl, {
+        position: [-1, -1, 0,  1, -1, 0,  -1,  1, 0,  1,  1, 0, ],  
+        texcoord: [0, 0,  1, 0,  0, 1,  1, 1,],
+        indices: [0,1,2,  1,3,2],
+    });
+    cubeBufferInfo = webglUtils.createBufferInfoFromArrays(gl, {
+        position: [
+            -1,  1,  1,  
+             1,  1,  1,  
+             1, -1,  1,  
+            -1, -1,  1, 
+             1,  1, -1,  
+            -1,  1, -1,  
+            -1, -1, -1,  
+             1, -1, -1, 
+        ],  
+        indices: [0,1,2,2,3,0,1,4,7,7,2,1,4,5,6,6,7,4,5,0,3,3,6,5,5,4,1,1,0,5,3,2,7,7,6,3],
+    });
+    colorProgramInfo = webglUtils.createProgramInfo(gl, ['color-vertex-shader', 'color-fragment-shader']);
+    skyProgramInfo = webglUtils.createProgramInfo(gl, ['sky-vertex-shader', 'sky-fragment-shader']);
+
+    camera = new Camera();
+    camera.position = [0,0,10];
+
+    cameraControl = new UECameraControl(camera);
+    cameraControl.registerEventHandlers(window);
+
+    // drawCanvas.style.cursor = "none";
+
+}
+
+function logicUpdate(delta_t) {
+    cameraControl.update(delta_t);
+
+}
+
+function render(delta_t) {
+    var viewMatrix = camera.getViewMatrix();
+    var fov = degreeToRad(45.);
+    var aspect = 1024./768.;
+    var near = 0.1;
+    var far = 100.0;
+    var projectionMatrix = m4.perspective(fov, aspect, near, far)
+    var worldMatrix =  m4.identity();
+
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    // sky
+    gl.disable(gl.DEPTH_TEST);
+    gl.useProgram(skyProgramInfo.program);
+    webglUtils.setUniforms(skyProgramInfo, {
+        u_view: viewMatrix,
+        u_projection: projectionMatrix,
+    });
+    webglUtils.setBuffersAndAttributes(gl, skyProgramInfo, cubeBufferInfo);
+    webglUtils.drawBufferInfo(gl, cubeBufferInfo);
+
+    // model
+    gl.enable(gl.DEPTH_TEST);
+    gl.useProgram(colorProgramInfo.program);
+    webglUtils.setUniforms(colorProgramInfo, {
+        u_view: viewMatrix,
+        u_projection: projectionMatrix,
+    });
+    webglUtils.setUniforms(colorProgramInfo,{
+        u_world: worldMatrix,
+        u_texture: canvasTexture,
+        u_useMaxFilter: useMaxFilter ? 1 : 0,
+        u_textureSize: [textureCanvas.width, textureCanvas.height, 1./textureCanvas.width, 1./textureCanvas.height],
+    });
+    webglUtils.setBuffersAndAttributes(gl, colorProgramInfo, planeBufferInfo);
+    webglUtils.drawBufferInfo(gl, planeBufferInfo);
+
+}
+
+var last_time = null;
+
+function frameLoop() {
+    var current_time = Date.now();
+    var delta_t = 1./30.;
+    if (last_time != null) {
+        delta_t = (current_time - last_time)/1000.0;
+    }
+    logicUpdate(delta_t);
+    render(delta_t);
+    last_time = current_time;
+    window.requestAnimationFrame(frameLoop);
+}
+
+initScene();
+frameLoop();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html>
+<head> <meta charset=utf-8 />
+<title>test</title>
+<script src='./m4.js'></script>
+<script src='./webgl-utils.js'></script>
+</head>
+
+<body>
+<canvas id="drawCanvas" width="1024" height="768"> </canvas>
+<div>
+    Pause <input type="checkbox" id="pause" value="0" > 
+</div>
+<div>
+    Time <input type="range" min="0" max="100" value="0" class="slider" id="myRange">
+</div>
+<div>
+    Select Animation <select id="animationSelect"></select> 
+</div>
+
+<script id="bone-vertex-shader" type="x-shader/x-vertex">
+attribute vec3 a_position;
+
+uniform mat4 u_projection;
+uniform mat4 u_view;
+uniform mat4 u_world;
+uniform float u_boneLength;
+
+varying vec3 local_pos;
+
+void main() {
+    vec3 pos = a_position*u_boneLength;
+    gl_Position = u_projection * u_view * u_world * vec4(pos, 1.0);
+    local_pos = a_position;
+}
+</script>
+
+<script id="bone-fragment-shader" type="x-shader/x-fragment">
+precision mediump float;
+
+varying vec3 local_pos;
+
+void main() {
+    gl_FragColor = vec4(local_pos*0.5+0.5, 1.0);         
+}
+
+</script>
+
+<script id="sky-vertex-shader" type="x-shader/x-vertex">
+attribute vec3 a_position;
+
+uniform mat4 u_projection;
+uniform mat4 u_view;
+
+varying vec3 v_texcoord;
+
+void main() {
+    vec3 positionVS = mat3(u_view) * (a_position);
+    gl_Position = u_projection * vec4(positionVS, 1.0);
+    // gl_Position = u_projection * u_view * u_world * vec4(a_position, 1.0);
+    v_texcoord = a_position;
+}
+</script>
+<script id="sky-fragment-shader" type="x-shader/x-fragment">
+precision mediump float;
+varying vec3 v_texcoord;
+
+#define Gamma 1.4
+
+#define Rayleigh 1.
+#define Mie 1.
+#define RayleighAtt 1.
+#define MieAtt 1.2
+const float g = -0.93;
+
+#if 1
+vec3 _betaR = vec3(1.95e-2, 1.1e-1, 2.94e-1); 
+vec3 _betaM = vec3(4e-2, 4e-2, 4e-2);
+#else
+vec3 _betaR = vec3(6.95e-2, 1.18e-1, 2.44e-1); 
+vec3 _betaM = vec3(4e-2, 4e-2, 4e-2);
+#endif
+
+vec3 calcAtmosphericScattering( float sR, float sM, out vec3 extinction, float cosine, float g1)
+{
+    extinction = exp(-(_betaR * sR + _betaM * sM));
+
+    // scattering phase
+    float g2 = g1 * g1;
+    float fcos2 = cosine * cosine;
+    float miePhase = Mie * pow(1. + g2 + 2. * g1 * cosine, -1.5) * (1. - g2) / (2. + g2);
+    //g = 0;
+    float rayleighPhase = Rayleigh;
+
+    vec3 inScatter = (1. + fcos2) * vec3(rayleighPhase + _betaM / _betaR * miePhase);
+    
+    return inScatter;
+}
+vec3 ACESFilm( vec3 x ) {
+    float tA = 2.51;
+    float tB = 0.03;
+    float tC = 2.43;
+    float tD = 0.59;
+    float tE = 0.14;
+    return clamp((x*(tA*x+tB))/(x*(tC*x+tD)+tE),0.0,1.0);
+}
+vec3 getSkyColor(in vec3 rd, vec3 light1) {
+    float sundot = clamp(dot(rd,light1),0.0,1.0);
+    
+    vec3 extinction;
+
+    // optical depth -> zenithAngle
+    float zenithAngle = max(0., rd.y); //abs( rd.y);
+    float sR = RayleighAtt / zenithAngle ;
+    float sM = MieAtt / zenithAngle ;
+
+    vec3 inScatter = calcAtmosphericScattering(sR, sM, extinction, sundot, g);
+    vec3 skyCol = inScatter*(1.0-extinction);
+
+    // sky  
+    vec3 col = skyCol; // *vec3(1.6,1.4,1.0)
+    // sun
+    col += 0.47*vec3(1.6,1.4,1.0)*pow( sundot, 350.0 ) * extinction;
+    // sun haze
+    col += 0.4*vec3(0.8,0.9,1.0)*pow( sundot, 2.0 ) * extinction;
+    
+    // sun scatter
+    col += 0.3*vec3(1.0,0.7,0.3)*pow( sundot, 8.0 );
+
+    // gamma
+    //col = sqrt(col);
+            
+    col = ACESFilm(col);
+    col = pow(col, vec3(Gamma));
+    return col;
+}
+void main() {
+    vec3 rd = normalize(v_texcoord.xyz);
+    vec3 light_dir = vec3(1.0, 10.0, 1.0);
+    vec3 color = getSkyColor(rd, normalize(light_dir));
+    gl_FragColor = vec4(color, 1.0);
+}
+</script>
+
+
+<script>
+function degreeToRad(degree) { return degree*Math.PI/180.0; }
+
+class Camera {
+    constructor() {
+        this.forward = [0,0,-1];    // -z
+        this.right = [1,0,0];       // x
+        this.position = [0,0,0];
+    }
+    moveForward(distance) {
+        this.position = m4.addVectors( this.position, m4.scaleVector(this.forward, distance) );
+    }
+    moveRight(distance) {
+        this.position = m4.addVectors( this.position, m4.scaleVector(this.right, distance) );
+    }
+    getViewMatrix() {
+        var target = m4.addVectors(this.position, this.forward);
+        var transform = m4.lookAt(this.position, target, [0,1,0]);
+        return m4.inverse(transform);
+    }
+}
+
+class UECameraControl {
+    constructor(camera) {
+        this.camera = camera;
+        this.moveSpeed = 2;
+        this.rotateSpeed = 1;
+        this.isMoveForward = false;
+        this.isMoveBackward = false;
+        this.isMoveLeft = false;
+        this.isMoveRight = false;
+        this.yaw = 0;
+        this.pitch = 0;
+        this.maxPitch = 88;
+        this.isLocked = true;
+    }
+    update(delta_t) {
+        this.updateCameraPosition(delta_t);
+        this.updateCameraRotation(delta_t);
+    }
+    updateCameraPosition(delta_t){
+        var distance = delta_t * this.moveSpeed;
+        if (this.isMoveForward && !this.isMoveBackward) {
+            this.camera.moveForward(distance);
+        }
+        if (!this.isMoveForward && this.isMoveBackward) {
+            this.camera.moveForward(-distance);
+        }
+        if (this.isMoveLeft && !this.isMoveRight) {
+            this.camera.moveRight(-distance);
+        }
+        if (!this.isMoveLeft && this.isMoveRight) {
+            this.camera.moveRight(distance);
+        }
+    }
+    updateCameraRotation(delta_t){
+        // yaw, pitch to forward & right
+        var sin_pitch = Math.sin(degreeToRad(this.pitch));
+        var sin_yaw = Math.sin(degreeToRad(this.yaw));
+        var cos_yaw = Math.cos(degreeToRad(this.yaw));
+        var xz_len = Math.sqrt(1.0 - sin_pitch*sin_pitch);
+        var fwd = [-xz_len*sin_yaw, sin_pitch, -xz_len*cos_yaw];
+        var right = [cos_yaw, 0, -sin_yaw];
+        camera.forward = fwd;
+        camera.right = right;
+    }
+
+    onKeyDown ( event ) {
+        if (this.isLocked) return;
+        switch ( event.code ) {
+            case 'ArrowUp':
+            case 'KeyW': this.isMoveForward = true; break;
+            case 'ArrowLeft':
+            case 'KeyA': this.isMoveLeft = true; break;
+            case 'ArrowDown':
+            case 'KeyS': this.isMoveBackward = true; break;
+            case 'ArrowRight':
+            case 'KeyD': this.isMoveRight = true; break;
+        }
+    };
+    onKeyUp ( event ) {
+        switch ( event.code ) {
+            case 'ArrowUp':
+            case 'KeyW': this.isMoveForward = false; break;
+            case 'ArrowLeft':
+            case 'KeyA': this.isMoveLeft = false; break;
+            case 'ArrowDown':
+            case 'KeyS': this.isMoveBackward = false; break;
+            case 'ArrowRight':
+            case 'KeyD': this.isMoveRight = false; break;
+        }
+    };
+    onPointerMove( event ) {
+        if (this.isLocked) return;
+        const movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
+        const movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+
+        this.yaw -= movementX * 0.05 * this.rotateSpeed;
+        this.yaw = this.yaw % 360;
+        this.pitch -= movementY * 0.05 * this.rotateSpeed;
+        this.pitch = Math.max( -this.maxPitch, Math.min( this.maxPitch, this.pitch ) );
+    }
+    onPointerDown(event) {
+        if (event.button == 2) {
+            this.isLocked = false;
+        }
+    }
+    onPointerUp(event) {
+        if (event.button == 2) {
+            this.isLocked = true;
+        }
+    }
+    onContextmenu( event ) {
+        event.preventDefault();
+    }
+
+    registerEventHandlers(domElement) {
+        domElement.addEventListener( 'mouseup', this.onPointerUp.bind(this) );
+        domElement.addEventListener( 'mousemove', this.onPointerMove.bind(this) );
+        domElement.addEventListener( 'mousedown', this.onPointerDown.bind(this) );
+        domElement.addEventListener( 'contextmenu', this.onContextmenu.bind(this) );
+        window.addEventListener( 'keydown', this.onKeyDown.bind(this) );
+        window.addEventListener( 'keyup', this.onKeyUp.bind(this) );
+    }
+}
+
+
+function base64ToByteArray(base64_string) {
+    return Uint8Array.from(atob(base64_string), c => c.charCodeAt(0));
+}
+
+function quaternionNormalize(q) {
+    var l2 = q[0]*q[0] + q[1]*q[1] + q[2]*q[2] + q[3]*q[3];
+    var inv_len = 1.0;
+    if (l2 > 1e-6) {
+        inv_len = 1./Math.sqrt(l2);
+    }
+    return [q[0]*inv_len, q[1]*inv_len, q[2]*inv_len, q[3]*inv_len];
+}
+
+function quaternionDot(a, b) {
+    return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
+}
+
+function clamp(num, min, max) {
+    return Math.min(Math.max(num, min), max);
+}
+
+function quaternionSlerp(q0, q1, t) {
+    var v0 = quaternionNormalize(q0);
+    var v1 = quaternionNormalize(q1);
+    var q = [0,0,0,1];
+
+    var dot = quaternionDot(v0, v1);
+    var sign = 1;
+    if (dot < 0) {
+        sign = -1;  // v1 = -v1;
+        dot = -dot;
+    }
+    const DOT_THRESHOLD = 0.9995;
+    if (dot > DOT_THRESHOLD) {
+        /* Quaternion result = v0 + t*(v1 – v0);
+        result.normalize();
+        return result;*/
+        q[0] = v0[0] + t * (sign*v1[0] - v0[0]);
+        q[1] = v0[1] + t * (sign*v1[1] - v0[1]);
+        q[2] = v0[2] + t * (sign*v1[2] - v0[2]);
+        q[3] = v0[3] + t * (sign*v1[3] - v0[3]);
+        return quaternionNormalize(q);
+    }
+
+    dot = clamp(dot, -1, 1);
+    var theta_0 = Math.acos(dot);  // theta_0 = angle between input vectors
+    var theta = theta_0 * t;    // theta = angle between v0 and result
+
+    var s0 = Math.cos(theta) - dot * Math.sin(theta) / Math.sin(theta_0);  // == sin(theta_0 - theta) / sin(theta_0)
+    var s1 = Math.sin(theta) / Math.sin(theta_0);
+
+    q[0] = (s0 * v0[0]) + (s1 * sign * v1[0]);
+    q[1] = (s0 * v0[1]) + (s1 * sign * v1[1]);
+    q[2] = (s0 * v0[2]) + (s1 * sign * v1[2]);
+    q[3] = (s0 * v0[3]) + (s1 * sign * v1[3]);
+    return quaternionNormalize(q);
+    //  return (s0 * v0) + (s1 * v1);
+
+}
+
+class GLTFModel {
+    constructor() {
+        this.buffers = [];
+        this.nodes = [];
+        this.defaultSceneId = -1;
+        this.scenes = [];   // each scene is a array of scene root node ids
+        this.bufferViews = [];
+        this.accessors = [];
+        this.animations = [];
+        this.runtimeTransforms = [];
+    }
+    load(jsonObj) {
+        this.defaultSceneId = jsonObj.scene;
+        this.nodes = jsonObj.nodes;
+        this.defaultSceneId = jsonObj.scene;
+        this.scenes = jsonObj.scenes;
+        this.buffers = jsonObj.buffers;
+        this.bufferViews = jsonObj.bufferViews;
+        this.accessors = jsonObj.accessors;
+        this.animations = jsonObj.animations;
+
+        this.buffers.forEach(x => {this.parseBuffer(x);});
+        this.bufferViews.forEach(x => {this.parseBufferView(x);});
+        this.accessors.forEach(x => {this.parseAccessors(x);});
+        this.animations.forEach(x => {this.parseAnimation(x)});
+        this.nodes.forEach((x, index) => {this.praseNode(x, index)});
+
+        // this.playAnimation(0, 0.48);
+    }
+    parseBuffer(buffer) {
+        const uri = buffer.uri;
+        const prefix = "data:application/octet-stream;base64,";
+        const prefix_len = prefix.length;
+        if (uri.slice(0, prefix_len) == prefix) {
+            const rawBase64 = uri.slice(prefix_len);
+            buffer.data = base64ToByteArray(rawBase64);
+            buffer.uri = undefined;
+            if (buffer.data.length != buffer.byteLength) {
+                console.log('error parsing gltf buffer: buffer length mismatch, base64 ', buffer.data.length, ', buffer.byteLength: ', buffer.byteLength);
+            }
+        } else {
+            console.log('error parsing gltf buffer: wrong prefix.');
+        }
+    }
+    parseBufferView(bufferView) {
+        const bufferId = bufferView.buffer;
+        if (bufferId >= this.buffers.length || bufferId < 0) {
+            console.log('error parse buffer view: bufferId > buffer count');
+            return;
+        }
+        const offset = bufferView.byteOffset;
+        const length = bufferView.byteLength;
+        const buffer = this.buffers[bufferId];
+        if ((length <= 0) || (offset < 0) || (offset + length > buffer.byteLength)) {
+            console.log('error parse buffer view: invalid length or offset');
+            return;
+        }
+        bufferView.data = buffer.data.slice(offset, offset + length);
+    }
+    getFormatBytes(formatId) {
+        switch (formatId) {
+            case 5120: return 1;    // int8
+            case 5121: return 1;    // uint8
+            case 5122: return 2;    // int16
+            case 5123: return 2;    // uint16
+            case 5125: return 4;    // uint32
+            case 5126: return 4;    // float
+        }
+        return 0;
+    }
+    getVectorDataNum(type) {
+        switch (type) {
+            case 'SCALAR' : return 1;
+            case 'VEC2' : return 2;
+            case 'VEC3' : return 3;
+            case 'VEC4' : return 4;
+            case 'MAT2' : return 4;
+            case 'MAT3' : return 9;
+            case 'MAT4' : return 16;
+        }
+        return 0;
+    }
+    parseAccessors(accessor) {
+        const bufferViewId = accessor.bufferView;
+        if (bufferViewId >= this.bufferViews.length || bufferViewId < 0) {
+            console.log('error parse accessor: invalid bufferView id');
+            return;
+        }
+        const bufferView = this.bufferViews[bufferViewId];
+        if (this.getVectorDataNum(accessor.type) * this.getFormatBytes(accessor.componentType) * accessor.count != bufferView.byteLength) {
+            console.log('error parse accessor: type & componentType & count & bufferView.byteLength mismatch. type: ' + accessor.type + ', componentType: ' + accessor.componentType + ', count: ' + accessor.count + ', bufferview byteLength: ' + bufferView.byteLength);
+            return;
+        }
+        if (accessor.componentType == 5120 || accessor.componentType == 5121) {
+            accessor.data = new Uint8Array(bufferView.data.buffer);
+        } else if (accessor.componentType == 5122 || accessor.componentType == 5123) {
+            accessor.data = new Uint16Array(bufferView.data.buffer);
+        } else if (accessor.componentType == 5125) {
+            accessor.data = new Uint32Array(bufferView.data.buffer);
+        } else if (accessor.componentType == 5126) {
+            accessor.data = new Float32Array(bufferView.data.buffer);
+        } else {
+            console.log('error parse accessor: unknown componentType');
+        }
+    }
+    parseSampler(sampler) {
+        const inputAccessor = this.accessors[sampler.input];
+        const outputAccessor = this.accessors[sampler.output];
+        if (inputAccessor.type != 'SCALAR') {
+            console.log('error parse sampler: input is not scalar');
+            return;
+        }
+        if (inputAccessor.count != outputAccessor.count) {
+            console.log('error parse sampler: input and output count mismatch');
+        }
+        const outputElemNum = this.getVectorDataNum(outputAccessor.type);
+        var data = [];
+        for (var i = 0; i < inputAccessor.count; i++) {
+            var t = inputAccessor.data[i];
+            var val = outputAccessor.data.slice(i*outputElemNum, (i+1)*outputElemNum);
+            data[i] = {k:t, v:val};
+        }
+        data.sort((a, b) => { 
+            if (a.k < b.k) return -1;
+            if (a.k > b.k) return 1;
+            return 0;
+         });
+        sampler.data = data;
+        sampler.vectorSize = outputElemNum;
+        sampler.current_interval = 1;   // [0, N]
+    }
+    seekSampler(sampler, t) {
+        var dataLen = sampler.data.length;
+        var current_interval = sampler.current_interval;
+        if (t <= sampler.data[0].k) {
+            return sampler.data[0].v;
+        } else if (t >= sampler.data[dataLen - 1].k) {
+            return sampler.data[dataLen - 1].v;
+        } else if (t < sampler.data[current_interval - 1].k) {
+            while (!(sampler.data[current_interval - 1].k <= t && t <= sampler.data[current_interval].k)) current_interval --;
+        } else if (t > sampler.data[current_interval].k) {
+            while (!(sampler.data[current_interval - 1].k <= t && t <= sampler.data[current_interval].k)) current_interval ++;
+        } else {
+        }
+
+        sampler.current_interval = current_interval;
+        const t0 = sampler.data[current_interval - 1].k;
+        const t1 = sampler.data[current_interval].k;
+        const v0 = sampler.data[current_interval - 1].v;
+        const v1 = sampler.data[current_interval].v;
+        const f = (t - t0) / (t1 - t0);
+        var ret = [];
+        if (v0.length == 4) {
+            ret = quaternionSlerp(v0, v1, f);
+        } else {
+            for (var i = 0; i < v0.length; i++) {
+                ret[i] = v0[i] * (1-f) + v1[i]*f;
+            }
+        }
+        return ret;
+    }
+    parseChannel(channel, sampler) {
+        var ok = true;
+        if (channel.target.path == "rotation") {
+            if (sampler.vectorSize != 4) {
+                ok = false;
+            }
+        } else if (channel.target.path == "translation") {
+            if (sampler.vectorSize != 3) {
+                ok = false;
+            }
+        } else if (channel.target.path == "scale") {
+            if (sampler.vectorSize != 3) {
+                ok = false;
+            }
+        } else {
+            console.log('error parse channel: unknown target path: ' + channel.target.path);
+        }
+        if (!ok) {
+            console.log('error parse channel: target path & sampler element size mismatch');
+        }
+    } 
+    praseNode(node, nodeIndex) {
+        if (!node.matrix) {
+            const defaultScale = [1,1,1];
+            const defaultVec3 = [0,0,0];
+            const defaultQuat = [0,0,0,1];
+            const scale = node.scale || defaultScale;
+            const quat = node.rotation || defaultQuat;
+            const translate = node.translation || defaultVec3;
+            node.matrix = m4.compose(translate, quat, scale);
+        }
+        node.distanceToParent = m4.length(m4.transformVector(node.matrix, [0,0,0,1]));
+        if (1) {
+            var scale = [0,0,0];
+            var quat = [0,0,0,1];
+            var translate = [0,0,0];
+            m4.decompose(node.matrix, translate, quat, scale);
+            // console.log(scale);
+            var translateNormalized = m4.normalize(translate);
+            var axis = m4.cross([0,1,0], translateNormalized);
+            var boneVisRotation = m4.identity();
+            if (m4.lengthSq(axis) < 1e-8) {
+            } else {
+                axis = m4.normalize(axis);
+                var angle = Math.acos(m4.dot([0,1,0], translateNormalized));
+                boneVisRotation = m4.axisRotation(axis, angle);
+            }
+            var len = node.distanceToParent;
+            node.boneVisMat = m4.multiply(boneVisRotation, m4.scaling(len,len,len));
+        }
+        if (node.children) {
+            node.children.forEach(x => {
+                this.nodes[x].parent = nodeIndex;
+            });
+        }
+    }
+    parseAnimation(animation) {
+        var samplers = animation.samplers;
+        var channels = animation.channels;
+        samplers.forEach(x => {this.parseSampler(x)});
+        channels.forEach(x => {this.parseChannel(x, samplers[x.sampler])});
+        animation.duration = 0;
+        for (var i = 0; i < channels.length; i++) {
+            var sampler = samplers[channels[i].sampler];
+            var duration = sampler.data[sampler.data.length - 1].k;
+            animation.duration = Math.max(animation.duration, duration);
+        }
+    }
+    getMatricesByAnimation(animation, time) {
+        // return a list of (local) matrix for the nodes (if has any animation, or else null).
+        var TRS = [];
+        for (var i = 0; i < animation.channels.length; i++) {
+            var channel = animation.channels[i];
+            var sampler = animation.samplers[channel.sampler];
+            const ret = this.seekSampler(sampler, time);
+            const nodeId = channel.target.node;
+            if (!TRS[nodeId]) TRS[nodeId] = {};
+            if (channel.target.path == 'rotation') {
+                var l2 = ret[0]*ret[0] + ret[1]*ret[1] + ret[2]*ret[2] + ret[3]*ret[3];
+                var inv_len = 1./Math.sqrt(l2);
+                TRS[nodeId].r = [ret[0]*inv_len, ret[1]*inv_len, ret[2]*inv_len, ret[3]*inv_len];
+            } else if (channel.target.path == 'translation') {
+                TRS[nodeId].t = ret;
+            } else if (channel.target.path == 'scale') {
+                TRS[nodeId].s = ret;
+            }
+        }
+        var matrices = [];
+        const defaultScale = [1,1,1];
+        const defaultVec3 = [0,0,0];
+        const defaultQuat = [0,0,0,1];
+        for (var i = 0; i < this.nodes.length; i++) {
+            const node = this.nodes[i];
+            if (TRS[i]) {
+                const scale = TRS[i].s || node.scale || defaultScale;
+                const translate = TRS[i].t || node.translation || defaultVec3;
+                const quat = TRS[i].r || node.rotation || defaultQuat;
+                const mat = m4.compose(translate, quat, scale);
+                matrices[i] = mat;
+            }
+        }
+        this.localTransforms = TRS;
+        return matrices;
+    }
+    updateInternalNodeGlobalTransforms(rootNodeIds, localTransforms) {
+        var queue = rootNodeIds.slice();
+        const identity = m4.identity();
+        while (queue.length > 0) {
+            var nodeId = queue.shift();
+            const node = this.nodes[nodeId];
+            if (node.children) {
+                const parentMat = this.runtimeTransforms[nodeId] || identity;
+                node.children.forEach(x => {
+                    const localMat = localTransforms[x] || this.nodes[x].matrix;
+                    this.runtimeTransforms[x] = m4.multiply(parentMat, localMat);   // not sure !!!!!!!!!!
+                    queue.push(x);
+                });
+            }
+
+        }
+    }
+    playAnimation(animationId, time) {
+        var mats = this.getMatricesByAnimation(this.animations[animationId], time);
+        this.updateInternalNodeGlobalTransforms(this.scenes[this.defaultSceneId].nodes, mats);
+    }
+    getAnimationList() {
+        return this.animations.map(x => x.name);
+    }
+}
+
+const drawCanvas = document.getElementById('drawCanvas');
+const gl = drawCanvas.getContext("webgl");
+
+var heightTexture = null;
+var heightmapSize = 32;
+var planeBufferInfo = null;
+var cubeBufferInfo = null;
+var boneBufferInfo = null;
+var boneProgramInfo = null;
+var skyProgramInfo = null;
+var camera = null;
+var cameraControl = null;
+var useMipmap = true;
+var modelGLTF = null;
+var globalTime = 0;
+var pause = false;
+var animationFPS = 24;
+
+let pauseBox = document.getElementById("pause");
+let slider = document.getElementById("myRange");
+let animationId = document.getElementById("animationSelect");
+animationId.addEventListener('change', (event) => {
+    onAnimationSelectionChange(animationId.selectedIndex);
+});
+function onAnimationSelectionChange(selectedIndex)
+{
+    var duration = modelGLTF.animations[selectedIndex].duration;
+    var frames = Math.floor(duration * animationFPS);
+    slider.min = "0";
+    slider.max = "" + frames;
+}
+
+function initTexture() {
+    if (heightTexture != null) {
+        gl.deleteTexture(heightTexture);
+    }
+    heightTexture = gl.createTexture();
+    var heightData = new Uint8Array(heightmapSize*heightmapSize*4);
+    for (var i = 0; i < heightmapSize; i++) {
+        for (var j = 0; j < heightmapSize; j++) {
+            var pix_idx = i*heightmapSize + j;
+            var p = Math.floor(Math.random() * 255);
+            heightData[pix_idx*4 + 0] = p;
+            heightData[pix_idx*4 + 1] = p;
+            heightData[pix_idx*4 + 2] = p;
+            heightData[pix_idx*4 + 3] = 255;
+        }
+    }
+
+    fillHeightmapData(heightTexture, heightmapSize, heightmapSize, heightData, useMipmap);
+}
+
+function fillHeightmapData(texture, width, height, data, genMipmap) {
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, data);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    if (genMipmap) {
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+        gl.generateMipmap(gl.TEXTURE_2D);
+    } else {
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);        
+    }
+
+    gl.bindTexture(gl.TEXTURE_2D, null);
+}
+
+function makeGridPlane(xGrids, yGrids, positionScale, uvScale) {
+    var position = [];
+    var texcoord = [];
+    for (var i = 0; i < yGrids + 1; i++) {
+        for (var j = 0; j < xGrids + 1; j++) {
+            var vert_idx = i*(xGrids+1) + j;
+            position[3*vert_idx + 0] = j * positionScale;
+            position[3*vert_idx + 1] = i * positionScale;
+            position[3*vert_idx + 2] = 0;
+            texcoord[2*vert_idx + 0] = j * uvScale;
+            texcoord[2*vert_idx + 1] = i * uvScale;
+        }
+    }
+    var indices = [];
+    for (var i = 0; i < yGrids; i++) {
+        for (var j = 0; j < xGrids; j++) {
+            var grid_idx = i*xGrids + j;
+            var idx00 = i*(xGrids+1) + j;
+            var idx01 = idx00 + (xGrids+1);
+            var idx10 = idx00 + 1;
+            var idx11 = idx01 + 1;
+            indices[6*grid_idx + 0] = idx00;
+            indices[6*grid_idx + 1] = idx01;
+            indices[6*grid_idx + 2] = idx11;
+            indices[6*grid_idx + 3] = idx00;
+            indices[6*grid_idx + 4] = idx11;
+            indices[6*grid_idx + 5] = idx10;
+        }
+    }
+    return {
+        position: position,
+        texcoord: texcoord,
+        indices: indices,
+    }
+}
+
+function makeBoneArrow() {
+    const width = 0.1;
+    const mid = 0.2;
+    var position = [
+        0,0,0,
+        -width, mid, width,
+        width, mid, width,
+        width, mid, -width,
+        -width, mid, -width,
+        0,1,0,
+    ];
+    var indices = [
+        0,2,1,
+        0,3,2,
+        0,4,3,
+        0,1,4,
+        1,2,5,
+        2,3,5,
+        3,4,5,
+        4,1,5,
+    ];
+    return {
+        position: position,
+        indices: indices,
+    }
+    
+}
+
+function constructAnimationSelectionUI(animationList) {
+    animationList.forEach(x => {
+        var option = document.createElement('option');
+        option.value = option.textContent = x;
+        animationId.appendChild(option);
+    });
+}
+
+function loadModel()
+{
+    var jsonFile = './Yang.gltf';
+    fetch(jsonFile).then(response => response.json()).then(json => {
+        modelGLTF = new GLTFModel;
+        modelGLTF.load(json);
+        console.log(json);
+        console.log(modelGLTF);
+        constructAnimationSelectionUI(modelGLTF.getAnimationList());
+        onAnimationSelectionChange(0);
+    });
+}
+
+function initScene() {
+    gl.clearColor(0, 0, 0, 1);
+    gl.clearDepth(1.0);
+
+    initTexture();
+    loadModel();
+
+    /*var planeVB = {
+        position: [-1, -1, 0,  1, -1, 0,  -1,  1, 0,  1,  1, 0, ],  
+        texcoord: [0, 0,  1, 0,  0, 1,  1, 1,],
+        indices: [0,1,2,  1,3,2],
+    };*/
+    var planeVB = makeGridPlane(heightmapSize, heightmapSize, 1./4, 1./heightmapSize);
+    var boneVB = makeBoneArrow();
+
+    planeBufferInfo = webglUtils.createBufferInfoFromArrays(gl, planeVB);
+    boneBufferInfo = webglUtils.createBufferInfoFromArrays(gl, boneVB);
+    cubeBufferInfo = webglUtils.createBufferInfoFromArrays(gl, {
+        position: [
+            -1,  1,  1,  
+             1,  1,  1,  
+             1, -1,  1,  
+            -1, -1,  1, 
+             1,  1, -1,  
+            -1,  1, -1,  
+            -1, -1, -1,  
+             1, -1, -1, 
+        ],  
+        indices: [0,1,2,2,3,0,1,4,7,7,2,1,4,5,6,6,7,4,5,0,3,3,6,5,5,4,1,1,0,5,3,2,7,7,6,3],
+    });
+    boneProgramInfo = webglUtils.createProgramInfo(gl, ['bone-vertex-shader', 'bone-fragment-shader']);
+    skyProgramInfo = webglUtils.createProgramInfo(gl, ['sky-vertex-shader', 'sky-fragment-shader']);
+
+    camera = new Camera();
+    camera.position = [0,0,10];
+
+    cameraControl = new UECameraControl(camera);
+    cameraControl.registerEventHandlers(window);
+
+}
+
+function logicUpdate(delta_t) {
+    if (modelGLTF) {
+        let animationIndex = animationId.selectedIndex;
+        pause = pauseBox.checked;
+        if (!pause) {
+            var val = parseInt(slider.value) + 1;
+            var maxVal = parseInt(slider.max);
+            if (val > maxVal) val = 0;
+            slider.value = "" + val;
+        } else {
+        }
+        var frameId = slider.value;
+        globalTime = frameId / animationFPS;
+        modelGLTF.playAnimation(animationIndex, globalTime);
+    }
+    
+    cameraControl.update(delta_t);
+
+}
+
+function render(delta_t) {
+    var viewMatrix = camera.getViewMatrix();
+    var fov = degreeToRad(45.);
+    var aspect = 1024./768.;
+    var near = 0.1;
+    var far = 100.0;
+    var projectionMatrix = m4.perspective(fov, aspect, near, far)
+    var worldMatrix =  m4.identity();
+
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    // sky
+    gl.useProgram(skyProgramInfo.program);
+    webglUtils.setUniforms(skyProgramInfo, {
+        u_view: viewMatrix,
+        u_projection: projectionMatrix,
+    });
+    webglUtils.setBuffersAndAttributes(gl, skyProgramInfo, cubeBufferInfo);
+    gl.disable(gl.DEPTH_TEST);
+    webglUtils.drawBufferInfo(gl, cubeBufferInfo);
+    gl.enable(gl.DEPTH_TEST);
+
+
+    // model
+    if (modelGLTF)
+    {
+        gl.useProgram(boneProgramInfo.program);
+        webglUtils.setUniforms(boneProgramInfo, {
+            u_view: viewMatrix,
+            u_projection: projectionMatrix,
+        });
+        for (var i = 0; i < modelGLTF.nodes.length; i++) {
+            if (!modelGLTF.nodes[i].parent) continue;
+            var node = modelGLTF.nodes[i];
+            const parentMatrix = modelGLTF.runtimeTransforms[modelGLTF.nodes[i].parent] || m4.identity();
+            const len = modelGLTF.nodes[i].distanceToParent;
+            const localMatrix = modelGLTF.nodes[i].boneVisMat;
+            const worldMatrix = m4.multiply(parentMatrix, localMatrix);
+            // const worldMatrix = modelGLTF.runtimeTransforms[i] || m4.identity();
+            webglUtils.setUniforms(boneProgramInfo,{
+                u_world: worldMatrix,
+                u_boneLength: 1
+            });
+            webglUtils.setBuffersAndAttributes(gl, boneProgramInfo, boneBufferInfo);
+            webglUtils.drawBufferInfo(gl, boneBufferInfo);
+        }
+    }
+
+}
+
+var last_time = null;
+
+function frameLoop() {
+    var current_time = Date.now();
+    var delta_t = 1./30.;
+    if (last_time != null) {
+        delta_t = (current_time - last_time)/1000.0;
+    }
+    logicUpdate(delta_t);
+    render(delta_t);
+    last_time = current_time;
+    window.requestAnimationFrame(frameLoop);
+}
+
+initScene();
+frameLoop();
+
+</script>
+
+    
+
+</body>
+</html>

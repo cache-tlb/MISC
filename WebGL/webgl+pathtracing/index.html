@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html>
+<head> <meta charset=utf-8 />
+<title>test</title>
+<script src='./m4.js'></script>
+<script src='./webgl-utils.js'></script>
+</head>
+
+<body>
+<canvas id="drawCanvas" width="1024" height="768"> </canvas>
+
+<script id="color-vertex-shader" type="x-shader/x-vertex">
+attribute vec3 a_position;
+
+uniform mat4 u_projection;
+uniform mat4 u_view;
+uniform mat4 u_world;
+
+void main() {
+    vec3 pos = a_position;
+    gl_Position = u_projection * u_view * u_world * vec4(pos, 1.0);
+}
+</script>
+
+<script id="color-fragment-shader" type="x-shader/x-fragment">
+precision mediump float;
+uniform vec4 u_modelColor;
+varying vec2 v_texcoord;
+
+void main() {
+    gl_FragColor = u_modelColor;
+}
+</script>
+
+<script id="postprocess-vertex-shader" type="x-shader/x-vertex">#version 300 es
+in vec3 a_position;
+out vec2 v_texcoord;
+void main() {
+    vec3 pos = a_position;
+    v_texcoord = pos.xy * 0.5 + 0.5;
+    gl_Position = vec4(pos, 1.0);
+}
+</script>
+
+<script id="accumulate-fragment-shader" type="x-shader/x-fragment">#version 300 es
+precision mediump float;
+uniform sampler2D u_texture;    // rgb = accumulated color, a = count
+in vec2 v_texcoord;
+out vec4 fragColor;
+
+void main() {
+    vec4 val = texture(u_texture, v_texcoord);
+    vec3 mean = val.xyz / max(val.w, 0.01);
+    mean = pow(mean, vec3(0.4545454, 0.454545, 0.454545));
+    fragColor = vec4(mean, 1.0);
+}
+</script>
+
+<script id="pathtracing-fragment-shader" type="x-shader/x-fragment">#version 300 es
+
+precision highp float;
+uniform mat4 u_projection;
+uniform mat4 u_invProjection;
+uniform mat4 u_view;
+uniform mat4 u_invView;
+uniform mat4 u_world[4];        // 0: tall block, 1: short block, 2: wall, 3: light
+uniform mat4 u_invWorld[4];
+uniform mat3 u_normalMat[4];
+uniform mat4 u_TR[4];
+uniform mat4 u_invTR[4];
+uniform vec3 u_scale[4];
+
+uniform vec4 u_ScreenSize;
+uniform float u_temporalSeed;
+uniform int u_lightAsEmissive;
+
+in vec2 v_texcoord;
+out vec4 fragColor;
+
+#define PI 3.1416
+
+void intersectPlane(in int axis, in float value,
+    in vec3 origin, in vec3 direction, 
+    out float hitT, out vec3 hitLocalPos)
+{
+    const float eps = 1.0e-6;
+    float t = -1.0;
+    if (axis == 0 && abs(direction.x) > eps) t = (value - origin.x) / direction.x; 
+    else if (axis == 1 && abs(direction.y) > eps) t = (value - origin.y) / direction.y; 
+    else if (axis == 2 && abs(direction.z) > eps) t = (value - origin.z) / direction.z;
+
+    hitT = -1.0;
+    if (t > 0.0) {
+        hitLocalPos = origin + t * direction;
+        if (hitLocalPos.x >= -eps && hitLocalPos.x <= 1.0 + eps && 
+            hitLocalPos.y >= -eps && hitLocalPos.y <= 1.0 + eps && 
+            hitLocalPos.z >= -eps && hitLocalPos.z <= 1.0 + eps ) {
+                hitT = t;
+        }
+    }
+}
+
+void updateHit(in mat3 normalMat, in mat4 worldMat, 
+    in float tMin, in float tMax,
+    in float t, in vec3 localPos, in vec3 localNormal, in int faceId,
+    out float currentT, out vec3 hitWorldPos, out vec3 hitWorldNormal, out int hitFaceId)
+{
+    // if (t > 0.0 && t > tMin && t < tMax && t < currentT) 
+    {
+        currentT = t;
+        hitWorldPos = (worldMat * vec4(localPos, 1.0)).xyz;
+        hitWorldNormal = normalize(normalMat * localNormal);
+        hitFaceId = faceId;
+    }
+}
+
+// 0:x+, 1: x-, 2: y+, 3: z+, 4: z-
+void intersectBlock(in mat4 world, in mat4 invWorld, in mat3 normalMat,
+    in vec3 origin, in vec3 direction, in float tMin, in float tMax, 
+    out float hitT, out vec3 hitWorldPos, out vec3 hitWorldNormal, out int hitFaceId)
+{
+    vec3 localOrigin = (invWorld * vec4(origin, 1.0)).xyz;
+    vec3 localDir = (invWorld * vec4(direction, 0.0)).xyz;
+    
+    // line: p = localOrigin + t*localDir
+    float finalT = tMax;
+
+    float t = 0.0;
+    vec3 localPos;
+    intersectPlane(0, 1.0, localOrigin, localDir, t, localPos); // x = 1
+    if (t > 0.0 && t < finalT) 
+        updateHit(normalMat, world, tMin, tMax, t, localPos, vec3(1.0, 0.0, 0.0), 0, finalT, hitWorldPos, hitWorldNormal, hitFaceId);
+
+    intersectPlane(0, 0.0, localOrigin, localDir, t, localPos); // x = 0
+    if (t > 0.0 && t < finalT) 
+        updateHit(normalMat, world, tMin, tMax, t, localPos, vec3(-1.0, 0.0, 0.0), 1, finalT, hitWorldPos, hitWorldNormal, hitFaceId);
+
+    intersectPlane(1, 1.0, localOrigin, localDir, t, localPos); // y = 1
+    if (t > 0.0 && t < finalT) 
+        updateHit(normalMat, world, tMin, tMax, t, localPos, vec3(0.0, 1.0, 0.0), 2, finalT, hitWorldPos, hitWorldNormal, hitFaceId);
+
+    intersectPlane(2, 1.0, localOrigin, localDir, t, localPos); // z = 1
+    if (t > 0.0 && t < finalT) 
+        updateHit(normalMat, world, tMin, tMax, t, localPos, vec3(0.0, 0.0, 1.0), 3, finalT, hitWorldPos, hitWorldNormal, hitFaceId);
+
+    intersectPlane(2, 0.0, localOrigin, localDir, t, localPos); // z = 0
+    if (t > 0.0 && t < finalT) 
+        updateHit(normalMat, world, tMin, tMax, t, localPos, vec3(0.0, 0.0, -1.0), 4, finalT, hitWorldPos, hitWorldNormal, hitFaceId);
+
+    if (finalT < tMax) hitT = finalT;
+    else hitT = -1.0;
+}
+/*
+vec2 intersectAABB(vec3 rayOrigin, vec3 rayDir, vec3 boxMin, vec3 boxMax) {
+    vec3 tMin = (boxMin - rayOrigin) / rayDir;
+    vec3 tMax = (boxMax - rayOrigin) / rayDir;
+    vec3 t1 = min(tMin, tMax);
+    vec3 t2 = max(tMin, tMax);
+    float tNear = max(max(t1.x, t1.y), t1.z);
+    float tFar = min(min(t2.x, t2.y), t2.z);
+    return vec2(tNear, tFar);
+}*/
+
+void intersectBlock2(in mat4 TR, in mat4 invTR, in vec3 scale,
+    in vec3 origin, in vec3 direction, in float tMin, in float tMax, 
+    out float hitT, out vec3 hitWorldPos, out vec3 hitWorldNormal, out int hitFaceId)
+{
+    vec3 localOrigin = (invTR * vec4(origin, 1.0)).xyz;
+    vec3 localDir = (invTR * vec4(direction, 0.0)).xyz;
+
+    vec3 boxMin = vec3(0.0, 0.0, 0.0);
+    vec3 boxMax = vec3(1.0, 1.0, 1.0) * scale;
+    vec3 tt1 = (boxMin - localOrigin) / localDir;
+    vec3 tt2 = (boxMax - localOrigin) / localDir;
+    vec3 t1 = min(tt1, tt2);    // entering time
+    vec3 t2 = max(tt1, tt2);    // exit time
+    float tNear = max(max(t1.x, t1.y), t1.z);   // latest entering time
+    float tFar = min(min(t2.x, t2.y), t2.z);    // earlist exit time
+    bool inside = false;
+    if (boxMin.x <= localOrigin.x && boxMin.y <= localOrigin.y && boxMin.z <= localOrigin.z && 
+        boxMax.x >= localOrigin.x && boxMax.y >= localOrigin.y && boxMax.z >= localOrigin.z) 
+    {
+        inside = true;        // origin is inside the box;
+    }
+
+    hitT = tNear;
+    if (inside) {
+        hitT = tFar;
+        if (hitT == tt1.y) hitT = -1.0;
+    } else { 
+        if (hitT == tt1.y) hitT = tFar;
+    }
+
+    if (tNear < tFar && hitT > 0.0) {
+        vec3 localPos = localOrigin + hitT * localDir;
+        int faceId = -1;
+        vec3 localNormal = vec3(0.0, 0.0, 0.0);
+        if (hitT == tt1.x) {
+            localNormal = vec3( 1.0, 0.0, 0.0); faceId = 1;
+        } else if (hitT == tt2.x) {
+            localNormal = vec3(-1.0, 0.0, 0.0); faceId = 0;
+        } else if (hitT == tt1.y) {
+            localNormal = vec3(0.0,  1.0, 0.0); faceId = 2;
+        } else if (hitT == tt2.y) {
+            localNormal = vec3(0.0, -1.0, 0.0); faceId = 6;
+        } else if (hitT == tt1.z) {
+            localNormal = vec3(0.0, 0.0,  1.0); faceId = 3;
+        } else if (hitT == tt2.z) {
+            localNormal = vec3(0.0, 0.0, -1.0); faceId = 4;
+        }
+        hitWorldPos = (TR * vec4(localPos, 1.0)).xyz;
+        hitWorldNormal = normalize(mat3(TR) * localNormal);
+        hitFaceId = faceId;
+    } else {
+        hitT = -1.0;
+    }
+}
+
+void traceRay(
+    in vec3 origin, in vec3 direction, in float tMin, in float tMax, 
+    out float hitT, out vec3 hitWorldPos, out vec3 hitWorldNormal, out int hitInstanceId, out int hitFaceId)
+{
+    hitT = tMax*2.0;
+    vec3 worldPos, worldNormal;
+    int faceId;
+    for (int i = 0; i < 4; i++) {
+        if (i == 3 && u_lightAsEmissive <= 0) break;
+        float t = 0.0;
+        intersectBlock2(u_world[i], u_invTR[i], u_scale[i], origin, direction, tMin, tMax, t, worldPos, worldNormal, faceId);
+        // intersectBlock(u_TR[i], u_invWorld[i], u_normalMat[i], origin, direction, tMin, tMax, t, worldPos, worldNormal, faceId);
+        if (t > 0.0 && t > tMin && t < tMax && t < hitT) {
+            hitT = t;
+            hitWorldPos = worldPos;
+            hitWorldNormal = worldNormal;
+            hitFaceId = faceId;
+            hitInstanceId = i;
+        }
+    }
+
+    // normal is always facing to neg ray direction 
+    hitWorldNormal = hitWorldNormal * sign(dot(hitWorldNormal, -direction));
+
+    if (hitT >= tMax) hitT = -1.0;
+}
+
+bool isEmissive(int hitFaceId) {
+    return hitFaceId == 3;
+}
+
+uint randInit(uint seed0, uint seed1) {
+	const uint delta = 0x9e3779b9u;
+	const uvec4 key = uvec4(0xa341316c, 0xc8013ea4, 0xad90777d, 0x7e95761e);
+	const uint rounds = 8u;
+
+	uint sum = 0u;
+	uvec2 value = uvec2(seed0, seed1);
+	for (uint i = 0u; i < rounds; ++i) {
+		sum += delta;
+		value.x += (value.y + sum) ^ ((value.y << 4) + key.x) ^ ((value.y >> 5) + key.y);
+		value.y += (value.x + sum) ^ ((value.x << 4) + key.z) ^ ((value.x >> 5) + key.w);
+	}
+
+	return value.x;
+}
+
+float rand(inout uint seed) {
+	const uint scale = 48271u;
+	const uint bias = 0u;
+	seed = seed * scale + bias;
+
+	float result = float(seed & 0x00FFFFFFu);
+	result /= float(0x01000000);
+	return result;
+}
+
+float ff(float M, float N, float z) {
+    return atan( M*N / (z*sqrt(z*z + M*M + N*N))  );
+}
+
+float computeRectSolidAngle(vec3 center, vec3 p00, vec3 p01, vec3 p10, vec3 p11) {
+    vec3 R = p00;
+    vec3 S = center;    // A
+    vec3 u = normalize(p10 - p00);
+    float len_u = length(p10 - p00);
+    vec3 v = normalize(p01 - p00);
+    float len_v = length(p01 - p00);
+    vec3 N = normalize(cross(u,v));
+    vec3 D = R - S;
+    float z = dot(D, N);
+    float a = dot(D, u);
+    float b = dot(D, v);
+    float M1 = len_u + a;
+    float M0 = a;
+    float N1 = len_v + b;
+    float N0 = b;
+    if (abs(z) < 1e-3) return 0.0;
+    return abs(ff(M1, N1, z) + ff(M0, N0, z) - ff(M1, N0, z) - ff(M0, N1, z));
+}
+
+void sampleLight(vec3 surfaceWorldPos, vec2 randomSample, out vec3 lightSamplePosition, out float lightPdf)
+{
+    lightSamplePosition = (u_world[3] * vec4(randomSample.x, 0.0, randomSample.y, 1.0)).xyz;
+    vec3 lightDirection = lightSamplePosition - surfaceWorldPos;
+	float lightDirectionLength = length(lightDirection);
+	lightDirection /= (lightDirectionLength);
+
+    if (dot(-lightDirection, vec3(0.0, -1.0, 0.0)) <= 0.0) {
+		lightPdf = 0.0;
+	} else {
+        // solid angle
+        vec3 p00 = (u_world[3] * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+        vec3 p01 = (u_world[3] * vec4(0.0, 0.0, 1.0, 1.0)).xyz;
+        vec3 p10 = (u_world[3] * vec4(1.0, 0.0, 0.0, 1.0)).xyz;
+        vec3 p11 = (u_world[3] * vec4(1.0, 0.0, 1.0, 1.0)).xyz;
+        float solidAngle = computeRectSolidAngle(surfaceWorldPos, p00, p01, p10, p11);
+        lightPdf = solidAngle > 1.0e-8 ? 1.0/solidAngle : 0.0;
+    }
+}
+
+vec4 cosineSampleHemisphere(vec2 E)
+{
+	float phi = 2.0 * PI * E.x;
+	float cosTheta = sqrt(E.y);
+	float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+
+	vec3 H;
+	H.x = sinTheta * cos(phi);
+	H.y = sinTheta * sin(phi);
+	H.z = cosTheta;
+
+	float pdf = cosTheta * (1.0 / PI);
+
+	return vec4(H, pdf);
+}
+
+float square(float x) { return x*x; }
+
+vec3 tangentToWorld(vec3 v, vec3 tangentZ)
+{
+    float s = (tangentZ.z >= 0.0 ? 1.0 : -1.0);
+	float a = -1.0/(s + tangentZ.z);
+	float b = tangentZ.x * tangentZ.y * a;
+
+	vec3 tangentX = vec3( 1.0 + s * a * square(tangentZ.x), s * b, -s * tangentZ.x );
+	vec3 tangentY = vec3( b, s + a * square(tangentZ.y), -tangentZ.y );
+
+    mat3 m = mat3(tangentX, tangentY, tangentZ);
+	return m * v;
+}
+
+void sampleMaterial(vec3 worldNormal, vec3 diffuseColor, vec2 randomSample, out vec3 outDirection, out vec3 outThroughput, out float outPdf) {
+	vec4 sampledValue = cosineSampleHemisphere(randomSample.xy);
+    outDirection = tangentToWorld(sampledValue.xyz, worldNormal);
+    outThroughput = diffuseColor / PI;
+    outPdf = sampledValue.w;
+    float nol = clamp(dot(worldNormal, outDirection), 0.0, 1.0);
+    outThroughput *= nol;
+}
+
+void applyPositionBias(inout vec3 rayOrigin, vec3 rayDirection, vec3 worldNormal, float maxNormalBias) {
+    float minBias = 0.01;
+	float maxBias = max(minBias, maxNormalBias);
+	float normalBias = mix(maxBias, minBias, clamp(dot(worldNormal, rayDirection), 0.0, 1.0));
+
+	rayOrigin += worldNormal * normalBias;
+
+}
+
+void main() {
+    vec4 filmPos4 = u_invView * u_invProjection * vec4(v_texcoord*2.0 - 1.0, -1.0, 1.0);
+    vec3 filmPos = filmPos4.xyz / filmPos4.w;
+    vec3 cameraPos = (u_invView * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
+    vec3 viewDir = normalize(filmPos - cameraPos);
+
+    float hitT; 
+    vec3 hitWorldPos, hitWorldNormal;
+    int hitInstanceId, hitFaceId;
+    vec3 hitDiffuseColor = vec3(1.0, 1.0, 1.0);
+
+    uvec2 launchIndex = uvec2(u_ScreenSize.xy * v_texcoord + 0.5);
+
+    vec2 bufferSize = u_ScreenSize.xy;
+	uint linearIndex = launchIndex.x + (launchIndex.y * uint(bufferSize.x + 2.0));
+    uint randomSeed = randInit(linearIndex, uint(u_temporalSeed));
+
+    vec3 rayThroughput = vec3(1.0, 1.0, 1.0);
+    float rayPdf = 1.0;
+
+    vec3 rayOrigin = cameraPos, rayDir = viewDir;
+    float tMin = 0.01, tMax = 1.0e5;
+    traceRay(rayOrigin, rayDir, tMin, tMax, hitT, hitWorldPos, hitWorldNormal, hitInstanceId, hitFaceId);
+    if (hitInstanceId == 2) {
+        if (hitFaceId == 0) hitDiffuseColor = vec3(1.0, 0.0, 0.0); 
+        else if (hitFaceId == 1) hitDiffuseColor = vec3(0.0, 1.0, 0.0); 
+    }
+
+    float materialPdf = 0.0;
+
+    bool bIsNeeValid = true;
+    vec3 irradiance = vec3(0.0);
+    for (int bounces = 0; bounces < 32; bounces++) {
+        // miss
+        if (hitT < 0.0) {
+            break;
+        }
+        
+        if (isEmissive(hitInstanceId)) {
+            vec3 emission = vec3(1.0, 1.0, 1.0) * 3.14;
+            irradiance += emission * rayThroughput / rayPdf;
+            break;
+        }
+
+        // bounces = bounces + 1;
+        rayOrigin = rayOrigin + rayDir * hitT;
+
+        // sample light
+        float neePdf = 0.0;
+        vec3 lightSamplePosition;
+        float rand1 = rand(randomSeed);
+        float rand2 = rand(randomSeed);
+        vec2 randomSample = vec2(rand1, rand2);
+
+        sampleLight(hitWorldPos, randomSample, lightSamplePosition, neePdf);
+        if (u_lightAsEmissive > 0) neePdf = 0.0;
+        
+        if (neePdf > 0.0) {
+            // GenerateLightRay
+            vec3 lightRayOrigin = rayOrigin;
+            float lightRayTMin = 0.001;
+            vec3 tempDir = lightSamplePosition - rayOrigin;
+            vec3 lightRayDir = normalize(tempDir);
+            float lightRayTMax = length(tempDir);
+
+            // ApplyPositionBias
+            {
+                float signedPositionBias = 1.0;
+                float nol = dot(hitWorldNormal, lightRayDir);
+                if (nol < 0.0) signedPositionBias = -1.0;
+                applyPositionBias(lightRayOrigin, lightRayDir, signedPositionBias*hitWorldNormal, 0.1);
+            }
+
+            // TraceVisibilityRay
+            float lightRayHitT;
+            vec3 lightHitWorldPos, lightHitWorldNormal;
+            int lightHitInstanceId, lightHitFaceId;
+            traceRay(lightRayOrigin, lightRayDir, lightRayTMin, lightRayTMax, lightRayHitT,lightHitWorldPos, lightHitWorldNormal, lightHitInstanceId, lightHitFaceId);
+
+            if (lightRayHitT <= 0.0) {
+                // EvalLight
+                float falloff = 1.0;
+                vec3 radiance = hitDiffuseColor * falloff * 3.14;
+
+                // EvalMaterial
+                float nol = max(dot(lightRayDir, hitWorldNormal), 0.0);
+                float materialEvalPdf = nol / PI;
+                float materialThroughput = materialEvalPdf;
+                // float misWeight = neePdf / (neePdf + materialEvalPdf);
+                float misWeight = 1.0;
+
+                irradiance += radiance * rayThroughput * materialThroughput * misWeight / (neePdf * rayPdf);
+            }
+            else {
+                // shadow
+                // irradiance = vec3(0.5, 1.0, 0.5);
+            }
+        } else {
+            // irradiance = vec3(1.0 ,0.5, 0.5);
+        }
+
+        // SampleMaterial
+        vec3 direction, throughput;
+        float samplePdf;
+
+        rand1 = rand(randomSeed);
+        rand2 = rand(randomSeed);
+        sampleMaterial(hitWorldNormal, hitDiffuseColor, vec2(rand1, rand2), direction, throughput, samplePdf);
+        if (samplePdf <= 0.0) break;
+
+        // PdfMaterial
+        {
+            float nol = max(dot(hitWorldNormal, direction), 0.0);
+            materialPdf = (nol / PI);
+        }
+
+        // update ray
+		rayDir = direction;
+        applyPositionBias(rayOrigin, rayDir, 1.0*hitWorldNormal, 0.1);
+        rayThroughput *= throughput;
+        rayPdf *= samplePdf;
+
+        // Russian roulette
+        float pathEnergy = max(max(rayThroughput.x, rayThroughput.y), rayThroughput.z);
+        float energyThreshold = 1.0;
+        if (pathEnergy < energyThreshold && bounces > 4) {
+            float Q = 1.0 - pathEnergy;
+            float r = rand(randomSeed);
+            if (r < Q) break;
+
+            rayThroughput /= (1.0 - Q);
+        }
+
+        // Firefly rejection
+        pathEnergy = max(max(rayThroughput.x, rayThroughput.y), rayThroughput.z);
+        float fireflyThreshold = 5.0;
+        if (pathEnergy / rayPdf > fireflyThreshold) {
+            break;
+        }
+
+        // Trace again
+        traceRay(rayOrigin, rayDir, tMin, tMax, hitT, hitWorldPos, hitWorldNormal, hitInstanceId, hitFaceId);
+        hitDiffuseColor = vec3(1.0, 1.0, 1.0);
+        if (hitInstanceId == 2) {
+            if (hitFaceId == 0) hitDiffuseColor = vec3(1.0, 0.0, 0.0); 
+            else if (hitFaceId == 1) hitDiffuseColor = vec3(0.0, 1.0, 0.0); 
+        }
+    }   // end for bounces
+
+
+    fragColor = vec4(irradiance, 1.0);
+}
+</script>
+
+
+<script id="sky-vertex-shader" type="x-shader/x-vertex">
+attribute vec3 a_position;
+
+uniform mat4 u_projection;
+uniform mat4 u_view;
+
+varying vec3 v_texcoord;
+
+void main() {
+    vec3 positionVS = mat3(u_view) * (a_position);
+    gl_Position = u_projection * vec4(positionVS, 1.0);
+    // gl_Position = u_projection * u_view * u_world * vec4(a_position, 1.0);
+    v_texcoord = a_position;
+}
+</script>
+<script id="sky-fragment-shader" type="x-shader/x-fragment">
+precision mediump float;
+varying vec3 v_texcoord;
+
+#define Gamma 1.4
+
+#define Rayleigh 1.
+#define Mie 1.
+#define RayleighAtt 1.
+#define MieAtt 1.2
+const float g = -0.93;
+
+#if 1
+vec3 _betaR = vec3(1.95e-2, 1.1e-1, 2.94e-1); 
+vec3 _betaM = vec3(4e-2, 4e-2, 4e-2);
+#else
+vec3 _betaR = vec3(6.95e-2, 1.18e-1, 2.44e-1); 
+vec3 _betaM = vec3(4e-2, 4e-2, 4e-2);
+#endif
+
+vec3 calcAtmosphericScattering( float sR, float sM, out vec3 extinction, float cosine, float g1)
+{
+    extinction = exp(-(_betaR * sR + _betaM * sM));
+
+    // scattering phase
+    float g2 = g1 * g1;
+    float fcos2 = cosine * cosine;
+    float miePhase = Mie * pow(1. + g2 + 2. * g1 * cosine, -1.5) * (1. - g2) / (2. + g2);
+    //g = 0;
+    float rayleighPhase = Rayleigh;
+
+    vec3 inScatter = (1. + fcos2) * vec3(rayleighPhase + _betaM / _betaR * miePhase);
+    
+    return inScatter;
+}
+vec3 ACESFilm( vec3 x ) {
+    float tA = 2.51;
+    float tB = 0.03;
+    float tC = 2.43;
+    float tD = 0.59;
+    float tE = 0.14;
+    return clamp((x*(tA*x+tB))/(x*(tC*x+tD)+tE),0.0,1.0);
+}
+vec3 getSkyColor(in vec3 rd, vec3 light1) {
+    float sundot = clamp(dot(rd,light1),0.0,1.0);
+    
+    vec3 extinction;
+
+    // optical depth -> zenithAngle
+    float zenithAngle = max(0., rd.y); //abs( rd.y);
+    float sR = RayleighAtt / zenithAngle ;
+    float sM = MieAtt / zenithAngle ;
+
+    vec3 inScatter = calcAtmosphericScattering(sR, sM, extinction, sundot, g);
+    vec3 skyCol = inScatter*(1.0-extinction);
+
+    // sky  
+    vec3 col = skyCol; // *vec3(1.6,1.4,1.0)
+    // sun
+    col += 0.47*vec3(1.6,1.4,1.0)*pow( sundot, 350.0 ) * extinction;
+    // sun haze
+    col += 0.4*vec3(0.8,0.9,1.0)*pow( sundot, 2.0 ) * extinction;
+    
+    // sun scatter
+    col += 0.3*vec3(1.0,0.7,0.3)*pow( sundot, 8.0 );
+
+    // gamma
+    //col = sqrt(col);
+            
+    col = ACESFilm(col);
+    col = pow(col, vec3(Gamma));
+    return col;
+}
+void main() {
+    vec3 rd = normalize(v_texcoord.xyz);
+    vec3 light_dir = vec3(1.0, 10.0, 1.0);
+    vec3 color = getSkyColor(rd, normalize(light_dir));
+    gl_FragColor = vec4(color, 1.0);
+}
+</script>
+
+
+<script>
+function degreeToRad(degree) { return degree*Math.PI/180.0; }
+
+class Camera {
+    constructor() {
+        this.forward = [0,0,-1];    // -z
+        this.right = [1,0,0];       // x
+        this.position = [0,0,0];
+    }
+    moveForward(distance) {
+        this.position = m4.addVectors( this.position, m4.scaleVector(this.forward, distance) );
+    }
+    moveRight(distance) {
+        this.position = m4.addVectors( this.position, m4.scaleVector(this.right, distance) );
+    }
+    getViewMatrix() {
+        var target = m4.addVectors(this.position, this.forward);
+        var transform = m4.lookAt(this.position, target, [0,1,0]);
+        return m4.inverse(transform);
+    }
+}
+
+class UECameraControl {
+    constructor(camera) {
+        this.camera = camera;
+        this.moveSpeed = 2;
+        this.rotateSpeed = 1;
+        this.isMoveForward = false;
+        this.isMoveBackward = false;
+        this.isMoveLeft = false;
+        this.isMoveRight = false;
+        this.yaw = 0;
+        this.pitch = 0;
+        this.maxPitch = 88;
+        this.isLocked = true;
+    }
+    update(delta_t) {
+        this.updateCameraPosition(delta_t);
+        this.updateCameraRotation(delta_t);
+    }
+    updateCameraPosition(delta_t){
+        var distance = delta_t * this.moveSpeed;
+        if (this.isMoveForward && !this.isMoveBackward) {
+            this.camera.moveForward(distance);
+        }
+        if (!this.isMoveForward && this.isMoveBackward) {
+            this.camera.moveForward(-distance);
+        }
+        if (this.isMoveLeft && !this.isMoveRight) {
+            this.camera.moveRight(-distance);
+        }
+        if (!this.isMoveLeft && this.isMoveRight) {
+            this.camera.moveRight(distance);
+        }
+    }
+    updateCameraRotation(delta_t){
+        // yaw, pitch to forward & right
+        var sin_pitch = Math.sin(degreeToRad(this.pitch));
+        var sin_yaw = Math.sin(degreeToRad(this.yaw));
+        var cos_yaw = Math.cos(degreeToRad(this.yaw));
+        var xz_len = Math.sqrt(1.0 - sin_pitch*sin_pitch);
+        var fwd = [-xz_len*sin_yaw, sin_pitch, -xz_len*cos_yaw];
+        var right = [cos_yaw, 0, -sin_yaw];
+        camera.forward = fwd;
+        camera.right = right;
+    }
+
+    onKeyDown ( event ) {
+        if (this.isLocked) return;
+        switch ( event.code ) {
+            case 'ArrowUp':
+            case 'KeyW': this.isMoveForward = true; break;
+            case 'ArrowLeft':
+            case 'KeyA': this.isMoveLeft = true; break;
+            case 'ArrowDown':
+            case 'KeyS': this.isMoveBackward = true; break;
+            case 'ArrowRight':
+            case 'KeyD': this.isMoveRight = true; break;
+        }
+    };
+    onKeyUp ( event ) {
+        switch ( event.code ) {
+            case 'ArrowUp':
+            case 'KeyW': this.isMoveForward = false; break;
+            case 'ArrowLeft':
+            case 'KeyA': this.isMoveLeft = false; break;
+            case 'ArrowDown':
+            case 'KeyS': this.isMoveBackward = false; break;
+            case 'ArrowRight':
+            case 'KeyD': this.isMoveRight = false; break;
+        }
+    };
+    onPointerMove( event ) {
+        if (this.isLocked) return;
+        const movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
+        const movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+
+        this.yaw -= movementX * 0.05 * this.rotateSpeed;
+        this.yaw = this.yaw % 360;
+        this.pitch -= movementY * 0.05 * this.rotateSpeed;
+        this.pitch = Math.max( -this.maxPitch, Math.min( this.maxPitch, this.pitch ) );
+    }
+    onPointerDown(event) {
+        if (event.button == 2) {
+            this.isLocked = false;
+        }
+    }
+    onPointerUp(event) {
+        if (event.button == 2) {
+            this.isLocked = true;
+        }
+    }
+    onContextmenu( event ) {
+        event.preventDefault();
+    }
+
+    registerEventHandlers(domElement) {
+        domElement.addEventListener( 'mouseup', this.onPointerUp.bind(this) );
+        domElement.addEventListener( 'mousemove', this.onPointerMove.bind(this) );
+        domElement.addEventListener( 'mousedown', this.onPointerDown.bind(this) );
+        domElement.addEventListener( 'contextmenu', this.onContextmenu.bind(this) );
+        window.addEventListener( 'keydown', this.onKeyDown.bind(this) );
+        window.addEventListener( 'keyup', this.onKeyUp.bind(this) );
+    }
+}
+
+const drawCanvas = document.getElementById('drawCanvas');
+const gl = drawCanvas.getContext("webgl2");
+
+var skycubeBufferInfo = null;
+var skyProgramInfo = null;
+var camera = null;
+var cameraControl = null;
+var pathtracingProgramInfo = null;
+var accumulateProgramInfo = null;
+var quadBufferInfo = null;
+var worldUniform = null;
+var invWorldUniform = null;
+var normalMatUniform = null;
+var TRUniform = null;
+var invTRUniform = null;
+var scaleUniform = null;
+var accumulateTexture = null;
+var accumulateFrameBuffer = null;
+var cameraMoved = true;
+var useEmissive = true;
+var forceClear = false;
+var clearOnce = false;
+
+var modelBufferInfo = null;
+var colorProgramInfo = null;
+
+var current_time = null;
+var lastViewMat = null;
+
+
+function initScene() {
+    gl.clearColor(0, 0, 0, 0);
+    gl.clearDepth(1.0);
+
+    skycubeBufferInfo = webglUtils.createBufferInfoFromArrays(gl, {
+        position: [
+            -1,  1,  1,  
+             1,  1,  1,  
+             1, -1,  1,  
+            -1, -1,  1, 
+             1,  1, -1,  
+            -1,  1, -1,  
+            -1, -1, -1,  
+             1, -1, -1, 
+        ],  
+        indices: [0,1,2,2,3,0,1,4,7,7,2,1,4,5,6,6,7,4,5,0,3,3,6,5,5,4,1,1,0,5,3,2,7,7,6,3],
+    });
+    modelBufferInfo = webglUtils.createBufferInfoFromArrays(gl, {
+        position: [
+            0,0,0,  
+            0,1,0,  
+            0,0,1,  
+            0,1,1,  
+            1,0,0,  
+            1,1,0,  
+            1,0,1,  
+            1,1,1,
+        ],  
+        indices: [
+            0,1,3,
+            0,3,2,
+            2,3,7,
+            2,7,6,
+            6,7,5,
+            6,5,4,
+            4,5,1,
+            4,1,0,
+            7,3,1,
+            7,1,5,
+        ],
+    });
+    quadBufferInfo = webglUtils.createBufferInfoFromArrays(gl, {
+        position: [-1,-1,-1, 1,-1,-1, -1,1,-1, 1,1,-1],
+        indices: [0,1,3, 0,3,2],
+    });
+
+    colorProgramInfo = webglUtils.createProgramInfo(gl, ['color-vertex-shader', 'color-fragment-shader']);
+    skyProgramInfo = webglUtils.createProgramInfo(gl, ['sky-vertex-shader', 'sky-fragment-shader']);
+    pathtracingProgramInfo = webglUtils.createProgramInfo(gl, ['postprocess-vertex-shader', 'pathtracing-fragment-shader']);
+    accumulateProgramInfo = webglUtils.createProgramInfo(gl, ['postprocess-vertex-shader', 'accumulate-fragment-shader']);
+
+    {
+        accumulateTexture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, accumulateTexture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, 1024, 768, 0, gl.RGBA, gl.FLOAT, null);
+ 
+        // set the filtering so we don't need mips
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+        accumulateFrameBuffer = gl.createFramebuffer();
+        gl.bindFramebuffer(gl.FRAMEBUFFER, accumulateFrameBuffer);
+        const attachmentPoint = gl.COLOR_ATTACHMENT0;
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, attachmentPoint, gl.TEXTURE_2D, accumulateTexture, 0);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    }
+
+    camera = new Camera();
+    camera.position = [0.5,0.5,3];
+
+    cameraControl = new UECameraControl(camera);
+    cameraControl.registerEventHandlers(window);
+
+    // mats
+    // tall 1.5824460983276367, 0, -0.4907958209514618, 0, 0, 3.312696933746338, 0, 0, 0.4907958209514618, 0, 1.5824460983276367, 0, 2.651874303817749, 0, 2.963514804840088, 1
+    // short 1.588279128074646, 0, 0.48266923427581787, 0, -0, 1.659999966621399, 0, 0, -0.48266923427581787, -0, 1.588279128074646, 0, 1.2968487739562988, 0, 0.6551977396011353, 1
+    // wall 5.569371223449707, 0, 0, 0, 0, -0.000020457517166505568, 5.569371223449707, 0, 0, -5.569371223449707, -0.000020457517166505568, 0, 0, 5.569371223449707, 0, 1
+    // light 1.6299999952316284, 0, 0, 0, 0, 0.009999999776482582, 0, 0, 0, 0, 1.6299999952316284, 0, 1.940000057220459, 5.541600227355957, 1.940000057220459, 1
+    var worldMats = [
+        [1.5824460983276367, 0, -0.4907958209514618, 0, 0, 3.312696933746338, 0, 0, 0.4907958209514618, 0, 1.5824460983276367, 0, 2.651874303817749, 0, 2.963514804840088, 1],
+        [1.588279128074646, 0, 0.48266923427581787, 0, -0, 1.659999966621399, 0, 0, -0.48266923427581787, -0, 1.588279128074646, 0, 1.2968487739562988, 0, 0.6551977396011353, 1],
+        [5.569371223449707, 0, 0, 0, 0, -0.000020457517166505568, 5.569371223449707, 0, 0, -5.569371223449707, -0.000020457517166505568, 0, 0, 5.569371223449707, 0, 1],
+        [1.6299999952316284, 0, 0, 0, 0, 0.009999999776482582, 0, 0, 0, 0, 1.6299999952316284, 0, 1.940000057220459, 5.541600227355957, 1.940000057220459, 1]
+    ];
+    var invWorldMats = worldMats.map((x) => Array.from(m4.inverse(x)));
+    var normalMats = invWorldMats.map((x) => {
+        return [  
+            x[0], x[4], x[8], 
+            x[1], x[5], x[9], 
+            x[2], x[6], x[10]];
+    });
+
+    var TRMats = [], scales = [];
+    for (var i = 0; i < 4; i++) {
+        var T = [0,0,0], R = [0,0,0,1], S = [1,1,1];
+        m4.decompose(worldMats[i], T,R,S);
+        TRMats[i] = Array.from( m4.compose(T, R, [1,1,1]) );
+        scales[i] = S;
+    }
+    var invTRMats = TRMats.map((x) => Array.from(m4.inverse(x)));
+
+    worldUniform = [].concat(worldMats[0], worldMats[1], worldMats[2], worldMats[3]);
+    invWorldUniform = [].concat(invWorldMats[0], invWorldMats[1], invWorldMats[2], invWorldMats[3]);
+    normalMatUniform = [].concat(normalMats[0], normalMats[1], normalMats[2], normalMats[3]);
+    TRUniform = [].concat(TRMats[0], TRMats[1], TRMats[2], TRMats[3]);
+    invTRUniform = [].concat(invTRMats[0], invTRMats[1], invTRMats[2], invTRMats[3]);
+    scaleUniform = [].concat(scales[0], scales[1], scales[2], scales[3]);
+    // console.log(TRUniform);
+    // console.log(invTRUniform);
+    // console.log(scaleUniform);
+}
+
+function logicUpdate(delta_t) {
+    cameraControl.update(delta_t);
+
+    if (lastViewMat == null) cameraMoved = true;
+    else {
+        var viewMat = camera.getViewMatrix();
+        var diff = 0.0;
+        for (var i = 0; i < 16; i++) diff += Math.abs(lastViewMat[i] - viewMat[i]);
+        cameraMoved = (diff > 1e-3);
+    }
+}
+
+function postLogicUpdate(delta_t) {
+    lastViewMat = Array.from(camera.getViewMatrix());
+    clearOnce = false;
+}
+
+function render(delta_t) {
+    var viewMatrix = camera.getViewMatrix();
+    var fov = degreeToRad(45.);
+    var aspect = 1024./768.;
+    var near = 0.1;
+    var far = 100.0;
+    var projectionMatrix = m4.perspective(fov, aspect, near, far)
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    // sky
+    gl.disable(gl.DEPTH_TEST);
+    gl.useProgram(skyProgramInfo.program);
+    webglUtils.setUniforms(skyProgramInfo, {
+        u_view: viewMatrix,
+        u_projection: projectionMatrix,
+    });
+    webglUtils.setBuffersAndAttributes(gl, skyProgramInfo, skycubeBufferInfo);
+    webglUtils.drawBufferInfo(gl, skycubeBufferInfo);
+    gl.enable(gl.DEPTH_TEST);
+
+    // model
+    gl.useProgram(colorProgramInfo.program);
+    // tall
+    webglUtils.setUniforms(colorProgramInfo, {
+        u_view: viewMatrix,
+        u_projection: projectionMatrix,
+    });
+    var rotation = [0,0,0,1];
+    var dummy1 = [], dummy2 = [];
+    m4.decompose(m4.yRotation(17.231243/180*3.1416), dummy1, rotation, dummy2);
+    var worldMatrixTall = m4.compose([2.65187439,0,2.96351471], rotation, [1.656809, 3.312697, 1.656809]);
+    webglUtils.setUniforms(colorProgramInfo,{
+        u_world: worldMatrixTall,
+        u_modelColor: [1.0, 0.5, 0.5, 1.0]
+    });
+    webglUtils.setBuffersAndAttributes(gl, colorProgramInfo, modelBufferInfo);
+    webglUtils.drawBufferInfo(gl, modelBufferInfo);
+
+    // short
+    m4.decompose(m4.yRotation(-16.903698/180*3.1416), dummy1, rotation, dummy2);
+    var worldMatrixShort = m4.compose([1.2968488,0,0.65519775], rotation, [1.66, 1.66, 1.66]);
+    webglUtils.setUniforms(colorProgramInfo,{
+        u_world: worldMatrixShort,
+        u_modelColor: [0.5, 1.0, 0.5, 1.0]
+    });
+    webglUtils.setBuffersAndAttributes(gl, colorProgramInfo, modelBufferInfo);
+    webglUtils.drawBufferInfo(gl, modelBufferInfo);
+
+    // wall
+    m4.decompose(m4.xRotation(90.0/180*3.1416), dummy1, rotation, dummy2);
+    var worldMatrixWall = m4.compose([0,5.569371,0], rotation, [5.569371, 5.569371, 5.569371]);
+    webglUtils.setUniforms(colorProgramInfo,{
+        u_world: worldMatrixWall,
+        u_modelColor: [0.5, 0.5, 1.0, 1.0]
+    });
+    webglUtils.setBuffersAndAttributes(gl, colorProgramInfo, modelBufferInfo);
+    webglUtils.drawBufferInfo(gl, modelBufferInfo);
+
+    // light
+    var worldMatrixLight = m4.compose([1.94, 5.5416, 1.94], [0,0,0,1], [1.63, 0.01, 1.63]);
+    webglUtils.setUniforms(colorProgramInfo,{
+        u_world: worldMatrixLight,
+        u_modelColor: [1.0, 1.0, 1.0, 1.0]
+    });
+    webglUtils.setBuffersAndAttributes(gl, colorProgramInfo, modelBufferInfo);
+    webglUtils.drawBufferInfo(gl, modelBufferInfo);
+
+    // trace
+    var t = (current_time % 1000000.0);
+    gl.disable(gl.DEPTH_TEST);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.ONE, gl.ONE);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, accumulateFrameBuffer);
+    if (cameraMoved || forceClear || clearOnce) gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.useProgram(pathtracingProgramInfo.program);
+    webglUtils.setUniforms(pathtracingProgramInfo, {
+        u_view: viewMatrix,
+        u_invView: m4.inverse(viewMatrix),
+        u_projection: projectionMatrix,
+        u_invProjection: m4.inverse(projectionMatrix),
+        u_world : worldUniform,
+        u_invWorld: invWorldUniform,
+        u_normalMat: normalMatUniform,
+        u_TR: TRUniform,
+        u_invTR: invTRUniform,
+        u_scale: scaleUniform,
+        u_temporalSeed: t,
+        u_lightAsEmissive: useEmissive,
+        u_ScreenSize: [1024, 768, 1./1024, 1./768]
+    });
+    webglUtils.setBuffersAndAttributes(gl, pathtracingProgramInfo, quadBufferInfo);
+    webglUtils.drawBufferInfo(gl, quadBufferInfo);
+    gl.disable(gl.BLEND);
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.useProgram(accumulateProgramInfo.program);
+    webglUtils.setBuffersAndAttributes(gl, accumulateProgramInfo, quadBufferInfo);
+    webglUtils.setUniforms(accumulateProgramInfo, {
+        u_texture: accumulateTexture
+    });
+    webglUtils.drawBufferInfo(gl, quadBufferInfo);
+
+}
+
+var last_time = null;
+
+function frameLoop() {
+    current_time = Date.now();
+    var delta_t = 1./30.;
+    if (last_time != null) {
+        delta_t = (current_time - last_time)/1000.0;
+    }
+    logicUpdate(delta_t);
+    render(delta_t);
+    postLogicUpdate(delta_t);
+    last_time = current_time;
+    window.requestAnimationFrame(frameLoop);
+}
+
+initScene();
+frameLoop();
+
+</script>
+
+</body>
+</html>

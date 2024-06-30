@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html>
+<head> <meta charset=utf-8 />
+<title>test</title>
+<script src='./m4.js'></script>
+<script src='./webgl-utils.js'></script>
+</head>
+
+<body>
+<canvas id="drawCanvas" width="1024" height="768"> </canvas>
+
+<script id="color-vertex-shader" type="x-shader/x-vertex">
+attribute vec3 a_position;
+uniform mat4 u_projection;
+uniform mat4 u_view;
+uniform mat4 u_world;
+varying vec2 v_texcoord;
+
+void main() {
+    vec3 pos = a_position;
+    gl_Position = u_projection * u_view * u_world * vec4(pos, 1.0);
+    v_texcoord = a_position.xz * 0.5 + 0.5;
+}
+</script>
+
+<script id="color-fragment-shader" type="x-shader/x-fragment">
+precision mediump float;
+varying vec2 v_texcoord;
+
+void main() {
+    vec2 uv = v_texcoord.xy;
+    uv = fract(uv * 8.0);
+    vec3 color = vec3(0.5, 0.5, 0.5);
+    bool t1 = uv.x > 0.5;
+    bool t2 = uv.y > 0.5;
+    if (t1 == t2) {
+        color = vec3(0.25, 0.25, 0.25);
+    } else {
+        color = vec3(0.75, 0.75, 0.75);
+    }
+    gl_FragColor = vec4(pow(color, vec3(0.454545)), 1.0);         
+}
+
+</script>
+
+<script id="sky-vertex-shader" type="x-shader/x-vertex"> #version 300 es
+in vec3 a_position;
+uniform mat4 u_projection;
+uniform mat4 u_view;
+out vec3 v_positionWS;
+
+void main() {
+    vec3 positionVS = mat3(u_view) * (a_position);
+    gl_Position = u_projection * vec4(positionVS, 1.0);
+    v_positionWS = a_position;
+}
+</script>
+
+<script id="sky-fragment-shader" type="x-shader/x-fragment"> #version 300 es
+precision highp float;
+in vec3 v_positionWS;
+uniform sampler2D u_texture;
+uniform vec4 u_textureSize;
+uniform float u_fixUv;
+out vec4 fragColor;
+
+void main() {
+    vec3 view_dir = normalize(v_positionWS).xzy;
+
+    vec2 uv = vec2(atan( view_dir.y, view_dir.x) * 0.1591549, 0.5 + atan( -view_dir.z,  sqrt(  view_dir.x *  view_dir.x + view_dir.y * view_dir.y ) ) * 0.3183099);
+    uv.y = clamp(uv.y, 0.0, 1.0);
+    float fwx = fwidth(uv.x);
+    float fwy = fwidth(uv.y);
+    if (u_fixUv > 0.5 && fwx > 0.02) {
+        if (uv.x >= 0.0) uv.x -= 1.0;
+    }
+
+    vec3 ret = texture(u_texture, uv).rgb;
+    
+    fragColor = vec4(view_dir*0.5+0.5, 1.0);
+}
+</script>
+
+
+<script>
+function degreeToRad(degree) { return degree*Math.PI/180.0; }
+
+class Camera {
+    constructor() {
+        this.forward = [0,0,-1];    // -z
+        this.right = [1,0,0];       // x
+        this.position = [0,0,0];
+    }
+    moveForward(distance) {
+        this.position = m4.addVectors( this.position, m4.scaleVector(this.forward, distance) );
+    }
+    moveRight(distance) {
+        this.position = m4.addVectors( this.position, m4.scaleVector(this.right, distance) );
+    }
+    getViewMatrix() {
+        var target = m4.addVectors(this.position, this.forward);
+        var transform = m4.lookAt(this.position, target, [0,1,0]);
+        return m4.inverse(transform);
+    }
+}
+
+class UECameraControl {
+    constructor(camera) {
+        this.camera = camera;
+        this.moveSpeed = 2;
+        this.rotateSpeed = 1;
+        this.isMoveForward = false;
+        this.isMoveBackward = false;
+        this.isMoveLeft = false;
+        this.isMoveRight = false;
+        this.yaw = 0;
+        this.pitch = 0;
+        this.maxPitch = 88;
+        this.isLocked = true;
+    }
+    update(delta_t) {
+        this.updateCameraPosition(delta_t);
+        this.updateCameraRotation(delta_t);
+    }
+    updateCameraPosition(delta_t){
+        var distance = delta_t * this.moveSpeed;
+        if (this.isMoveForward && !this.isMoveBackward) {
+            this.camera.moveForward(distance);
+        }
+        if (!this.isMoveForward && this.isMoveBackward) {
+            this.camera.moveForward(-distance);
+        }
+        if (this.isMoveLeft && !this.isMoveRight) {
+            this.camera.moveRight(-distance);
+        }
+        if (!this.isMoveLeft && this.isMoveRight) {
+            this.camera.moveRight(distance);
+        }
+    }
+    updateCameraRotation(delta_t){
+        // yaw, pitch to forward & right
+        var sin_pitch = Math.sin(degreeToRad(this.pitch));
+        var sin_yaw = Math.sin(degreeToRad(this.yaw));
+        var cos_yaw = Math.cos(degreeToRad(this.yaw));
+        var xz_len = Math.sqrt(1.0 - sin_pitch*sin_pitch);
+        var fwd = [-xz_len*sin_yaw, sin_pitch, -xz_len*cos_yaw];
+        var right = [cos_yaw, 0, -sin_yaw];
+        camera.forward = fwd;
+        camera.right = right;
+    }
+
+    onKeyDown ( event ) {
+        if (this.isLocked) return;
+        switch ( event.code ) {
+            case 'ArrowUp':
+            case 'KeyW': this.isMoveForward = true; break;
+            case 'ArrowLeft':
+            case 'KeyA': this.isMoveLeft = true; break;
+            case 'ArrowDown':
+            case 'KeyS': this.isMoveBackward = true; break;
+            case 'ArrowRight':
+            case 'KeyD': this.isMoveRight = true; break;
+        }
+    };
+    onKeyUp ( event ) {
+        switch ( event.code ) {
+            case 'ArrowUp':
+            case 'KeyW': this.isMoveForward = false; break;
+            case 'ArrowLeft':
+            case 'KeyA': this.isMoveLeft = false; break;
+            case 'ArrowDown':
+            case 'KeyS': this.isMoveBackward = false; break;
+            case 'ArrowRight':
+            case 'KeyD': this.isMoveRight = false; break;
+        }
+    };
+    onPointerMove( event ) {
+        if (this.isLocked) return;
+        const movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
+        const movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+
+        this.yaw -= movementX * 0.05 * this.rotateSpeed;
+        this.yaw = this.yaw % 360;
+        this.pitch -= movementY * 0.05 * this.rotateSpeed;
+        this.pitch = Math.max( -this.maxPitch, Math.min( this.maxPitch, this.pitch ) );
+    }
+    onPointerDown(event) {
+        if (event.button == 2) {
+            this.isLocked = false;
+        }
+    }
+    onPointerUp(event) {
+        if (event.button == 2) {
+            this.isLocked = true;
+        }
+    }
+    onContextmenu( event ) {
+        event.preventDefault();
+    }
+
+    registerEventHandlers(domElement) {
+        domElement.addEventListener( 'mouseup', this.onPointerUp.bind(this) );
+        domElement.addEventListener( 'mousemove', this.onPointerMove.bind(this) );
+        domElement.addEventListener( 'mousedown', this.onPointerDown.bind(this) );
+        domElement.addEventListener( 'contextmenu', this.onContextmenu.bind(this) );
+        window.addEventListener( 'keydown', this.onKeyDown.bind(this) );
+        window.addEventListener( 'keyup', this.onKeyUp.bind(this) );
+    }
+}
+
+const drawCanvas = document.getElementById('drawCanvas');
+const gl = drawCanvas.getContext("webgl2");
+
+var panoTexture = null;
+var textureWidth = 2048;
+var textureHeight = 1024;
+var colorProgramInfo = null;
+var planeBufferInfo = null;
+var cubeBufferInfo = null;
+var skyProgramInfo = null;
+var camera = null;
+var cameraControl = null;
+var useMipmap = true;
+var fixUv = true;
+var fixClampY = true;
+
+function hueToRgb(p, q, t) {
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1/6) return p + (q - p) * 6 * t;
+    if (t < 1/2) return q;
+    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+    return p;
+}
+function hslToRgb(h, s, l) {
+    let r, g, b;
+
+    if (s === 0) {
+        r = g = b = l; // achromatic
+    } else {
+        const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        const p = 2 * l - q;
+        r = hueToRgb(p, q, h + 1/3);
+        g = hueToRgb(p, q, h);
+        b = hueToRgb(p, q, h - 1/3);
+    }
+
+    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+}
+
+function initTexture() {
+    if (panoTexture != null) {
+        gl.deleteTexture(panoTexture);
+    }
+    panoTexture = gl.createTexture();
+    var heightData = new Uint8Array(textureWidth*textureHeight*4);
+    for (var i = 0; i < textureHeight; i++) {
+        for (var j = 0; j < textureWidth; j++) {
+            var pix_idx = i*textureWidth + j;
+            var h = j*1.0/textureWidth, s = i*1.0/textureWidth, v = 0.5;
+            var rgb = hslToRgb(h,s,v);
+            heightData[pix_idx*4 + 0] = rgb[0];
+            heightData[pix_idx*4 + 1] = rgb[1];
+            heightData[pix_idx*4 + 2] = rgb[2];
+            heightData[pix_idx*4 + 3] = 255;
+        }
+    }
+
+    fillTextureData(panoTexture, textureWidth, textureHeight, heightData, useMipmap);
+}
+
+function fillTextureData(texture, width, height, data, genMipmap) {
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, data);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+    // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    if (genMipmap) {
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+        gl.generateMipmap(gl.TEXTURE_2D);
+    } else {
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);        
+    }
+
+    gl.bindTexture(gl.TEXTURE_2D, null);
+}
+
+function initScene() {
+    gl.clearColor(0, 0, 0, 1);
+    gl.clearDepth(1.0);
+
+    initTexture();
+
+    planeBufferInfo = webglUtils.createBufferInfoFromArrays(gl, {
+        position: [
+            -1,  0,  1,  
+             1,  0,  1,  
+             1, 0,  -1,  
+            -1, 0,  -1
+        ],
+        indices: [0,1,2,2,3,0],
+
+    });
+    cubeBufferInfo = webglUtils.createBufferInfoFromArrays(gl, {
+        position: [
+            -1,  1,  1,  
+             1,  1,  1,  
+             1, -1,  1,  
+            -1, -1,  1, 
+             1,  1, -1,  
+            -1,  1, -1,  
+            -1, -1, -1,  
+             1, -1, -1, 
+        ],  
+        indices: [0,1,2,2,3,0,1,4,7,7,2,1,4,5,6,6,7,4,5,0,3,3,6,5,5,4,1,1,0,5,3,2,7,7,6,3],
+    });
+    colorProgramInfo = webglUtils.createProgramInfo(gl, ['color-vertex-shader', 'color-fragment-shader']);
+    skyProgramInfo = webglUtils.createProgramInfo(gl, ['sky-vertex-shader', 'sky-fragment-shader']);
+
+    camera = new Camera();
+    camera.position = [0,5,10];
+
+    cameraControl = new UECameraControl(camera);
+    cameraControl.registerEventHandlers(window);
+
+}
+
+function logicUpdate(delta_t) {
+    cameraControl.update(delta_t);
+
+}
+
+function render(delta_t) {
+    var viewMatrix = camera.getViewMatrix();
+    var fov = degreeToRad(45.);
+    var aspect = 1024./768.;
+    var near = 0.1;
+    var far = 100.0;
+    var projectionMatrix = m4.perspective(fov, aspect, near, far)
+    var worldMatrix =  m4.scaling(10,10,10);
+
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    // sky
+    gl.disable(gl.DEPTH_TEST);
+    gl.useProgram(skyProgramInfo.program);
+    webglUtils.setUniforms(skyProgramInfo, {
+        u_view: viewMatrix,
+        u_projection: projectionMatrix,
+        u_cameraPos: camera.position,
+        u_texture: panoTexture,
+        u_textureSize: [textureWidth, textureHeight, 1./textureWidth, 1./textureHeight],
+        u_fixUv: fixUv ? 1.0 : 0.0,
+    });
+    webglUtils.setBuffersAndAttributes(gl, skyProgramInfo, cubeBufferInfo);
+    webglUtils.drawBufferInfo(gl, cubeBufferInfo);
+    gl.enable(gl.DEPTH_TEST);
+
+
+    // model
+    gl.useProgram(colorProgramInfo.program);
+    webglUtils.setUniforms(colorProgramInfo, {
+        u_view: viewMatrix,
+        u_projection: projectionMatrix,
+        u_world: worldMatrix,
+    });
+    webglUtils.setBuffersAndAttributes(gl, colorProgramInfo, planeBufferInfo);
+    webglUtils.drawBufferInfo(gl, planeBufferInfo);
+
+}
+
+var last_time = null;
+
+function frameLoop() {
+    var current_time = Date.now();
+    var delta_t = 1./30.;
+    if (last_time != null) {
+        delta_t = (current_time - last_time)/1000.0;
+    }
+    logicUpdate(delta_t);
+    render(delta_t);
+    last_time = current_time;
+    window.requestAnimationFrame(frameLoop);
+}
+
+initScene();
+frameLoop();
+
+</script>
+
+</body>
+</html>

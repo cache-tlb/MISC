@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset=utf-8 />
+<title>test</title>
+  
+</head>
+<body>
+<canvas id="canvas"> </canvas>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+// settings 
+var size = 10;
+var spring = 0.5;
+var friction = 0.5;
+var split_num = 10;
+var diff = 3.125;
+
+// states
+var mouse_state = 0;    // 0: not pressed, 1: pressed
+var mouse_x = 0;
+var mouse_y = 0;
+
+// runtime status
+var x = 0;
+var y = 0;
+var vx = 0;
+var vy = 0;
+var v = 0;
+var r = 0;
+var f = false;
+
+var oldX = 0;
+var oldY = 0;
+
+function init() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+
+function IsMousePressed() {
+    return mouse_state == 1;
+}
+
+function draw1() {
+    if (IsMousePressed()) {
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(mouse_x, mouse_y, size, 0, 2 * Math.PI);
+        ctx.stroke();
+    }
+}
+
+function draw2() {
+    if (IsMousePressed()) {
+        if(!f) {
+            // Initialize coordinates
+            f = true;
+            x = mouse_x;
+            y = mouse_y;
+        }
+        vx += ( mouse_x - x ) * spring;
+        vy += ( mouse_y - y ) * spring;
+        vx *= friction;
+        vy *= friction;
+        
+        x += vx;
+        y += vy;
+
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, 2 * Math.PI);
+        ctx.stroke();
+    } else if(f) {
+        vx = vy = 0;
+        f = false;
+    }
+}
+
+function draw3() {
+    if(IsMousePressed()) {
+        if(!f) {
+            f = true;
+            x = mouse_x;
+            y = mouse_y;
+        }
+        vx += ( mouse_x - x ) * spring;
+        vy += ( mouse_y - y ) * spring;
+        vx *= friction;
+        vy *= friction;
+    
+        v += Math.sqrt( vx*vx + vy*vy ) - v;  // ADD
+        v *= 0.6;  // ADD
+        
+        r = size - v;  // ADD
+        
+        x += vx;
+        y += vy;
+        
+        if(r < 1) { r = 1; }  // ADD (Set the minimum value of r to 1)
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, 2 * Math.PI);
+        ctx.stroke();    
+    } else if(f) {
+        vx = vy = 0;
+        f = false;
+    }
+}
+
+function draw4() {
+    if(IsMousePressed()) {
+        if(!f) {
+            f = true;
+            x = mouse_x;
+            y = mouse_y;
+        }
+        vx += ( mouse_x - x ) * spring;
+        vy += ( mouse_y - y ) * spring;
+        vx *= friction;
+        vy *= friction;
+        
+        v += Math.sqrt( vx*vx + vy*vy ) - v;
+        v *= 0.6;
+        
+        r = size - v;
+        
+        oldX = x;  // ADD
+        oldY = y;  // ADD
+        x += vx;
+        y += vy;
+        
+        if(r < 1) { r = 1; }
+        console.log(x,y, oldX, oldY);
+        // AMEND: circle( x, y, r ) -> line( x, y, oldX, oldY )
+        ctx.beginPath();
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
+        ctx.lineWidth = r;  // AMEND: 3 -> r
+        ctx.moveTo(x, y);
+        ctx.lineTo(oldX, oldY);
+        ctx.stroke();
+    
+    } else if(f) {
+        vx = vy = 0;
+        f = false;
+    }
+}
+
+function draw5() {
+    if(IsMousePressed()) {
+        if(!f) {
+            f = true;
+            x = mouse_x;
+            y = mouse_y;
+        }
+        vx += ( mouse_x - x ) * spring;
+        vy += ( mouse_y - y ) * spring;
+        vx *= friction;
+        vy *= friction;
+        
+        v += Math.sqrt( vx*vx + vy*vy ) - v;
+        v *= 0.6;
+        
+        oldR = r;  // ADD
+        r = size - v;
+
+            for( var i = 0; i < split_num; ++i ) {  // ADD
+                oldX = x;
+                oldY = y;
+                x += vx/split_num;  // AMEND: vx -> vx/split_num
+                y += vy/split_num;  // AMEND: vy -> vy/split_num
+                oldR += (r-oldR)/split_num;  // ADD
+                if(oldR < 1) { oldR = 1; }  // AMEND: r -> oldR
+                ctx.lineWidth = oldR;   // AMEND: r -> oldR
+                // line( x, y, oldX, oldY );
+                ctx.beginPath();
+                ctx.lineJoin = "round";
+                ctx.lineCap = "round";
+                ctx.lineWidth = r;  // AMEND: 3 -> r
+                ctx.moveTo(x, y);
+                ctx.lineTo(oldX, oldY);
+                ctx.stroke();
+            }  // ADD
+            
+    } else if(f) {
+        vx = vy = 0;
+        f = false;
+    }
+}
+
+function draw6() {
+    if(IsMousePressed()) {
+        if(!f) {
+            f = true;
+            x = mouse_x;
+            y = mouse_y;
+        }
+        vx += ( mouse_x - x ) * spring;
+        vy += ( mouse_y - y ) * spring;
+        vx *= friction;
+        vy *= friction;
+        
+        v += Math.sqrt( vx*vx + vy*vy ) - v;
+        v *= 0.6;
+        
+        oldR = r;
+        r = size - v;
+
+        for( let i = 0; i < split_num; ++i ) {
+            oldX = x;
+            oldY = y;
+            x += vx / split_num;
+            y += vy / split_num;
+            oldR += ( r - oldR ) / split_num;
+            if(oldR < 1) { oldR = 1; }
+            // strokeWeight( oldR+diff );  // AMEND: oldR -> oldR+diff
+            ctx.lineWidth = oldR+diff;
+            // line( x, y, oldX, oldY );
+            ctx.beginPath();
+            ctx.lineJoin = "round";
+            ctx.lineCap = "round";
+            ctx.moveTo(x, y);
+            ctx.lineTo(oldX, oldY);
+            ctx.stroke();
+
+            // strokeWeight( oldR );  // ADD
+            ctx.lineWidth = oldR;
+            // line( x+diff*2, y+diff*2, oldX+diff*2, oldY+diff*2 );  // ADD
+            // line( x-diff, y-diff, oldX-diff, oldY-diff );  // ADD
+            ctx.beginPath();
+            ctx.lineJoin = "round";
+            ctx.lineCap = "round";
+            ctx.moveTo(x+diff*2, y+diff*2);
+            ctx.lineTo(oldX+diff*2, oldY+diff*2);
+            ctx.moveTo(x-diff, y-diff);
+            ctx.lineTo(oldX-diff, oldY-diff);
+            ctx.stroke();
+        }
+    } else if(f) {
+        vx = vy = 0;
+        f = false;
+    }
+}
+
+init();
+
+function render() {
+    draw6();
+    window.requestAnimationFrame(render);
+}
+window.requestAnimationFrame(render);
+
+canvas.addEventListener('mousedown', function (event) {
+    mouse_state = 1;
+    mouse_x = event.clientX;
+    mouse_y = event.clientY;
+}, false);
+canvas.addEventListener('mousemove', function (event) {
+    mouse_x = event.clientX;
+    mouse_y = event.clientY;
+}, false);
+canvas.addEventListener('mouseup', function (event) {
+    mouse_state = 0;
+    mouse_x = event.clientX;
+    mouse_y = event.clientY;
+}, false);
+function getTouchPos(canvasDom, touchEvent) {
+  var rect = canvasDom.getBoundingClientRect();
+  return {
+    x: touchEvent.touches[0].clientX - rect.left,
+    y: touchEvent.touches[0].clientY - rect.top
+  };
+}
+canvas.addEventListener("touchstart", function (e) {
+    mousePos = getTouchPos(canvas, e);
+    var touch = e.touches[0];
+    var mouseEvent = new MouseEvent("mousedown", {
+        clientX: touch.clientX,
+        clientY: touch.clientY
+    });
+  canvas.dispatchEvent(mouseEvent);
+  event.preventDefault();
+}, false);
+canvas.addEventListener("touchend", function (e) {
+    var mouseEvent = new MouseEvent("mouseup", {});
+    canvas.dispatchEvent(mouseEvent);
+    event.preventDefault();
+}, false);
+canvas.addEventListener("touchmove", function (e) {
+    var touch = e.touches[0];
+    var mouseEvent = new MouseEvent("mousemove", {
+        clientX: touch.clientX,
+        clientY: touch.clientY
+    });
+    canvas.dispatchEvent(mouseEvent);
+    event.preventDefault();
+}, false);
+
+</script>
+  
+</body>
+</html>

@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html>
+<head> <meta charset=utf-8 />
+<title>test</title>
+<script src='./m4.js'></script>
+<script src='./webgl-utils.js'></script>
+</head>
+
+<body>
+<canvas id="drawCanvas" width="1024" height="768"> </canvas>
+
+<script id="color-vertex-shader" type="x-shader/x-vertex">
+attribute vec3 a_position;
+
+uniform mat4 u_projection;
+uniform mat4 u_view;
+uniform mat4 u_world;
+
+varying vec3 v_local_pos;
+
+void main() {
+    vec3 pos = a_position;
+    v_local_pos = pos;
+    gl_Position = u_projection * u_view * u_world * vec4(pos, 1.0);
+}
+</script>
+
+<script id="color-fragment-shader" type="x-shader/x-fragment">
+precision highp float;
+uniform samplerCube u_texture;
+
+varying vec3 v_local_pos;
+
+#define PI 3.14159265359
+
+vec3 get_axis_val(int axis, float s)
+{
+    vec3 ret = vec3(0.0);
+    if (axis == 0) ret.x = 1.0;
+    else if (axis == 1) ret.y = 1.0;
+    else if (axis == 2) ret.z = 1.0;
+    ret = (0.5 - 0.5*s)*vec3(1.0, 1.0, 1.0) + s*ret;
+    return ret;
+}
+
+float solid_angle(vec3 p1, vec3 p2, vec3 p3)
+{
+    vec3 n1 = normalize(cross(p2, p3));
+    vec3 n2 = normalize(cross(p3, p1));
+    vec3 n3 = normalize(cross(p1, p2));
+    float a1 = acos(-dot(n2, n3));
+    float a2 = acos(-dot(n3, n1));
+    float a3 = acos(-dot(n1, n2));
+    return a1+a2+a3 - PI;
+}
+
+float area(vec3 p1, vec3 p2, vec3 p3)
+{
+    vec3 v1 = p2 - p1, v2 = p3 - p1;
+    // return 0.5*length(cross(v1, v2));
+    return 0.5*sqrt(dot(v1,v1)*dot(v2,v2) - dot(v1,v2)*dot(v1,v2));
+}
+
+vec4 cubemapInterpolation(vec3 dir_normalized)
+{
+    // color1 <- directly sample cubemap
+    vec3 color1 = textureCube(u_texture, dir_normalized).xyz;
+    // return textureCube(u_texture, dir_normalized);
+
+    // color2 <- face color
+    vec3 sign_dir = sign(dir_normalized);
+    vec3 ret = vec3(0.0);
+    vec3 abs_dir = abs(dir_normalized);
+    float max_asix_val = max(max(abs_dir.x, abs_dir.y), abs_dir.z);
+    int axis = -1;
+    float s = 0.0;
+    if (abs_dir.x == max_asix_val) {
+        axis = 0;
+        s = sign_dir.x;
+    } else if (abs_dir.y == max_asix_val) {
+        axis = 1;
+        s = sign_dir.y;
+    } else if (abs_dir.z == max_asix_val) {
+        axis = 2;
+        s = sign_dir.z;
+    }
+    vec3 color2 = get_axis_val(axis, s);
+
+    // color3 <- spherical barycenteric
+    vec3 axis_x = vec3(1.0, 0.0, 0.0) * sign_dir;
+    vec3 axis_y = vec3(0.0, 1.0, 0.0) * sign_dir;
+    vec3 axis_z = vec3(0.0, 0.0, 1.0) * sign_dir;
+    float sa = solid_angle(axis_x, axis_y, axis_z);
+    float sa1 = solid_angle(dir_normalized, axis_y, axis_z);
+    float sa2 = solid_angle(axis_x, dir_normalized, axis_z);
+    float sa3 = solid_angle(axis_x, axis_y, dir_normalized);
+
+    vec3 cx = get_axis_val(0, sign_dir.x);
+    vec3 cy = get_axis_val(1, sign_dir.y);
+    vec3 cz = get_axis_val(2, sign_dir.z);
+    vec3 f = vec3(sa1, sa2, sa3) / sa;
+    vec3 color3 = f.x * cx + f.y*cy + f.z*cz;
+
+    // color4 <- project to octahedron
+    float t = 1.0 / dot(vec3(1.0,1.0,1.0), abs(dir_normalized));
+    vec3 p = t*dir_normalized;
+    float a = area(axis_x, axis_y, axis_z);
+    float a1 = area(p, axis_y, axis_z);
+    float a2 = area(axis_x, p, axis_z);
+    float a3 = area(axis_x, axis_y, p);
+
+    vec3 ff = vec3(a1, a2, a3) / a;
+    vec3 color4 = ff.x * cx + ff.y*cy + ff.z*cz;
+
+    // color5 <- bilinear interpolation on one face
+    vec3 color5 = vec3(0.);
+    {
+        vec3 uv_tmp = abs_dir / max_asix_val;
+        vec3 c1 = color2;
+        vec3 c2,c3;
+        vec2 uv;
+        if (axis == 0) {
+            c2 = cy;
+            c3 = cz;
+            uv = uv_tmp.yz;
+        } else if (axis == 1) {
+            c2 = cz;
+            c3 = cx;
+            uv = uv_tmp.zx;
+        } else if (axis == 2) {
+            c2 = cx;
+            c3 = cy;
+            uv = uv_tmp.xy;
+        }
+        /*vec3 A = c1, B = (c1+c2)*0.5, C = (c1+c3)*0.5, D = (c1+c2+c3)/3.0;
+        float u = uv.x, v = uv.y;*/
+        vec3 A = c1, B = c2, C = c3, D = (c1+c2+c3)/3.0;
+        float u = uv.x*0.5, v = uv.y*0.5;
+        color5 = A*(1.0-u)*(1.0-v) + B*u*(1.0-v) + C*(1.0-u)*v + D*u*v;
+        // color5 = vec3(uv, 0.0);
+    }
+    // return vec4(color5, 1.0);
+
+    return vec4(abs(color5 - color1)*10.0, 1.0);
+}
+
+void main() {
+    // gl_FragColor = vec4(normalize(v_local_pos), 1.0);
+    gl_FragColor = cubemapInterpolation(normalize(v_local_pos));
+}
+</script>
+
+
+<script id="sky-vertex-shader" type="x-shader/x-vertex">
+attribute vec3 a_position;
+
+uniform mat4 u_projection;
+uniform mat4 u_view;
+
+varying vec3 v_texcoord;
+
+void main() {
+    vec3 positionVS = mat3(u_view) * (a_position);
+    gl_Position = u_projection * vec4(positionVS, 1.0);
+    // gl_Position = u_projection * u_view * u_world * vec4(a_position, 1.0);
+    v_texcoord = a_position;
+}
+</script>
+<script id="sky-fragment-shader" type="x-shader/x-fragment">
+precision mediump float;
+varying vec3 v_texcoord;
+
+#define Gamma 1.4
+
+#define Rayleigh 1.
+#define Mie 1.
+#define RayleighAtt 1.
+#define MieAtt 1.2
+const float g = -0.93;
+
+#if 1
+vec3 _betaR = vec3(1.95e-2, 1.1e-1, 2.94e-1); 
+vec3 _betaM = vec3(4e-2, 4e-2, 4e-2);
+#else
+vec3 _betaR = vec3(6.95e-2, 1.18e-1, 2.44e-1); 
+vec3 _betaM = vec3(4e-2, 4e-2, 4e-2);
+#endif
+
+vec3 calcAtmosphericScattering( float sR, float sM, out vec3 extinction, float cosine, float g1)
+{
+    extinction = exp(-(_betaR * sR + _betaM * sM));
+
+    // scattering phase
+    float g2 = g1 * g1;
+    float fcos2 = cosine * cosine;
+    float miePhase = Mie * pow(1. + g2 + 2. * g1 * cosine, -1.5) * (1. - g2) / (2. + g2);
+    //g = 0;
+    float rayleighPhase = Rayleigh;
+
+    vec3 inScatter = (1. + fcos2) * vec3(rayleighPhase + _betaM / _betaR * miePhase);
+    
+    return inScatter;
+}
+vec3 ACESFilm( vec3 x ) {
+    float tA = 2.51;
+    float tB = 0.03;
+    float tC = 2.43;
+    float tD = 0.59;
+    float tE = 0.14;
+    return clamp((x*(tA*x+tB))/(x*(tC*x+tD)+tE),0.0,1.0);
+}
+vec3 getSkyColor(in vec3 rd, vec3 light1) {
+    float sundot = clamp(dot(rd,light1),0.0,1.0);
+    
+    vec3 extinction;
+
+    // optical depth -> zenithAngle
+    float zenithAngle = max(0., rd.y); //abs( rd.y);
+    float sR = RayleighAtt / zenithAngle ;
+    float sM = MieAtt / zenithAngle ;
+
+    vec3 inScatter = calcAtmosphericScattering(sR, sM, extinction, sundot, g);
+    vec3 skyCol = inScatter*(1.0-extinction);
+
+    // sky  
+    vec3 col = skyCol; // *vec3(1.6,1.4,1.0)
+    // sun
+    col += 0.47*vec3(1.6,1.4,1.0)*pow( sundot, 350.0 ) * extinction;
+    // sun haze
+    col += 0.4*vec3(0.8,0.9,1.0)*pow( sundot, 2.0 ) * extinction;
+    
+    // sun scatter
+    col += 0.3*vec3(1.0,0.7,0.3)*pow( sundot, 8.0 );
+
+    // gamma
+    //col = sqrt(col);
+            
+    col = ACESFilm(col);
+    col = pow(col, vec3(Gamma));
+    return col;
+}
+void main() {
+    vec3 rd = normalize(v_texcoord.xyz);
+    vec3 light_dir = vec3(1.0, 10.0, 1.0);
+    vec3 color = getSkyColor(rd, normalize(light_dir));
+    gl_FragColor = vec4(color, 1.0);
+}
+</script>
+
+
+<script>
+function degreeToRad(degree) { return degree*Math.PI/180.0; }
+
+class Camera {
+    constructor() {
+        this.forward = [0,0,-1];    // -z
+        this.right = [1,0,0];       // x
+        this.position = [0,0,0];
+    }
+    moveForward(distance) {
+        this.position = m4.addVectors( this.position, m4.scaleVector(this.forward, distance) );
+    }
+    moveRight(distance) {
+        this.position = m4.addVectors( this.position, m4.scaleVector(this.right, distance) );
+    }
+    getViewMatrix() {
+        var target = m4.addVectors(this.position, this.forward);
+        var transform = m4.lookAt(this.position, target, [0,1,0]);
+        return m4.inverse(transform);
+    }
+}
+
+class UECameraControl {
+    constructor(camera) {
+        this.camera = camera;
+        this.moveSpeed = 2;
+        this.rotateSpeed = 1;
+        this.isMoveForward = false;
+        this.isMoveBackward = false;
+        this.isMoveLeft = false;
+        this.isMoveRight = false;
+        this.yaw = 0;
+        this.pitch = 0;
+        this.maxPitch = 88;
+        this.isLocked = true;
+    }
+    update(delta_t) {
+        this.updateCameraPosition(delta_t);
+        this.updateCameraRotation(delta_t);
+    }
+    updateCameraPosition(delta_t){
+        var distance = delta_t * this.moveSpeed;
+        if (this.isMoveForward && !this.isMoveBackward) {
+            this.camera.moveForward(distance);
+        }
+        if (!this.isMoveForward && this.isMoveBackward) {
+            this.camera.moveForward(-distance);
+        }
+        if (this.isMoveLeft && !this.isMoveRight) {
+            this.camera.moveRight(-distance);
+        }
+        if (!this.isMoveLeft && this.isMoveRight) {
+            this.camera.moveRight(distance);
+        }
+    }
+    updateCameraRotation(delta_t){
+        // yaw, pitch to forward & right
+        var sin_pitch = Math.sin(degreeToRad(this.pitch));
+        var sin_yaw = Math.sin(degreeToRad(this.yaw));
+        var cos_yaw = Math.cos(degreeToRad(this.yaw));
+        var xz_len = Math.sqrt(1.0 - sin_pitch*sin_pitch);
+        var fwd = [-xz_len*sin_yaw, sin_pitch, -xz_len*cos_yaw];
+        var right = [cos_yaw, 0, -sin_yaw];
+        camera.forward = fwd;
+        camera.right = right;
+    }
+
+    onKeyDown ( event ) {
+        if (this.isLocked) return;
+        switch ( event.code ) {
+            case 'ArrowUp':
+            case 'KeyW': this.isMoveForward = true; break;
+            case 'ArrowLeft':
+            case 'KeyA': this.isMoveLeft = true; break;
+            case 'ArrowDown':
+            case 'KeyS': this.isMoveBackward = true; break;
+            case 'ArrowRight':
+            case 'KeyD': this.isMoveRight = true; break;
+        }
+    };
+    onKeyUp ( event ) {
+        switch ( event.code ) {
+            case 'ArrowUp':
+            case 'KeyW': this.isMoveForward = false; break;
+            case 'ArrowLeft':
+            case 'KeyA': this.isMoveLeft = false; break;
+            case 'ArrowDown':
+            case 'KeyS': this.isMoveBackward = false; break;
+            case 'ArrowRight':
+            case 'KeyD': this.isMoveRight = false; break;
+        }
+    };
+    onPointerMove( event ) {
+        if (this.isLocked) return;
+        const movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
+        const movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+
+        this.yaw -= movementX * 0.05 * this.rotateSpeed;
+        this.yaw = this.yaw % 360;
+        this.pitch -= movementY * 0.05 * this.rotateSpeed;
+        this.pitch = Math.max( -this.maxPitch, Math.min( this.maxPitch, this.pitch ) );
+    }
+    onPointerDown(event) {
+        if (event.button == 2) {
+            this.isLocked = false;
+        }
+    }
+    onPointerUp(event) {
+        if (event.button == 2) {
+            this.isLocked = true;
+        }
+    }
+    onContextmenu( event ) {
+        event.preventDefault();
+    }
+
+    registerEventHandlers(domElement) {
+        domElement.addEventListener( 'mouseup', this.onPointerUp.bind(this) );
+        domElement.addEventListener( 'mousemove', this.onPointerMove.bind(this) );
+        domElement.addEventListener( 'mousedown', this.onPointerDown.bind(this) );
+        domElement.addEventListener( 'contextmenu', this.onContextmenu.bind(this) );
+        window.addEventListener( 'keydown', this.onKeyDown.bind(this) );
+        window.addEventListener( 'keyup', this.onKeyUp.bind(this) );
+    }
+}
+
+const drawCanvas = document.getElementById('drawCanvas');
+const gl = drawCanvas.getContext("webgl2");
+
+var skycubeBufferInfo = null;
+var skyProgramInfo = null;
+var camera = null;
+var cameraControl = null;
+
+var modelBufferInfo = null;
+var colorProgramInfo = null;
+
+var current_time = null;
+
+var texture = null;
+
+function initScene() {
+    gl.clearColor(0, 0, 0, 0);
+    gl.clearDepth(1.0);
+
+    skycubeBufferInfo = webglUtils.createBufferInfoFromArrays(gl, {
+        position: [
+            -1,  1,  1,  
+             1,  1,  1,  
+             1, -1,  1,  
+            -1, -1,  1, 
+             1,  1, -1,  
+            -1,  1, -1,  
+            -1, -1, -1,  
+             1, -1, -1, 
+        ],  
+        indices: [0,1,2,2,3,0,1,4,7,7,2,1,4,5,6,6,7,4,5,0,3,3,6,5,5,4,1,1,0,5,3,2,7,7,6,3],
+    });
+    modelBufferInfo = webglUtils.createBufferInfoFromArrays(gl, {
+        position: [
+            0,0,0,  
+            0,1,0,  
+            0,0,1,  
+            0,1,1,  
+            1,0,0,  
+            1,1,0,  
+            1,0,1,  
+            1,1,1,
+        ],  
+        indices: [
+            0,1,3,
+            0,3,2,
+            2,3,7,
+            2,7,6,
+            6,7,5,
+            6,5,4,
+            4,5,1,
+            4,1,0,
+            7,3,1,
+            7,1,5,
+        ],
+    });
+
+    colorProgramInfo = webglUtils.createProgramInfo(gl, ['color-vertex-shader', 'color-fragment-shader']);
+    skyProgramInfo = webglUtils.createProgramInfo(gl, ['sky-vertex-shader', 'sky-fragment-shader']);
+
+    camera = new Camera();
+    camera.position = [0.5,0.5,3];
+
+    cameraControl = new UECameraControl(camera);
+    cameraControl.registerEventHandlers(window);
+
+    {
+        texture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_CUBE_MAP, texture);
+
+        const faceInfos = [
+            { target: gl.TEXTURE_CUBE_MAP_POSITIVE_X, faceColor: [255,0,0]},
+            { target: gl.TEXTURE_CUBE_MAP_NEGATIVE_X, faceColor: [0,255,255]},
+            { target: gl.TEXTURE_CUBE_MAP_POSITIVE_Y, faceColor: [0,255,0]},
+            { target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Y, faceColor: [255,0,255]},
+            { target: gl.TEXTURE_CUBE_MAP_POSITIVE_Z, faceColor: [0,0,255]},
+            { target: gl.TEXTURE_CUBE_MAP_NEGATIVE_Z, faceColor: [255,255,0]},
+        ];
+        faceInfos.forEach((faceInfo) => {
+            const {target, faceColor} = faceInfo;            
+            const level = 0;
+            const internalFormat = gl.RGBA;
+            const format = gl.RGBA;
+            const type = gl.UNSIGNED_BYTE;
+            const width = 1;
+            const height = 1;
+            var source = new Uint8Array(width*height*4);
+            for (var i = 0; i < height; i++) {
+                for (var j = 0; j < width; j++) {
+                    source[i*width*4 + j*4 + 0] = faceColor[0];
+                    source[i*width*4 + j*4 + 1] = faceColor[1];
+                    source[i*width*4 + j*4 + 2] = faceColor[2];
+                    source[i*width*4 + j*4 + 3] = 255;
+                }
+            }
+            gl.texImage2D(target, level, internalFormat, width, height, 0, format, type, source);
+            // gl.texImage2D(target, 1, internalFormat, width/2, height/2, 0, format, type, source);
+        });
+        // gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_NEAREST);
+        // gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+    }
+    
+}
+
+function logicUpdate(delta_t) {
+    cameraControl.update(delta_t);
+}
+
+function postLogicUpdate(delta_t) {
+}
+
+function render(delta_t) {
+    var viewMatrix = camera.getViewMatrix();
+    var fov = degreeToRad(45.);
+    var aspect = 1024./768.;
+    var near = 0.1;
+    var far = 100.0;
+    var projectionMatrix = m4.perspective(fov, aspect, near, far)
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    // sky
+    gl.disable(gl.DEPTH_TEST);
+    gl.useProgram(skyProgramInfo.program);
+    webglUtils.setUniforms(skyProgramInfo, {
+        u_view: viewMatrix,
+        u_projection: projectionMatrix,
+    });
+    webglUtils.setBuffersAndAttributes(gl, skyProgramInfo, skycubeBufferInfo);
+    webglUtils.drawBufferInfo(gl, skycubeBufferInfo);
+    gl.enable(gl.DEPTH_TEST);
+
+    // model
+    gl.useProgram(colorProgramInfo.program);
+    // ball
+    webglUtils.setUniforms(colorProgramInfo, {
+        u_view: viewMatrix,
+        u_projection: projectionMatrix,
+    });
+    var worldMatrix = m4.identity();
+    webglUtils.setUniforms(colorProgramInfo,{
+        u_world: worldMatrix,
+        u_texture: texture
+    });
+    webglUtils.setBuffersAndAttributes(gl, colorProgramInfo, skycubeBufferInfo);
+    webglUtils.drawBufferInfo(gl, skycubeBufferInfo);
+
+}
+
+var last_time = null;
+
+function frameLoop() {
+    current_time = Date.now();
+    var delta_t = 1./30.;
+    if (last_time != null) {
+        delta_t = (current_time - last_time)/1000.0;
+    }
+    logicUpdate(delta_t);
+    render(delta_t);
+    postLogicUpdate(delta_t);
+    last_time = current_time;
+    window.requestAnimationFrame(frameLoop);
+}
+
+initScene();
+frameLoop();
+
+</script>
+
+</body>
+</html>

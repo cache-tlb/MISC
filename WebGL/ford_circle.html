@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset=utf-8 />
+<title>test</title>
+  
+</head>
+<body>
+    <br/>
+
+<canvas id="canvas" style="border:1px solid #d3d3d3;"> </canvas>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+// states
+var mouse_state = 0;    // 0: not pressed, 1: pressed
+var mouse_x = 0;
+var mouse_y = 0;
+
+var press_x = 0;
+var press_y = 0;
+var old_plot_center_x = 0;
+var old_plot_center_y = 0;
+
+function init() {
+    canvas.width = window.innerWidth*0.75;
+    canvas.height = window.innerHeight*0.75;
+}
+
+function IsMousePressed() {
+    return mouse_state == 1;
+}
+
+
+init();
+
+var offset_x = canvas.width*0.5;
+var offset_y = canvas.height*0.5;
+var scale = Math.min(canvas.width, canvas.height)*0.5;
+
+var plot_range = 0.5;
+var plot_center_x = 0.25;
+var plot_center_y = 0.25;
+
+function plot_size_to_canvas_size() {
+    return scale / plot_range;
+}
+
+function canvas_size_to_plot_size() {
+    return plot_range / scale;
+}
+
+function plot_pos_to_canvas_pos(x,y) {
+    return {x: (x - plot_center_x) / plot_range *scale + offset_x, y: ((y - plot_center_y) / plot_range * scale + offset_y)}
+}
+
+
+function gcd(m,n) {
+    if (n % m == 0) return m;
+    else return gcd( n % m, m);
+}
+
+function draw_circle(x,y,r) {
+    var center_in_canvas = plot_pos_to_canvas_pos(x,y);
+    var radius_in_canvas = r * plot_size_to_canvas_size();
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(center_in_canvas.x, canvas.height - center_in_canvas.y, radius_in_canvas, 0, 2 * Math.PI);
+    ctx.stroke();
+}
+
+function draw_text(text, canvas_x, canvas_y) {
+    ctx.fillText(text, canvas_x, canvas_y);
+}
+
+function get_text_dims(text) {
+    var metrics = ctx.measureText(text);
+    return {width: metrics.width, height: metrics.actualBoundingBoxAscent - metrics.actualBoundingBoxDescent };
+}
+
+function draw_fraction_text(numerator_text, denominator_text, text_center_x, text_center_y, font_size, font_name, max_size_plot) {
+    if (font_size < 10) return;
+
+    ctx.font = '' + font_size + 'px ' + font_name;
+
+    var max_size_canvas = max_size_plot * plot_size_to_canvas_size();
+    var denominator_dims = get_text_dims(denominator_text);
+    var numerator_dims = get_text_dims(numerator_text);
+    var seperator_height = font_size*0.2; 
+    var box_width = Math.max(denominator_dims.width, numerator_dims.width);
+    var box_height = denominator_dims.height + numerator_dims.height + seperator_height;
+    if (Math.max(box_height, box_width) > max_size_canvas) return;
+
+    var center_pos = plot_pos_to_canvas_pos(text_center_x, text_center_y);
+    draw_text(numerator_text, center_pos.x, canvas.height - (center_pos.y + seperator_height/2 + font_size/2));
+    draw_text(denominator_text, center_pos.x, canvas.height - (center_pos.y - seperator_height/2 - font_size/2));
+
+    var seperator_text = '─'.repeat(Math.max(denominator_text.length, numerator_text.length));
+    draw_text(seperator_text, center_pos.x, canvas.height - (center_pos.y));    
+    /*ctx.beginPath();
+    ctx.moveTo(center_pos.x - box_width / 2, canvas.height - center_pos.y);
+    ctx.lineTo(center_pos.x + box_width / 2, canvas.height - center_pos.y);
+    ctx.stroke();*/
+}
+
+function draw() {
+    var draw_count = 0;
+    var iterate_count = 0;
+    draw_circle(0, 0.5, 0.5);
+    draw_circle(1, 0.5, 0.5);
+    for (var n = 2; n < 100000; n++) {
+        var r = 0.5 / (n*n);
+        var radius_in_canvas = r * plot_size_to_canvas_size();
+        if (radius_in_canvas < 1) break;
+        // var font_size = Math.round(canvas.height * r / 16) / plot_range;
+        var font_size = 25;
+        var left = Math.max(1, Math.floor( (plot_center_x - plot_range - r) * n));
+        var right = Math.min(n, Math.ceil((plot_center_x + plot_range + r) * n ));
+        for (var m = left; m <= right; m++) {
+            iterate_count ++;
+            if (gcd(n,m) != 1) continue;
+            var x = (1.0*m) / n;
+            draw_count++;
+            draw_circle(x, r, r); 
+            draw_fraction_text('' + m, ''+ n, x, r, font_size, 'consolas', r);
+        }
+    }
+    // console.log(draw_count, iterate_count);
+    // x-axis
+    var line_start = plot_pos_to_canvas_pos(-1000,0);
+    var line_end = plot_pos_to_canvas_pos(1000,0);
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(line_start.x, canvas.height - line_start.y);
+    ctx.lineTo(line_end.x, canvas.height - line_end.y);
+    ctx.stroke();
+}
+
+function zoom_in() {
+    plot_range /= 2;
+}
+
+function zoom_out() {
+    plot_range *= 2;
+}
+
+function render() {
+    ctx.clearRect(0,0,canvas.width, canvas.height);
+    ctx.lineWidth = 2;
+    ctx.font = "20px consolas";
+    ctx.textAlign = 'center';
+    ctx.textBase = 'middle';
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    // ctx.translate(0.5, 0.5);
+    draw();
+    window.requestAnimationFrame(render);
+}
+window.requestAnimationFrame(render);
+
+function move_plot() {
+    if (mouse_state == 1) {
+        var dx = mouse_x - press_x;
+        var dy = mouse_y - press_y;
+        plot_center_x = old_plot_center_x - dx * plot_range / scale;
+        plot_center_y = old_plot_center_y + dy * plot_range / scale;
+    }
+}
+
+canvas.addEventListener('mousedown', function (event) {
+    mouse_state = 1;
+    mouse_x = event.clientX;
+    mouse_y = event.clientY;
+    press_x = mouse_x;
+    press_y = mouse_y;
+    old_plot_center_x = plot_center_x;
+    old_plot_center_y = plot_center_y;
+}, false);
+canvas.addEventListener('mousemove', function (event) {
+    mouse_x = event.clientX;
+    mouse_y = event.clientY;
+    move_plot();
+}, false);
+canvas.addEventListener('mouseup', function (event) {
+    mouse_state = 0;
+    mouse_x = event.clientX;
+    mouse_y = event.clientY;
+}, false);
+function getTouchPos(canvasDom, touchEvent) {
+  var rect = canvasDom.getBoundingClientRect();
+  return {
+    x: touchEvent.touches[0].clientX - rect.left,
+    y: touchEvent.touches[0].clientY - rect.top
+  };
+}
+canvas.addEventListener("touchstart", function (e) {
+    mousePos = getTouchPos(canvas, e);
+    var touch = e.touches[0];
+    var mouseEvent = new MouseEvent("mousedown", {
+        clientX: touch.clientX,
+        clientY: touch.clientY
+    });
+  canvas.dispatchEvent(mouseEvent);
+  event.preventDefault();
+}, false);
+canvas.addEventListener("touchend", function (e) {
+    var mouseEvent = new MouseEvent("mouseup", {});
+    canvas.dispatchEvent(mouseEvent);
+    event.preventDefault();
+}, false);
+canvas.addEventListener("touchmove", function (e) {
+    var touch = e.touches[0];
+    var mouseEvent = new MouseEvent("mousemove", {
+        clientX: touch.clientX,
+        clientY: touch.clientY
+    });
+    canvas.dispatchEvent(mouseEvent);
+    event.preventDefault();
+}, false);
+
+</script>
+<input value="zoom in" type="button" onclick="zoom_in()" />
+<input value="zoom out" type="button" onclick="zoom_out()" />
+</body>
+</html>
