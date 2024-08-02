@@ -1791,6 +1791,86 @@ $$r = \frac{a\cdot W_A}{W_P}, \qquad s = \frac{b\cdot W_B}{W_P},\qquad t = \frac
 \newpage
 %------------------------------------------------------------------------------%
 
+球极投影是将球面上一点映射到平面的一种投影方式, 设单位球面的球心在原点, $N=(0,0,1)$ 是北极点, 球面上任一点 $P$ 与 $N$ 连线, 与平面 $z=-1$ 交于一点 $Q$, 则 $Q$ 就是 $P$ 的球极投影. 球面上的一个圆(不一定是大圆) 经过球极投影得到的仍然是一个圆. 下面是一种代数的证明方法.
+\begin{figure*}[htbp]
+\centering
+%\tikzset{MyPersp/.style={scale=2,x={(0.95cm,-0.3122cm)}, y={(0cm,1cm)},z={(-0.95cm,-0.3122cm)}}}
+%\begin{tikzpicture}[MyPersp,font=\large]
+\tdplotsetmaincoords{60}{145}
+\begin{tikzpicture}[scale=3.2,tdplot_main_coords]
+%\shade[ball color = lightgray,opacity = 0.5] (0,0,0) circle (1cm);
+\draw[line width=1pt] (0,0,0) circle (1cm);
+\begin{scope}[canvas is xy plane at z=-1]
+   \draw[blue] (0,0) circle (2cm);
+\end{scope}
+%\foreach \x in {-2,-0.75,...,2}
+%    \foreach \y in {-2,-0.75,...,2}
+%    {
+%        \draw[gray] (\x,-2,-1) -- (\x,2,-1);
+%        \draw[gray] (-2,\y,-1) -- (2,\y,-1);
+%    }
+\begin{scope}[canvas is zx plane at y=0]
+   \draw[red,dashed] (0,0) circle (1cm);
+   \draw[dashed] (-1,0) -- (1,0);
+\end{scope}
+\begin{scope}[canvas is xy plane at z=0]
+   \draw[dashed,blue] (0,0) circle (1cm);
+  \draw[dashed] (0,-1) -- (0,1);
+  \draw[dashed] (-1,0) -- (1,0);
+\end{scope}
+\begin{scope}[canvas is zy plane at x=0]
+  \draw[green,dashed] (0,0) circle (1cm);
+\end{scope}
+\coordinate (O) at (0,0,0);
+\coordinate (N) at (0,0,1);
+\fill[fill=black,draw=black,thick,fill opacity=1] (0,0,0) circle (0.6pt);
+\fill[fill=black,draw=black,thick,fill opacity=1] (0,0,1) circle (0.3pt) node[left]{$N$};
+\fill[fill=black,draw=black,thick,fill opacity=1] (0,1,0) circle (0.3pt);
+\fill[fill=black,draw=black,thick,fill opacity=1] (1,0,0) circle (0.3pt);
+%\draw[dashed] (N)--(0,-2,-1) ;
+\draw[green,dashed] (N)--(0,2,-1) ;
+%\draw[dashed] (N)--(-2,0,-1) ;
+\draw[red,dashed] (N)--(2,0,-1) ;
+\draw[green,dashed] (0,-2,-1)--(0,2,-1) ;
+\draw[red,dashed] (-2,0,-1)--(2,0,-1) ;
+\fill[fill=black,draw=black,thick,fill opacity=1] (0,2,-1,-1) circle (0.3pt);
+\fill[fill=black,draw=black,thick,fill opacity=1] (0,-2,-1) circle (0.3pt);
+\fill[fill=black,draw=black,thick,fill opacity=1] (2,0,-1) circle (0.3pt);
+\fill[fill=black,draw=black,thick,fill opacity=1] (-2,0,-1) circle (0.3pt);
+\end{tikzpicture}
+\end{figure*}
+
+设球面上的圆所在的平面方程为 $$ ax+by+cz=d ,$$ 圆上的一点$P=(x_0,y_0,z_0)$要同时满足平面和球面的方程, 即
+\begin{align*}
+ax_0+by_0+cz_0&=d \tag{1} \\
+x_0^2+y_0^2+z_0^2&=1 \tag{2} 
+\end{align*}
+$P$点经过球极投影之后被映射到点 $Q=(x_1,y_1,-1)$, 因为 $N,P,Q$ 共线, 由 $\dfrac{NP}{NQ}=\dfrac{1-z_0}{2}$ 可得
+$$
+x_0 = \frac{(1-z_0)x_1}{2}, \qquad
+y_0 = \frac{(1-z_0)y_1}{2} 
+$$
+将$x_0,y_0$代入 (1) 和 (2):
+\begin{align*}
+a(1-z_0)x_1+b(1-z_0)y_1+2cz_0&=2d \tag{3}\\
+(1-z_0)^2x_1^2 + (1-z_0)^2y_1^2 + 4z_0^2&=4\tag{4}
+\end{align*}
+根据 (4) 进一步可得
+\begin{align*}
+(x_1^2+y_1^2+4)(1-z_0)^2 &= 8-8z_0 \\
+x_1^2+y_1^2+4 &= \frac{8}{1-z_0} \tag{5}
+\end{align*}
+根据 (3), 将 $z_0$ 用 $x_1,y_1$ 表示: $$ z_0 = \frac{ax_1+by_1-2d}{ax_1+by_1-2c} $$
+代入 (5) 得: $$x_1^2+y_1^2+4=\frac{4(ax_1+by_1-2c)}{d-c}$$
+整理得到:
+$$ (x_1^2-\frac{4a}{d-c}x_1) + (y_1^2-\frac{4b}{d-c}y_1) = \frac{-8c}{d-c}-4, $$
+配方后得:
+$$ (x_1-\frac{2a}{d-c})^2 + (y_1-\frac{2b}{d-c})^2 = 4\cdot\frac{a^2+b^2+c^2-d^2}{(d-c)^2}.$$
+可见 $(x_1,y_1)$ 满足圆的方程的形式.
+
+
+\newpage
+%------------------------------------------------------------------------------%
 \noindent 环球城市数学竞赛~ 1980 春季~ 高中组
 
 空间中有 30 个向量, 求证一定存在两个向量夹角小于 $ 45 \degree $.
