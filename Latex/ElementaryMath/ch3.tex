@@ -1720,6 +1720,39 @@ $\triangle ABC$ 中, $\angle BAC = 80\degree$, $\angle ABC=20\degree$, $D$在$AB
 
 因为 $\angle ACE = \angle ACB - \angle ECB = 80\degree - 60\degree = 20\degree = \angle DBC$, $AC = DB$, $CE = BC$, 所以 $\triangle ACE \cong \triangle DBC$, $\angle DCB = \angle AEC = 10\degree$, $\angle ADC = \angle DCB + \angle DBC = 30\degree$.
 
+~
+
+另一种做法:
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[] (A) at (8,0);
+\coordinate[] (B) at (5.222, -0.49);
+\coordinate[] (C) at (2.778, -0.921);
+\coordinate[] (D) at (0.965, -1.24);
+\coordinate[] (E) at (0, -1.411);
+\coordinate[] (F) at (5.222, 0.49);
+\coordinate[] (G) at (2.778, 0.921);
+\coordinate[] (H) at (0.965, 1.24);
+\coordinate[] (I) at (0, 1.411);
+\coordinate[] (M) at (-2, 1.763);
+\coordinate[] (N) at (-2, -1.763);
+\draw [line width=1pt] (A) --(B) -- (G) -- (D) -- (I) -- (E) -- (H) -- (C) -- (F) -- cycle;
+\draw [dashed,line width=1pt] (B) -- (N);
+\draw [dashed,line width=1pt] (F) --(M);
+\foreach \p in {A,B,C,D,E,F,G,H,I}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\draw pic["$\alpha$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.6cm] {angle=M--A--N};
+\draw pic[draw,line width=1pt,red, angle eccentricity=1.5, angle radius=0.6cm] {angle=G--B--D};
+\draw pic[draw,line width=1pt,red, angle eccentricity=1.5, angle radius=0.45cm] {angle=B--D--G};
+\draw pic[draw,line width=1pt,green, angle eccentricity=1.5, angle radius=0.3cm] {angle=D--I--G};
+\draw pic[draw,line width=1pt,green, angle eccentricity=1.5, angle radius=0.3cm] {angle=I--G--D};
+\draw pic[draw,line width=1pt,blue, angle eccentricity=1.5, angle radius=0.25cm] {angle=D--E--I};
+\draw pic[draw,line width=1pt,blue, angle eccentricity=1.5, angle radius=0.25cm] {angle=I--D--E};
+\end{tikzpicture}
+\end{figure*}
+
+假设有两条射线, 夹角为 $\alpha$, 依次如上图连出 9 条线段, 每条线段长度相等, 端点均在两条射线上. 可以求出红色的两个角为 $2\alpha$, 绿色的两个角为 $3\alpha$, 蓝色的两个角为 $4\alpha$. 所以最外层的等腰三角形顶角为 $\alpha$, 底角为 $4\alpha$, 则 $\alpha = 20\degree$. 它的图形正好符合题目的图形, 可以求出各个角度.
 
 %------------------------------------------------------------------------------%
 \newpage
