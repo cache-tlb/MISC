@@ -1690,6 +1690,37 @@ $\triangle ABC$ 中, $\angle BAC = 80\degree$, $\angle ABC=20\degree$, $D$在$AB
 
 于是 $\angle BCD = \angle CBE = 10\degree$, $\angle ADC = \angle DCB + \angle DBC = 30\degree$.
 
+~
+
+另一种做法:
+\begin{figure*}[htbp]
+\centering
+\begin{tikzpicture}[scale=1]
+\coordinate[label=below left:$A$] (A) at (0,0);
+\coordinate[label=below right:$B$] (B) at (8,0);
+\coordinate[label=above:$C$] (C) at (0.482,2.736);
+\coordinate[label=below:$D$] (D) at (5.222,0);
+\coordinate[label=below:$E$] (E) at (1.872, -5.142);
+\draw [line width=1pt] (D) --(C) -- (A) -- (B) -- (C);
+%\draw [line width=1pt] (C) -- (A) node [midway,sloped] {$||$};
+%\draw [line width=1pt] (B) -- (D) node [near end,sloped] {$||$};
+\draw [dashed,line width=1pt] (C) --(E) -- (B);
+\draw [dashed,line width=1pt] (A) --(E);
+\foreach \p in {A,B,C,D,E}
+	\fill[fill=black,draw=black,thick] (\p) circle (1.25pt);
+\draw pic["$80\degree$",draw,line width=1pt, angle eccentricity=2.5, angle radius=0.3cm] {angle=B--A--C};
+\draw pic[draw,red,line width=1pt, angle eccentricity=2.3, angle radius=0.6cm] {angle=A--C--E};
+\draw pic[draw,red,line width=1pt, angle eccentricity=2.3, angle radius=0.6cm] {angle=C--B--A};
+\draw pic["$?$",draw,line width=1pt, angle eccentricity=1.5, angle radius=0.6cm] {angle=C--D--A};
+\end{tikzpicture}
+\end{figure*}
+
+以 $BC$ 为边构造一个等边三角形 $BCE$, 并连接 $AE$. $\angle ABE = \angle CBE - \angle CBA = 40\degree$.
+因为 $BA = BC = BE$, 在等腰三角形 $ABE$ 中, $\angle AEB = 70\degree$. $\angle AEC = 10\degree$.
+
+因为 $\angle ACE = \angle ACB - \angle ECB = 80\degree - 60\degree = 20\degree = \angle DBC$, $AC = DB$, $CE = BC$, 所以 $\triangle ACE \cong \triangle DBC$, $\angle DCB = \angle AEC = 10\degree$, $\angle ADC = \angle DCB + \angle DBC = 30\degree$.
+
+
 %------------------------------------------------------------------------------%
 \newpage
 
