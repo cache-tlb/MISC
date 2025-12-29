@@ -28,6 +28,9 @@ void main() {
 <script id="color-fragment-shader" type="x-shader/x-fragment">
 precision highp float;
 uniform samplerCube u_texture;
+uniform int u_mode;
+uniform int u_showDiff;
+uniform float u_diffScale;
 
 varying vec3 v_local_pos;
 
@@ -69,7 +72,6 @@ vec4 cubemapInterpolation(vec3 dir_normalized)
 
     // color2 <- face color
     vec3 sign_dir = sign(dir_normalized);
-    vec3 ret = vec3(0.0);
     vec3 abs_dir = abs(dir_normalized);
     float max_asix_val = max(max(abs_dir.x, abs_dir.y), abs_dir.z);
     int axis = -1;
@@ -141,7 +143,24 @@ vec4 cubemapInterpolation(vec3 dir_normalized)
     }
     // return vec4(color5, 1.0);
 
-    return vec4(abs(color5 - color1)*10.0, 1.0);
+    vec3 ret = vec3(0.0);
+    if (u_mode == 1) {
+        ret = color1;
+    } else if (u_mode == 2) {
+        ret = color2;
+    } else if (u_mode == 3) {
+        ret = color3;
+    } else if (u_mode == 4) {
+        ret = color4;
+    } else {
+        ret = color5;
+    }
+
+    if (u_showDiff > 0) {
+        ret = abs(ret - color1) * u_diffScale;
+    }
+
+    return vec4(ret, 1.0);
 }
 
 void main() {
@@ -377,6 +396,7 @@ class UECameraControl {
 const drawCanvas = document.getElementById('drawCanvas');
 const gl = drawCanvas.getContext("webgl2");
 
+
 var skycubeBufferInfo = null;
 var skyProgramInfo = null;
 var camera = null;
@@ -388,6 +408,10 @@ var colorProgramInfo = null;
 var current_time = null;
 
 var texture = null;
+
+var mode = 1;
+var diffScale = 10;
+var showDiff = 1;
 
 function initScene() {
     gl.clearColor(0, 0, 0, 0);
@@ -518,7 +542,10 @@ function render(delta_t) {
     var worldMatrix = m4.identity();
     webglUtils.setUniforms(colorProgramInfo,{
         u_world: worldMatrix,
-        u_texture: texture
+        u_texture: texture,
+        u_mode: mode,
+        u_showDiff: showDiff,
+        u_diffScale: diffScale,
     });
     webglUtils.setBuffersAndAttributes(gl, colorProgramInfo, skycubeBufferInfo);
     webglUtils.drawBufferInfo(gl, skycubeBufferInfo);
