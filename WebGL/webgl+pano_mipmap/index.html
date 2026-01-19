@@ -62,6 +62,7 @@ in vec3 v_positionWS;
 uniform sampler2D u_texture;
 uniform vec4 u_textureSize;
 uniform float u_fixUv;
+uniform float u_useMip0;
 out vec4 fragColor;
 
 void main() {
@@ -74,10 +75,13 @@ void main() {
     if (u_fixUv > 0.5 && fwx > 0.02) {
         if (uv.x >= 0.0) uv.x -= 1.0;
     }
-
-    vec3 ret = texture(u_texture, uv).rgb;
+    vec3 ret;
+    if (u_useMip0 > 0.5)
+        ret = textureLod(u_texture, uv, 0.0).rgb;
+    else
+        ret = texture(u_texture, uv).rgb;
     
-    fragColor = vec4(view_dir*0.5+0.5, 1.0);
+    fragColor = vec4(ret, 1.0);
 }
 </script>
 
@@ -212,6 +216,7 @@ const drawCanvas = document.getElementById('drawCanvas');
 const gl = drawCanvas.getContext("webgl2");
 
 var panoTexture = null;
+var panoImgTexture = null;
 var textureWidth = 2048;
 var textureHeight = 1024;
 var colorProgramInfo = null;
@@ -220,9 +225,19 @@ var cubeBufferInfo = null;
 var skyProgramInfo = null;
 var camera = null;
 var cameraControl = null;
+
 var useMipmap = true;
 var fixUv = true;
 var fixClampY = true;
+var useRealImg = false;
+var useIsotropic = false;
+var showFloor = true;
+
+const anisotropicExt = 
+        gl.getExtension("EXT_texture_filter_anisotropic") ||
+        gl.getExtension("MOZ_EXT_texture_filter_anisotropic") ||
+        gl.getExtension("WEBKIT_EXT_texture_filter_anisotropic");
+const maxAnisotropic = anisotropicExt ? gl.getParameter(anisotropicExt.MAX_TEXTURE_MAX_ANISOTROPY_EXT) : 1.0;
 
 function hueToRgb(p, q, t) {
     if (t < 0) t += 1;
@@ -253,23 +268,70 @@ function initTexture() {
         gl.deleteTexture(panoTexture);
     }
     panoTexture = gl.createTexture();
-    var heightData = new Uint8Array(textureWidth*textureHeight*4);
+    var data = new Uint8Array(textureWidth*textureHeight*4);
     for (var i = 0; i < textureHeight; i++) {
         for (var j = 0; j < textureWidth; j++) {
             var pix_idx = i*textureWidth + j;
             var h = j*1.0/textureWidth, s = i*1.0/textureWidth, v = 0.5;
             var rgb = hslToRgb(h,s,v);
-            heightData[pix_idx*4 + 0] = rgb[0];
-            heightData[pix_idx*4 + 1] = rgb[1];
-            heightData[pix_idx*4 + 2] = rgb[2];
-            heightData[pix_idx*4 + 3] = 255;
+            data[pix_idx*4 + 0] = rgb[0];
+            data[pix_idx*4 + 1] = rgb[1];
+            data[pix_idx*4 + 2] = rgb[2];
+            data[pix_idx*4 + 3] = 255;
         }
     }
 
-    fillTextureData(panoTexture, textureWidth, textureHeight, heightData, useMipmap);
+    fillTextureData(panoTexture, textureWidth, textureHeight, data);
+
+    if (panoImgTexture != null) {
+        gl.deleteTexture(panoTexture);        
+    }
+    panoImgTexture = gl.createTexture();
+    var img = new Image();
+    img.src = "./panorama_3.jpg";
+    img.addEventListener('load', function() {
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+        gl.bindTexture(gl.TEXTURE_2D, panoImgTexture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+        gl.generateMipmap(gl.TEXTURE_2D);
+    });
 }
 
-function fillTextureData(texture, width, height, data, genMipmap) {
+function setFixUv(value) {
+    fixUv = value;
+}
+
+function setTexState(texture, clampY, useIsotropic) {
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    if (clampY) {
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    } else {
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    }
+    if (useIsotropic) {
+        gl.texParameterf(gl.TEXTURE_2D, anisotropicExt.TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropic);
+    }  else {
+        gl.texParameterf(gl.TEXTURE_2D, anisotropicExt.TEXTURE_MAX_ANISOTROPY_EXT, 1.0);
+    }
+    gl.bindTexture(gl.TEXTURE_2D, null);
+}
+
+function setFixClampY(value) {
+    fixClampY = value;
+    setTexState(panoTexture, fixClampY, useIsotropic);
+    setTexState(panoImgTexture, fixClampY, useIsotropic);
+}
+
+function setUseIsotropic(value) {
+    useIsotropic = value;
+    setTexState(panoTexture, fixClampY, useIsotropic);
+    setTexState(panoImgTexture, fixClampY, useIsotropic);
+}
+
+function fillTextureData(texture, width, height, data) {
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
     gl.bindTexture(gl.TEXTURE_2D, texture);
@@ -278,12 +340,8 @@ function fillTextureData(texture, width, height, data, genMipmap) {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
     // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    if (genMipmap) {
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
-        gl.generateMipmap(gl.TEXTURE_2D);
-    } else {
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);        
-    }
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    gl.generateMipmap(gl.TEXTURE_2D);
 
     gl.bindTexture(gl.TEXTURE_2D, null);
 }
@@ -351,9 +409,10 @@ function render(delta_t) {
         u_view: viewMatrix,
         u_projection: projectionMatrix,
         u_cameraPos: camera.position,
-        u_texture: panoTexture,
+        u_texture: useRealImg ? panoImgTexture : panoTexture,
         u_textureSize: [textureWidth, textureHeight, 1./textureWidth, 1./textureHeight],
         u_fixUv: fixUv ? 1.0 : 0.0,
+        u_useMip0: useMipmap ? 0.0 : 1.0,
     });
     webglUtils.setBuffersAndAttributes(gl, skyProgramInfo, cubeBufferInfo);
     webglUtils.drawBufferInfo(gl, cubeBufferInfo);
@@ -361,15 +420,17 @@ function render(delta_t) {
 
 
     // model
-    gl.useProgram(colorProgramInfo.program);
-    webglUtils.setUniforms(colorProgramInfo, {
-        u_view: viewMatrix,
-        u_projection: projectionMatrix,
-        u_world: worldMatrix,
-    });
-    webglUtils.setBuffersAndAttributes(gl, colorProgramInfo, planeBufferInfo);
-    webglUtils.drawBufferInfo(gl, planeBufferInfo);
-
+    if (showFloor)
+    {
+        gl.useProgram(colorProgramInfo.program);
+        webglUtils.setUniforms(colorProgramInfo, {
+            u_view: viewMatrix,
+            u_projection: projectionMatrix,
+            u_world: worldMatrix,
+        });
+        webglUtils.setBuffersAndAttributes(gl, colorProgramInfo, planeBufferInfo);
+        webglUtils.drawBufferInfo(gl, planeBufferInfo);
+    }
 }
 
 var last_time = null;
