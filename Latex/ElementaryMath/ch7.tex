@@ -1122,7 +1122,7 @@ F(x,y,t+\Delta t) &= 0 \tag{2}
 再联立 (1), (4) 两个方程可以解出交点坐标 $(X_t, Y_t)$.
 
 既然 $(X_t, Y_t)$ 位于曲线 $F(x,y,t)=0$ 上, 那么可以求出该点处切线斜率. 固定 $t$, 变化 $x,y$, 使 $(X_t+\Delta x, Y_t + \Delta y)$ 仍然位于 $F(x,y,t)=0$ 上, 令 $\Delta x, \Delta y\to 0$, 则
-\[ F(X_t,Y_t,t) + F'_x(X_t,Y_t,t)\Delta x + F(X_t,Y_t,t) + F'_y(X_t,Y_t,t)\Delta y = 0 .\]
+\[ F(X_t,Y_t,t) + F'_x(X_t,Y_t,t)\Delta x + F'_y(X_t,Y_t,t)\Delta y = 0 .\]
 将 $F(X_t,Y_t,t)=0$ 代入, 得切线斜率为
 \[ \frac{\Delta y}{\Delta x} = -\frac{ F'_x(X_t,Y_t,t)}{ F'_y(X_t,Y_t,t)}  \tag{5}\]
 
