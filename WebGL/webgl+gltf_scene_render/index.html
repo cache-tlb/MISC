@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html>
+<head> <meta charset=utf-8 />
+<title>test</title>
+<script src='./m4.js'></script>
+<script src='./webgl-utils.js'></script>
+</head>
+
+<body>
+    <div>
+        <div id="container" style="position: absolute;transform: translate(0px, 0px);"> </div>
+        <canvas id="drawCanvas" width="1024" height="768"> </canvas>
+    </div>
+
+<script id="sky-vertex-shader" type="x-shader/x-vertex">
+attribute vec3 a_position;
+
+uniform mat4 u_projection;
+uniform mat4 u_view;
+
+varying vec3 v_texcoord;
+
+void main() {
+    vec3 positionVS = mat3(u_view) * (a_position);
+    gl_Position = u_projection * vec4(positionVS, 1.0);
+    // gl_Position = u_projection * u_view * u_world * vec4(a_position, 1.0);
+    v_texcoord = a_position;
+}
+</script>
+<script id="sky-fragment-shader" type="x-shader/x-fragment">
+precision mediump float;
+varying vec3 v_texcoord;
+
+#define Gamma 1.4
+
+#define Rayleigh 1.
+#define Mie 1.
+#define RayleighAtt 1.
+#define MieAtt 1.2
+const float g = -0.93;
+
+#if 1
+vec3 _betaR = vec3(1.95e-2, 1.1e-1, 2.94e-1); 
+vec3 _betaM = vec3(4e-2, 4e-2, 4e-2);
+#else
+vec3 _betaR = vec3(6.95e-2, 1.18e-1, 2.44e-1); 
+vec3 _betaM = vec3(4e-2, 4e-2, 4e-2);
+#endif
+
+vec3 calcAtmosphericScattering( float sR, float sM, out vec3 extinction, float cosine, float g1)
+{
+    extinction = exp(-(_betaR * sR + _betaM * sM));
+
+    // scattering phase
+    float g2 = g1 * g1;
+    float fcos2 = cosine * cosine;
+    float miePhase = Mie * pow(1. + g2 + 2. * g1 * cosine, -1.5) * (1. - g2) / (2. + g2);
+    //g = 0;
+    float rayleighPhase = Rayleigh;
+
+    vec3 inScatter = (1. + fcos2) * vec3(rayleighPhase + _betaM / _betaR * miePhase);
+    
+    return inScatter;
+}
+vec3 ACESFilm( vec3 x ) {
+    float tA = 2.51;
+    float tB = 0.03;
+    float tC = 2.43;
+    float tD = 0.59;
+    float tE = 0.14;
+    return clamp((x*(tA*x+tB))/(x*(tC*x+tD)+tE),0.0,1.0);
+}
+vec3 getSkyColor(in vec3 rd, vec3 light1) {
+    float sundot = clamp(dot(rd,light1),0.0,1.0);
+    
+    vec3 extinction;
+
+    // optical depth -> zenithAngle
+    float zenithAngle = max(0., rd.y); //abs( rd.y);
+    float sR = RayleighAtt / zenithAngle ;
+    float sM = MieAtt / zenithAngle ;
+
+    vec3 inScatter = calcAtmosphericScattering(sR, sM, extinction, sundot, g);
+    vec3 skyCol = inScatter*(1.0-extinction);
+
+    // sky  
+    vec3 col = skyCol; // *vec3(1.6,1.4,1.0)
+    // sun
+    col += 0.47*vec3(1.6,1.4,1.0)*pow( sundot, 350.0 ) * extinction;
+    // sun haze
+    col += 0.4*vec3(0.8,0.9,1.0)*pow( sundot, 2.0 ) * extinction;
+    
+    // sun scatter
+    col += 0.3*vec3(1.0,0.7,0.3)*pow( sundot, 8.0 );
+
+    // gamma
+    //col = sqrt(col);
+            
+    col = ACESFilm(col);
+    col = pow(col, vec3(Gamma));
+    return col;
+}
+void main() {
+    vec3 rd = normalize(v_texcoord.xyz);
+    vec3 light_dir = vec3(1.0, 10.0, 1.0);
+    vec3 color = getSkyColor(rd, normalize(light_dir));
+    gl_FragColor = vec4(color, 1.0);
+}
+</script>
+
+<script id="model-vertex-shader" type="x-shader/x-vertex">#version 300 es
+in vec3 a_position;
+in vec3 a_normal;
+in vec2 a_texcoord;
+
+uniform mat4 u_model;
+uniform mat4 u_projection;
+uniform mat4 u_view;
+uniform mat4 u_lightViewProj;
+
+out vec2 v_uv;
+out vec3 v_normal;
+out vec4 v_shadowSpacePos;
+
+void main() {
+    vec3 pos = a_position;
+    gl_Position = u_projection * u_view * u_model * vec4(pos, 1.0);
+    v_uv = a_texcoord;
+    v_normal = a_normal;
+    v_shadowSpacePos = u_lightViewProj * u_model * vec4(pos, 1.0);
+}
+</script>
+
+<script id="shadowmap-fragment-shader" type="x-shader/x-fragment"> #version 300 es
+precision highp float;
+in vec2 a_texcoord;
+out vec4 FragColor;
+
+void main() {
+    FragColor = vec4(1.0,1.0,1.0,1.0);
+}
+</script>
+
+<script id="model-fragment-shader" type="x-shader/x-fragment"> #version 300 es
+precision highp float;
+uniform sampler2D u_texture;
+uniform sampler2D u_shadowDepth;
+uniform vec3 u_lightDir;
+uniform vec3 u_lightColor;
+uniform float u_bias;
+
+in vec2 v_uv;
+in vec3 v_normal;
+in vec4 v_shadowSpacePos;
+
+out vec4 FragColor;
+
+float calcShadow() {
+    vec3 shadowSpacePos = v_shadowSpacePos.xyz / v_shadowSpacePos.w * 0.5 + 0.5;
+    bool inRange = shadowSpacePos.x >= 0.0 && shadowSpacePos.x <= 1.0 && shadowSpacePos.y >= 0.0 && shadowSpacePos.y <= 1.0; 
+    float shadowmapValue = texture(u_shadowDepth, shadowSpacePos.xy).r;
+    float ret = (inRange && shadowmapValue <= shadowSpacePos.z + u_bias) ? 0.0 : 1.0;
+
+    return ret;
+}
+
+void main() {
+    vec3 baseColor = texture(u_texture, v_uv).rgb;
+    vec3 normal = normalize(v_normal);
+    float ndotl = max(dot(normal, u_lightDir), 0.0);
+    vec3 envColor = vec3(0.05,0.05,0.1);
+    vec3 l = envColor + vec3(ndotl)*u_lightColor*calcShadow();
+    vec3 c = l * baseColor;
+
+    FragColor = vec4(pow(c,vec3(0.454545)), 1.0);
+}
+</script>
+
+<script id="debug-fragment-shader" type="x-shader/x-fragment"> #version 300 es
+precision mediump float;
+uniform sampler2D u_texture;
+in vec2 v_uv;
+out vec4 FragColor;
+void main() {
+    vec3 c = texture(u_texture, v_uv).rgb;
+    FragColor = vec4(c, 1.0);
+}
+</script>
+
+<script type="module">
+function degreeToRad(degree) { return degree*Math.PI/180.0; }
+
+class Camera {
+    constructor() {
+        this.forward = [0,0,-1];    // -z
+        this.right = [1,0,0];       // x
+        this.position = [0,0,0];
+    }
+    moveForward(distance) {
+        this.position = m4.addVectors( this.position, m4.scaleVector(this.forward, distance) );
+    }
+    moveRight(distance) {
+        this.position = m4.addVectors( this.position, m4.scaleVector(this.right, distance) );
+    }
+    moveUp(distance) {
+        this.position = m4.addVectors( this.position, m4.scaleVector([0,1,0], distance) );
+    }
+    getViewMatrix() {
+        var target = m4.addVectors(this.position, this.forward);
+        var transform = m4.lookAt(this.position, target, [0,1,0]);
+        return m4.inverse(transform);
+    }
+}
+
+class UECameraControl {
+    constructor(camera) {
+        this.camera = camera;
+        this.moveSpeed = 2;
+        this.rotateSpeed = 1;
+        this.isMoveForward = false;
+        this.isMoveBackward = false;
+        this.isMoveLeft = false;
+        this.isMoveRight = false;
+        this.isMoveUp = false;
+        this.isMoveDown = false;
+        this.yaw = 0;
+        this.pitch = 0;
+        this.maxPitch = 88;
+        this.isLocked = true;
+    }
+    update(delta_t) {
+        this.updateCameraPosition(delta_t);
+        this.updateCameraRotation(delta_t);
+    }
+    updateCameraPosition(delta_t){
+        var distance = delta_t * this.moveSpeed;
+        if (this.isMoveForward && !this.isMoveBackward) {
+            this.camera.moveForward(distance);
+        }
+        if (!this.isMoveForward && this.isMoveBackward) {
+            this.camera.moveForward(-distance);
+        }
+        if (this.isMoveLeft && !this.isMoveRight) {
+            this.camera.moveRight(-distance);
+        }
+        if (!this.isMoveLeft && this.isMoveRight) {
+            this.camera.moveRight(distance);
+        }
+        if (this.isMoveUp && !this.isMoveDown) {
+            this.camera.moveUp(distance);
+        }
+        if (!this.isMoveUp && this.isMoveDown) {
+            this.camera.moveUp(-distance);
+        }
+    }
+    updateCameraRotation(delta_t){
+        // yaw, pitch to forward & right
+        var sin_pitch = Math.sin(degreeToRad(this.pitch));
+        var sin_yaw = Math.sin(degreeToRad(this.yaw));
+        var cos_yaw = Math.cos(degreeToRad(this.yaw));
+        var xz_len = Math.sqrt(1.0 - sin_pitch*sin_pitch);
+        var fwd = [-xz_len*sin_yaw, sin_pitch, -xz_len*cos_yaw];
+        var right = [cos_yaw, 0, -sin_yaw];
+        camera.forward = fwd;
+        camera.right = right;
+    }
+
+    onKeyDown ( event ) {
+        if (this.isLocked) return;
+        switch ( event.code ) {
+            case 'ArrowUp':
+            case 'KeyW': this.isMoveForward = true; break;
+            case 'ArrowLeft':
+            case 'KeyA': this.isMoveLeft = true; break;
+            case 'ArrowDown':
+            case 'KeyS': this.isMoveBackward = true; break;
+            case 'ArrowRight':
+            case 'KeyD': this.isMoveRight = true; break;
+            case 'KeyE': this.isMoveUp = true; break;
+            case 'KeyQ': this.isMoveDown = true; break;
+        }
+    };
+    onKeyUp ( event ) {
+        switch ( event.code ) {
+            case 'ArrowUp':
+            case 'KeyW': this.isMoveForward = false; break;
+            case 'ArrowLeft':
+            case 'KeyA': this.isMoveLeft = false; break;
+            case 'ArrowDown':
+            case 'KeyS': this.isMoveBackward = false; break;
+            case 'ArrowRight':
+            case 'KeyD': this.isMoveRight = false; break;
+            case 'KeyE': this.isMoveUp = false; break;
+            case 'KeyQ': this.isMoveDown = false; break;
+        }
+    };
+    onPointerMove( event ) {
+        if (this.isLocked) return;
+        const movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
+        const movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+
+        this.yaw -= movementX * 0.05 * this.rotateSpeed;
+        this.yaw = this.yaw % 360;
+        this.pitch -= movementY * 0.05 * this.rotateSpeed;
+        this.pitch = Math.max( -this.maxPitch, Math.min( this.maxPitch, this.pitch ) );
+    }
+    onPointerDown(event) {
+        if (event.button == 2) {
+            this.isLocked = false;
+        }
+    }
+    onPointerUp(event) {
+        if (event.button == 2) {
+            this.isLocked = true;
+        }
+    }
+    onContextmenu( event ) {
+        event.preventDefault();
+    }
+
+    registerEventHandlers(domElement) {
+        domElement.addEventListener( 'mouseup', this.onPointerUp.bind(this) );
+        domElement.addEventListener( 'mousemove', this.onPointerMove.bind(this) );
+        domElement.addEventListener( 'mousedown', this.onPointerDown.bind(this) );
+        domElement.addEventListener( 'contextmenu', this.onContextmenu.bind(this) );
+        window.addEventListener( 'keydown', this.onKeyDown.bind(this) );
+        window.addEventListener( 'keyup', this.onKeyUp.bind(this) );
+    }
+}
+
+
+function base64ToByteArray(base64_string) {
+    return Uint8Array.from(atob(base64_string), c => c.charCodeAt(0));
+}
+
+function byteArrayToBase64(rawData) {
+    return btoa(unescape(encodeURIComponent(rawData)));
+}
+
+function quaternionNormalize(q) {
+    var l2 = q[0]*q[0] + q[1]*q[1] + q[2]*q[2] + q[3]*q[3];
+    var inv_len = 1.0;
+    if (l2 > 1e-6) {
+        inv_len = 1./Math.sqrt(l2);
+    }
+    return [q[0]*inv_len, q[1]*inv_len, q[2]*inv_len, q[3]*inv_len];
+}
+
+function quaternionDot(a, b) {
+    return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
+}
+
+function clamp(num, min, max) {
+    return Math.min(Math.max(num, min), max);
+}
+
+function quaternionSlerp(q0, q1, t) {
+    var v0 = quaternionNormalize(q0);
+    var v1 = quaternionNormalize(q1);
+    var q = [0,0,0,1];
+
+    var dot = quaternionDot(v0, v1);
+    var sign = 1;
+    if (dot < 0) {
+        sign = -1;  // v1 = -v1;
+        dot = -dot;
+    }
+    const DOT_THRESHOLD = 0.9995;
+    if (dot > DOT_THRESHOLD) {
+        /* Quaternion result = v0 + t*(v1 – v0);
+        result.normalize();
+        return result;*/
+        q[0] = v0[0] + t * (sign*v1[0] - v0[0]);
+        q[1] = v0[1] + t * (sign*v1[1] - v0[1]);
+        q[2] = v0[2] + t * (sign*v1[2] - v0[2]);
+        q[3] = v0[3] + t * (sign*v1[3] - v0[3]);
+        return quaternionNormalize(q);
+    }
+
+    dot = clamp(dot, -1, 1);
+    var theta_0 = Math.acos(dot);  // theta_0 = angle between input vectors
+    var theta = theta_0 * t;    // theta = angle between v0 and result
+
+    var s0 = Math.cos(theta) - dot * Math.sin(theta) / Math.sin(theta_0);  // == sin(theta_0 - theta) / sin(theta_0)
+    var s1 = Math.sin(theta) / Math.sin(theta_0);
+
+    q[0] = (s0 * v0[0]) + (s1 * sign * v1[0]);
+    q[1] = (s0 * v0[1]) + (s1 * sign * v1[1]);
+    q[2] = (s0 * v0[2]) + (s1 * sign * v1[2]);
+    q[3] = (s0 * v0[3]) + (s1 * sign * v1[3]);
+    return quaternionNormalize(q);
+    //  return (s0 * v0) + (s1 * v1);
+}
+
+class GLTFModel {
+    constructor() {
+        this.buffers = [];
+        this.nodes = [];
+        this.defaultSceneId = -1;
+        this.scenes = [];   // each scene is a array of scene root node ids
+        this.meshes = [];
+        this.bufferViews = [];
+        this.accessors = [];
+        this.animations = [];
+        this.runtimeTransforms = [];
+    }
+    async load(jsonObj) {
+        this.defaultSceneId = jsonObj.scene;
+        this.nodes = jsonObj.nodes || [];
+        this.scenes = jsonObj.scenes || [];
+        this.buffers = jsonObj.buffers || [];
+        this.bufferViews = jsonObj.bufferViews || [];
+        this.accessors = jsonObj.accessors || [];
+        this.animations = jsonObj.animations || [];
+        this.meshes = jsonObj.meshes || [];
+
+        // this.buffers.forEach(x => {this.parseBuffer(x);});
+        const fetchBufferPromises = this.buffers.map(async x => await this.parseBuffer(x));
+        await Promise.all(fetchBufferPromises);
+        this.bufferViews.forEach(x => {this.parseBufferView(x);});
+        this.accessors.forEach(x => {this.parseAccessor(x);});
+        this.meshes.forEach(x => {this.parseMesh(x);});
+        this.animations.forEach(x => {this.parseAnimation(x)});
+        this.nodes.forEach((x, index) => {this.praseNode(x, index)});
+    }
+    async parseBuffer(buffer) {
+        const uri = buffer.uri;
+        const prefix = "data:application/octet-stream;base64,";
+        const prefix_len = prefix.length;
+        if (uri.slice(0, prefix_len) == prefix) {
+            const rawBase64 = uri.slice(prefix_len);
+            buffer.data = base64ToByteArray(rawBase64);
+            buffer.uri = undefined;
+        } else {
+            // a binary file
+            await fetch(uri)
+                .then(response => response.arrayBuffer()) // 直接获取ArrayBuffer
+                .then(arrayBuffer => {
+                    buffer.data = new Uint8Array(arrayBuffer);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+        if (buffer.data.length != buffer.byteLength) {
+            console.log('error parsing gltf buffer: buffer length mismatch, base64 ', buffer.data.length, ', buffer.byteLength: ', buffer.byteLength);
+        }
+    }
+    parseBufferView(bufferView) {
+        const bufferId = bufferView.buffer;
+        if (bufferId >= this.buffers.length || bufferId < 0) {
+            console.log('error parse buffer view: bufferId > buffer count');
+            return;
+        }
+        const offset = bufferView.byteOffset;
+        const length = bufferView.byteLength;
+        const buffer = this.buffers[bufferId];
+        if ((length <= 0) || (offset < 0) || (offset + length > buffer.byteLength)) {
+            console.log('error parse buffer view: invalid length or offset');
+            return;
+        }
+        bufferView.data = buffer.data.slice(offset, offset + length);
+    }
+    getFormatBytes(formatId) {
+        switch (formatId) {
+            case 5120: return 1;    // int8
+            case 5121: return 1;    // uint8
+            case 5122: return 2;    // int16
+            case 5123: return 2;    // uint16
+            case 5125: return 4;    // uint32
+            case 5126: return 4;    // float
+        }
+        return 0;
+    }
+    getVectorDataNum(type) {
+        switch (type) {
+            case 'SCALAR' : return 1;
+            case 'VEC2' : return 2;
+            case 'VEC3' : return 3;
+            case 'VEC4' : return 4;
+            case 'MAT2' : return 4;
+            case 'MAT3' : return 9;
+            case 'MAT4' : return 16;
+        }
+        return 0;
+    }
+    parseAccessor(accessor) {
+        const bufferViewId = accessor.bufferView;
+        accessor.data = [];
+        if (bufferViewId >= this.bufferViews.length || bufferViewId < 0) {
+            console.log('error parse accessor: invalid bufferView id');
+            return;
+        }
+        const bufferView = this.bufferViews[bufferViewId];
+        if (this.getVectorDataNum(accessor.type) * this.getFormatBytes(accessor.componentType) * accessor.count != bufferView.byteLength) {
+            console.log('error parse accessor: type & componentType & count & bufferView.byteLength mismatch. type: ' + accessor.type + ', componentType: ' + accessor.componentType + ', count: ' + accessor.count + ', bufferview byteLength: ' + bufferView.byteLength);
+            return;
+        }
+        if (accessor.componentType == 5120) {
+            accessor.data = new Int8Array(bufferView.data.buffer);
+        } else if (accessor.componentType == 5121) {
+            accessor.data = new Uint8Array(bufferView.data.buffer);
+        } else if (accessor.componentType == 5122) {
+            accessor.data = new Int16Array(bufferView.data.buffer);
+        } else if (accessor.componentType == 5123) {
+            accessor.data = new Uint16Array(bufferView.data.buffer);
+        } else if (accessor.componentType == 5125) {
+            accessor.data = new Uint32Array(bufferView.data.buffer);
+        } else if (accessor.componentType == 5126) {
+            accessor.data = new Float32Array(bufferView.data.buffer);
+        } else {
+            console.log('error parse accessor: unknown componentType');
+        }
+    }
+
+    parseMesh(mesh) {
+        // POINTS: 0, LINES: 1, LINE_LOOP: 2, LINE_STRIP: 3, TRIANGLES: 4, TRIANGLE_STRIP: 5, TRIANGLE_FAN: 6,
+        mesh.mode = mesh.mode || 4;  // rendering mode
+    }
+    parseAnimationSampler(sampler) {
+        const inputAccessor = this.accessors[sampler.input];
+        const outputAccessor = this.accessors[sampler.output];
+        if (inputAccessor.type != 'SCALAR') {
+            console.log('error parse sampler: input is not scalar');
+            return;
+        }
+        if (inputAccessor.count != outputAccessor.count) {
+            console.log('error parse sampler: input and output count mismatch');
+        }
+        const outputElemNum = this.getVectorDataNum(outputAccessor.type);
+        var data = [];
+        for (var i = 0; i < inputAccessor.count; i++) {
+            var t = inputAccessor.data[i];
+            var val = outputAccessor.data.slice(i*outputElemNum, (i+1)*outputElemNum);
+            data[i] = {k:t, v:val};
+        }
+        data.sort((a, b) => { 
+            if (a.k < b.k) return -1;
+            if (a.k > b.k) return 1;
+            return 0;
+         });
+        sampler.data = data;
+        sampler.vectorSize = outputElemNum;
+        sampler.current_interval = 1;   // [0, N]
+    }
+    seekAnimationSampler(sampler, t) {
+        var dataLen = sampler.data.length;
+        var current_interval = sampler.current_interval;
+        if (t <= sampler.data[0].k) {
+            return sampler.data[0].v;
+        } else if (t >= sampler.data[dataLen - 1].k) {
+            return sampler.data[dataLen - 1].v;
+        } else if (t < sampler.data[current_interval - 1].k) {
+            while (!(sampler.data[current_interval - 1].k <= t && t <= sampler.data[current_interval].k)) current_interval --;
+        } else if (t > sampler.data[current_interval].k) {
+            while (!(sampler.data[current_interval - 1].k <= t && t <= sampler.data[current_interval].k)) current_interval ++;
+        } else {
+        }
+
+        sampler.current_interval = current_interval;
+        const t0 = sampler.data[current_interval - 1].k;
+        const t1 = sampler.data[current_interval].k;
+        const v0 = sampler.data[current_interval - 1].v;
+        const v1 = sampler.data[current_interval].v;
+        const f = (t - t0) / (t1 - t0);
+        var ret = [];
+        if (v0.length == 4) {
+            ret = quaternionSlerp(v0, v1, f);
+        } else {
+            for (var i = 0; i < v0.length; i++) {
+                ret[i] = v0[i] * (1-f) + v1[i]*f;
+            }
+        }
+        return ret;
+    }
+    parseChannel(channel, sampler) {
+        var ok = true;
+        if (channel.target.path == "rotation") {
+            if (sampler.vectorSize != 4) {
+                ok = false;
+            }
+        } else if (channel.target.path == "translation") {
+            if (sampler.vectorSize != 3) {
+                ok = false;
+            }
+        } else if (channel.target.path == "scale") {
+            if (sampler.vectorSize != 3) {
+                ok = false;
+            }
+        } else {
+            console.log('error parse channel: unknown target path: ' + channel.target.path);
+        }
+        if (!ok) {
+            console.log('error parse channel: target path & sampler element size mismatch');
+        }
+    } 
+    praseNode(node, nodeIndex) {
+        if (!node.matrix) {
+            const defaultScale = [1,1,1];
+            const defaultVec3 = [0,0,0];
+            const defaultQuat = [0,0,0,1];
+            const scale = node.scale || defaultScale;
+            const quat = node.rotation || defaultQuat;
+            const translate = node.translation || defaultVec3;
+            node.matrix = m4.compose(translate, quat, scale);
+        }
+        node.distanceToParent = m4.length(m4.transformVector(node.matrix, [0,0,0,1]));
+        if (1) {
+            var scale = [0,0,0];
+            var quat = [0,0,0,1];
+            var translate = [0,0,0];
+            m4.decompose(node.matrix, translate, quat, scale);
+            // console.log(scale);
+            var translateNormalized = m4.normalize(translate);
+            var axis = m4.cross([0,1,0], translateNormalized);
+            var boneVisRotation = m4.identity();
+            if (m4.lengthSq(axis) < 1e-8) {
+            } else {
+                axis = m4.normalize(axis);
+                var angle = Math.acos(m4.dot([0,1,0], translateNormalized));
+                boneVisRotation = m4.axisRotation(axis, angle);
+            }
+            var len = node.distanceToParent;
+            node.boneVisMat = m4.multiply(boneVisRotation, m4.scaling(len,len,len));
+        }
+        if (node.children) {
+            node.children.forEach(x => {
+                this.nodes[x].parent = nodeIndex;
+            });
+        }
+    }
+    parseAnimation(animation) {
+        var samplers = animation.samplers;
+        var channels = animation.channels;
+        samplers.forEach(x => {this.parseAnimationSampler(x)});
+        channels.forEach(x => {this.parseChannel(x, samplers[x.sampler])});
+        animation.duration = 0;
+        for (var i = 0; i < channels.length; i++) {
+            var sampler = samplers[channels[i].sampler];
+            var duration = sampler.data[sampler.data.length - 1].k;
+            animation.duration = Math.max(animation.duration, duration);
+        }
+    }
+    getMatricesByAnimation(animation, time) {
+        // return a list of (local) matrix for the nodes (if has any animation, or else null).
+        var TRS = [];
+        for (var i = 0; i < animation.channels.length; i++) {
+            var channel = animation.channels[i];
+            var sampler = animation.samplers[channel.sampler];
+            const ret = this.seekAnimationSampler(sampler, time);
+            const nodeId = channel.target.node;
+            if (!TRS[nodeId]) TRS[nodeId] = {};
+            if (channel.target.path == 'rotation') {
+                var l2 = ret[0]*ret[0] + ret[1]*ret[1] + ret[2]*ret[2] + ret[3]*ret[3];
+                var inv_len = 1./Math.sqrt(l2);
+                TRS[nodeId].r = [ret[0]*inv_len, ret[1]*inv_len, ret[2]*inv_len, ret[3]*inv_len];
+            } else if (channel.target.path == 'translation') {
+                TRS[nodeId].t = ret;
+            } else if (channel.target.path == 'scale') {
+                TRS[nodeId].s = ret;
+            }
+        }
+        var matrices = [];
+        const defaultScale = [1,1,1];
+        const defaultVec3 = [0,0,0];
+        const defaultQuat = [0,0,0,1];
+        for (var i = 0; i < this.nodes.length; i++) {
+            const node = this.nodes[i];
+            if (TRS[i]) {
+                const scale = TRS[i].s || node.scale || defaultScale;
+                const translate = TRS[i].t || node.translation || defaultVec3;
+                const quat = TRS[i].r || node.rotation || defaultQuat;
+                const mat = m4.compose(translate, quat, scale);
+                matrices[i] = mat;
+            }
+        }
+        this.localTransforms = TRS;
+        return matrices;
+    }
+    updateInternalNodeGlobalTransforms(rootNodeIds, localTransforms) {
+        var queue = rootNodeIds.slice();
+        const identity = m4.identity();
+        while (queue.length > 0) {
+            var nodeId = queue.shift();
+            const node = this.nodes[nodeId];
+            if (node.children) {
+                const parentMat = this.runtimeTransforms[nodeId] || identity;
+                node.children.forEach(x => {
+                    const localMat = localTransforms[x] || this.nodes[x].matrix;
+                    this.runtimeTransforms[x] = m4.multiply(parentMat, localMat);   // not sure !!!!!!!!!!
+                    queue.push(x);
+                });
+            }
+
+        }
+    }
+    playAnimation(animationId, time) {
+        var mats = this.getMatricesByAnimation(this.animations[animationId], time);
+        this.updateInternalNodeGlobalTransforms(this.scenes[this.defaultSceneId].nodes, mats);
+    }
+    getAnimationList() {
+        return this.animations.map(x => x.name);
+    }
+}
+
+const drawCanvas = document.getElementById('drawCanvas');
+const gl = drawCanvas.getContext("webgl2");
+const ext = gl.getExtension('EXT_color_buffer_float');
+if (!ext) {
+    alert('need EXT_color_buffer_float');
+}
+
+
+var planeBufferInfo = null;
+var cubeBufferInfo = null;
+var skyProgramInfo = null;
+var modelProgramInfo = null;
+var shadowmapProgramInfo = null;
+var debugProgramInfo = null;
+var camera = null;
+var cameraControl = null;
+var modelGLTF = null;
+var diffuseTex = null;
+var modelBufferInfo = [];
+var lightDir = [0.36,0.8,0.48];
+var lightColor = [1,1,1];
+var shadowmapColor = null;
+var shadowmapDepth = null;
+var shadowmapFB = -1;
+var shadowmapSize = 2048;
+var lightViewProj = null;
+var shadow_bias = -0.005;
+
+import GUI from './lil-gui.js';
+const gui = new GUI( {container: document.getElementById( 'container' )});
+gui.title('setting');
+const lightSetting = gui.addFolder( 'light' );
+const lightParams = {
+    "yaw": 0,
+    "pitch": 0
+};
+lightSetting.add(lightParams, "yaw", 0, 359).step(1);
+lightSetting.add(lightParams, "pitch", -89, 89).step(1);
+
+
+async function loadModel() {
+    // var gltfFile = './town-single.gltf';
+    var gltfFile = './town.gltf';
+    const json = await fetch(gltfFile).then(response => response.json());
+    modelGLTF = new GLTFModel;
+    await modelGLTF.load(json);
+    // console.log(json);
+    // console.log(modelGLTF);
+}
+
+function makeVBO() {
+    for (var k = 0; k < modelGLTF.meshes.length; k++) {
+        const mesh = modelGLTF.meshes[k];
+        for (var i = 0; i < mesh.primitives.length; i++) {
+            const primitive = mesh.primitives[i];
+            const indices = modelGLTF.accessors[primitive.indices];
+            const attributes = primitive.attributes;
+            const position = modelGLTF.accessors[attributes.POSITION];
+            const normal = modelGLTF.accessors[attributes.NORMAL];
+            const texcoord0 = modelGLTF.accessors[attributes.TEXCOORD_0];
+            var renderNode = {
+                position: position,
+                normal: normal,
+                texcoord: texcoord0,
+                indices: indices
+            };
+            modelBufferInfo.push(webglUtils.createBufferInfoFromArrays(gl, renderNode));
+            
+        }
+    }
+}
+
+function loadTexture(url) {
+    const texture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+
+    // Because images have to be downloaded over the internet
+    // they might take a moment until they are ready.
+    // Until then put a single pixel in the texture so we can
+    // use it immediately. When the image has finished downloading
+    // we'll update the texture with the contents of the image.
+    const level = 0;
+    const internalFormat = gl.RGBA;
+    const width = 1;
+    const height = 1;
+    const border = 0;
+    const srcFormat = gl.RGBA;
+    const srcType = gl.UNSIGNED_BYTE;
+    const pixel = new Uint8Array([0, 0, 255, 255]); // opaque blue
+    gl.texImage2D(gl.TEXTURE_2D, level, internalFormat,width,height,border,srcFormat,srcType,pixel,);
+
+    const image = new Image();
+    image.onload = () => {
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.texImage2D(gl.TEXTURE_2D,level,internalFormat,srcFormat,srcType,image,);
+
+        // WebGL1 has different requirements for power of 2 images
+        // vs. non power of 2 images so check if the image is a
+        // power of 2 in both dimensions.
+        if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
+            // Yes, it's a power of 2. Generate mips.
+            gl.generateMipmap(gl.TEXTURE_2D);
+            gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);
+        } else {
+            // No, it's not a power of 2. Turn off mips and set
+            // wrapping to clamp to edge
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        }
+    };
+    image.src = url;
+
+    return texture;
+}
+
+function isPowerOf2(value) {
+  return (value & (value - 1)) === 0;
+}
+
+function createTexture2D(options) {
+    const width = options.width || 2;
+    const height = options.height || 2;
+    const data = options.data || null;
+
+    let internal_format = options.internal_format || gl.RGBA;
+    let format = options.format || gl.RGBA;
+    let type = options.type || gl.UNSIGNED_BYTE;
+    let wrap_mode = options.wrap_mode || gl.CLAMP_TO_EDGE;
+    let filter_mode = options.filter_mode || gl.NEAREST;
+
+    const tex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texImage2D(
+        gl.TEXTURE_2D,      // target
+        0,                  // mip level
+        internal_format, // internal format
+        width, 
+        height,
+        0,                  // border
+        format, // format
+        type,    // type
+        data);              
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter_mode);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter_mode);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrap_mode);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrap_mode);
+    return tex;
+}
+
+function createDepthBuffer(width, height) {
+    const options = {
+        "width": width,
+        "height": height,
+        "internal_format": gl.DEPTH_COMPONENT32F,
+        "format": gl.DEPTH_COMPONENT,
+        "type": gl.FLOAT,
+        "wrap_mode": gl.CLAMP_TO_EDGE,
+        "filter_mode": gl.NEAREST
+    };
+    return createTexture2D(options);
+}
+
+function createColorBuffer(width, height) {
+    const options = {
+        "width": width,
+        "height": height,
+        "internal_format": gl.RGBA32F,
+        "format": gl.RGBA,
+        "type": gl.FLOAT,
+        "wrap_mode": gl.REPEAT,
+        "filter_mode": gl.LINEAR
+    }
+    return createTexture2D(options);
+}
+
+function initShadowmap() {
+    const width = shadowmapSize, height = shadowmapSize;
+    shadowmapFB = gl.createFramebuffer();
+    shadowmapDepth = createDepthBuffer(width, height);
+    shadowmapColor = createColorBuffer(width, height);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, shadowmapFB);
+    gl.framebufferTexture2D(
+        gl.FRAMEBUFFER,       // target
+        gl.DEPTH_ATTACHMENT,  // attachment point
+        gl.TEXTURE_2D,        // texture target
+        shadowmapDepth,         // texture
+        0);                   // mip level
+    gl.framebufferTexture2D(
+        gl.FRAMEBUFFER,        // target
+        gl.COLOR_ATTACHMENT0,  // attachment point
+        gl.TEXTURE_2D,         // texture target
+        shadowmapColor,         // texture
+        0);                    // mip level
+
+    const res = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+    if (res != gl.FRAMEBUFFER_COMPLETE) {
+        console.log('frame buffer status error');
+        if (res == gl.FRAMEBUFFER_INCOMPLETE_ATTACHMENT) {
+            console.log('FRAMEBUFFER_INCOMPLETE_ATTACHMENT');
+        }
+        if (res == gl.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT) {
+            console.log('FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT');
+        }
+        if (res == gl.FRAMEBUFFER_INCOMPLETE_DIMENSIONS) {
+            console.log('FRAMEBUFFER_INCOMPLETE_DIMENSIONS');
+        }
+        if (res == FRAMEBUFFER_UNSUPPORTED) {
+            console.log('FRAMEBUFFER_UNSUPPORTED');
+        }
+    }
+}
+
+async function initScene() {
+    gl.clearColor(0, 0, 0, 1);
+    gl.clearDepth(1.0);
+
+    await loadModel();
+    makeVBO();
+    diffuseTex = loadTexture('./T_Atlas.jpg');
+
+    initShadowmap();
+    
+    var planeVB = {
+        position: [-1, -1, 0,  1, -1, 0,  -1,  1, 0,  1,  1, 0, ],  
+        texcoord: [0, 0,  1, 0,  0, 1,  1, 1,],
+        indices: [0,1,2,  1,3,2],
+    };
+
+    planeBufferInfo = webglUtils.createBufferInfoFromArrays(gl, planeVB);
+    cubeBufferInfo = webglUtils.createBufferInfoFromArrays(gl, {
+        position: [
+            -1,  1,  1,  
+             1,  1,  1,  
+             1, -1,  1,  
+            -1, -1,  1, 
+             1,  1, -1,  
+            -1,  1, -1,  
+            -1, -1, -1,  
+             1, -1, -1, 
+        ],  
+        indices: [0,1,2,2,3,0,1,4,7,7,2,1,4,5,6,6,7,4,5,0,3,3,6,5,5,4,1,1,0,5,3,2,7,7,6,3],
+    });
+    skyProgramInfo = webglUtils.createProgramInfo(gl, ['sky-vertex-shader', 'sky-fragment-shader']);
+    modelProgramInfo = webglUtils.createProgramInfo(gl, ['model-vertex-shader', 'model-fragment-shader']);
+    shadowmapProgramInfo = webglUtils.createProgramInfo(gl, ['model-vertex-shader', 'shadowmap-fragment-shader']);
+    debugProgramInfo = webglUtils.createProgramInfo(gl, ['model-vertex-shader', 'debug-fragment-shader']);
+
+    camera = new Camera();
+    camera.position = [0,10,50];
+
+    cameraControl = new UECameraControl(camera);
+    cameraControl.registerEventHandlers(window);
+    cameraControl.moveSpeed *= 10;
+}
+
+function logicUpdate(delta_t) {
+    cameraControl.update(delta_t);
+}
+
+function renderMainPass() {
+    var viewMatrix = camera.getViewMatrix();
+    var fov = degreeToRad(45.);
+    var aspect = 1024./768.;
+    var near = 0.1;
+    var far = 1000.0;
+    var projectionMatrix = m4.perspective(fov, aspect, near, far);
+    var worldMatrix =  m4.identity();
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.viewport(0, 0, 1024, 768);
+    gl.clearColor(1,1,1,1);
+    gl.clearDepth(1);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    // sky
+    gl.useProgram(skyProgramInfo.program);
+    webglUtils.setUniforms(skyProgramInfo, {
+        u_view: viewMatrix,
+        u_projection: projectionMatrix,
+    });
+    webglUtils.setBuffersAndAttributes(gl, skyProgramInfo, cubeBufferInfo);
+    gl.disable(gl.DEPTH_TEST);
+    webglUtils.drawBufferInfo(gl, cubeBufferInfo);
+    gl.enable(gl.DEPTH_TEST);
+
+    // model
+    gl.enable(gl.CULL_FACE);
+    gl.cullFace(gl.BACK);
+    gl.useProgram(modelProgramInfo.program);
+    webglUtils.setUniforms(modelProgramInfo, {
+        u_model: m4.identity(),
+        u_view: viewMatrix,
+        u_projection: projectionMatrix,
+        u_texture: diffuseTex,
+        u_shadowDepth: shadowmapDepth,
+        u_lightDir: m4.normalize(lightDir),
+        u_lightColor: lightColor,
+        u_bias: shadow_bias,
+        u_lightViewProj: lightViewProj,
+    });
+    for (var i = 0; i < modelBufferInfo.length; i++) {
+        webglUtils.setBuffersAndAttributes(gl, modelProgramInfo, modelBufferInfo[i]);
+        webglUtils.drawBufferInfo(gl, modelBufferInfo[i]);
+    }
+
+    // debug plane
+    gl.useProgram(debugProgramInfo.program);
+    webglUtils.setUniforms(debugProgramInfo, {
+        u_model: m4.compose([10,10,-50], [0,0,0,1], [10,10,10]),
+        u_view: viewMatrix,
+        u_projection: projectionMatrix,
+        u_texture: shadowmapDepth
+    });
+    webglUtils.setBuffersAndAttributes(gl, debugProgramInfo, planeBufferInfo);
+    webglUtils.drawBufferInfo(gl, planeBufferInfo);
+}
+
+function renderShadowmap() {
+    var light_cam_pos = m4.scaleVector(m4.normalize(lightDir), 1);
+    var light_up = [0,1,0];
+    if (lightDir[0]*lightDir[0] + lightDir[2]*lightDir[2] < 1e-4) {
+        light_up = [0,0,1];
+    }
+    var light_target = [0,0,0];
+    var viewMatrix = m4.inverse(m4.lookAt(light_cam_pos, light_target, light_up));
+    var projectionMatrix = m4.orthographic(-40,40,-40,40,-30,40);
+    lightViewProj = m4.multiply(projectionMatrix, viewMatrix);
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, shadowmapFB);
+    gl.enable(gl.DEPTH_TEST);
+    gl.viewport(0, 0, shadowmapSize, shadowmapSize);
+    gl.clearColor(1,1,1,1);
+    gl.clearDepth(1);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.enable(gl.CULL_FACE);
+    gl.cullFace(gl.BACK);
+    gl.useProgram(shadowmapProgramInfo.program);
+    webglUtils.setUniforms(shadowmapProgramInfo, {
+        u_model: m4.identity(),
+        u_view: viewMatrix,
+        u_projection: projectionMatrix,
+        u_texture: diffuseTex,
+        u_lightDir: m4.normalize(lightDir),
+        u_lightColor: lightColor,
+    });
+    for (var i = 0; i < modelBufferInfo.length; i++) {
+        webglUtils.setBuffersAndAttributes(gl, shadowmapProgramInfo, modelBufferInfo[i]);
+        webglUtils.drawBufferInfo(gl, modelBufferInfo[i]);
+    }
+}
+
+function render(delta_t) {
+    renderShadowmap();
+    renderMainPass();
+}
+
+var last_time = null;
+
+function frameLoop() {
+    var current_time = Date.now();
+    var delta_t = 1./30.;
+    if (last_time != null) {
+        delta_t = (current_time - last_time)/1000.0;
+    }
+    logicUpdate(delta_t);
+    render(delta_t);
+    last_time = current_time;
+    window.requestAnimationFrame(frameLoop);
+}
+
+async function main() {
+    await initScene();
+    frameLoop();
+}
+
+main();
+
+</script>
+
+    
+
+</body>
+</html>

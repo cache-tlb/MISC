@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html>
+<head> <meta charset=utf-8 />
+<title>test</title>
+<script src='./m4.js'></script>
+<script src='./webgl-utils.js'></script>
+</head>
+
+<body>
+    <div>
+        <div id="container" style="position: absolute;transform: translate(0px, 0px);"> </div>
+        <canvas id="drawCanvas" width="1024" height="768"> </canvas>
+    </div>
+
+<script id="sky-vertex-shader" type="x-shader/x-vertex">
+attribute vec3 a_position;
+
+uniform mat4 u_projection;
+uniform mat4 u_view;
+
+varying vec3 v_texcoord;
+
+void main() {
+    vec3 positionVS = mat3(u_view) * (a_position);
+    gl_Position = u_projection * vec4(positionVS, 1.0);
+    // gl_Position = u_projection * u_view * u_world * vec4(a_position, 1.0);
+    v_texcoord = a_position;
+}
+</script>
+<script id="sky-fragment-shader" type="x-shader/x-fragment">
+precision mediump float;
+varying vec3 v_texcoord;
+
+#define Gamma 1.4
+
+#define Rayleigh 1.
+#define Mie 1.
+#define RayleighAtt 1.
+#define MieAtt 1.2
+const float g = -0.93;
+
+#if 1
+vec3 _betaR = vec3(1.95e-2, 1.1e-1, 2.94e-1); 
+vec3 _betaM = vec3(4e-2, 4e-2, 4e-2);
+#else
+vec3 _betaR = vec3(6.95e-2, 1.18e-1, 2.44e-1); 
+vec3 _betaM = vec3(4e-2, 4e-2, 4e-2);
+#endif
+
+vec3 calcAtmosphericScattering( float sR, float sM, out vec3 extinction, float cosine, float g1)
+{
+    extinction = exp(-(_betaR * sR + _betaM * sM));
+
+    // scattering phase
+    float g2 = g1 * g1;
+    float fcos2 = cosine * cosine;
+    float miePhase = Mie * pow(1. + g2 + 2. * g1 * cosine, -1.5) * (1. - g2) / (2. + g2);
+    //g = 0;
+    float rayleighPhase = Rayleigh;
+
+    vec3 inScatter = (1. + fcos2) * vec3(rayleighPhase + _betaM / _betaR * miePhase);
+    
+    return inScatter;
+}
+vec3 ACESFilm( vec3 x ) {
+    float tA = 2.51;
+    float tB = 0.03;
+    float tC = 2.43;
+    float tD = 0.59;
+    float tE = 0.14;
+    return clamp((x*(tA*x+tB))/(x*(tC*x+tD)+tE),0.0,1.0);
+}
+vec3 getSkyColor(in vec3 rd, vec3 light1) {
+    float sundot = clamp(dot(rd,light1),0.0,1.0);
+    
+    vec3 extinction;
+
+    // optical depth -> zenithAngle
+    float zenithAngle = max(0., rd.y); //abs( rd.y);
+    float sR = RayleighAtt / zenithAngle ;
+    float sM = MieAtt / zenithAngle ;
+
+    vec3 inScatter = calcAtmosphericScattering(sR, sM, extinction, sundot, g);
+    vec3 skyCol = inScatter*(1.0-extinction);
+
+    // sky  
+    vec3 col = skyCol; // *vec3(1.6,1.4,1.0)
+    // sun
+    col += 0.47*vec3(1.6,1.4,1.0)*pow( sundot, 350.0 ) * extinction;
+    // sun haze
+    col += 0.4*vec3(0.8,0.9,1.0)*pow( sundot, 2.0 ) * extinction;
+    
+    // sun scatter
+    col += 0.3*vec3(1.0,0.7,0.3)*pow( sundot, 8.0 );
+
+    // gamma
+    //col = sqrt(col);
+            
+    col = ACESFilm(col);
+    col = pow(col, vec3(Gamma));
+    return col;
+}
+void main() {
+    vec3 rd = normalize(v_texcoord.xyz);
+    vec3 light_dir = vec3(1.0, 10.0, 1.0);
+    vec3 color = getSkyColor(rd, normalize(light_dir));
+    gl_FragColor = vec4(color, 1.0);
+}
+</script>
+
+<script id="model-vertex-shader" type="x-shader/x-vertex">#version 300 es
+    #define M_PI 3.1416
+
+struct TwoJet {
+    float f, fu, fv, fuv;
+};
+
+TwoJet Mod(TwoJet self, float d) { self.f = mod(self.f, d); if (self.f < 0.0) self.f += d; return self;}
+
+TwoJet Add(TwoJet x, TwoJet y) {
+    return TwoJet(x.f+y.f, x.fu+y.fu, x.fv+y.fv, x.fuv + y.fuv);
+}
+TwoJet Mul(TwoJet x, TwoJet y) {
+    return TwoJet(
+      x.f*y.f,
+      x.f*y.fu + x.fu*y.f,
+      x.f*y.fv + x.fv*y.f,
+      x.f*y.fuv + x.fu*y.fv + x.fv*y.fu + x.fuv*y.f
+    );
+}
+TwoJet Add(TwoJet x, float d) {
+    return TwoJet( x.f + d, x.fu, x.fv, x.fuv);
+}
+
+TwoJet Mul(TwoJet x, float d) {
+    return TwoJet( d*x.f, d*x.fu, d*x.fv, d*x.fuv);
+}
+
+TwoJet Sin(TwoJet x) {
+    TwoJet t = Mul(x,(2.0*M_PI));
+    float s = sin(t.f);
+    float c = cos(t.f);
+    return TwoJet(s, c*t.fu, c*t.fv, c*t.fuv - s*t.fu*t.fv);
+}
+
+TwoJet Cos(TwoJet x) {
+    TwoJet t = Mul(x,(2.0*M_PI));
+    float s = cos(t.f);
+    float c = -sin(t.f);
+    return TwoJet(s, c*t.fu, c*t.fv, c*t.fuv - s*t.fu*t.fv);
+}
+
+TwoJet Pow(TwoJet x, float n) {
+    float x0 = pow(x.f, n);
+    float x1 = (x.f == 0.0) ? 0.0 : n * x0/x.f;
+    float x2 = (x.f == 0.0) ? 0.0 : (n-1.0)*x1/x.f;
+    return TwoJet(x0, x1*x.fu, x1*x.fv, x1*x.fuv + x2*x.fu*x.fv);
+}
+
+TwoJet Annihilate(TwoJet x, int index) {
+    return TwoJet(x.f, (index == 1 ? x.fu : 0.0), (index == 0 ? x.fv : 0.0), 0.0);
+}
+  
+TwoJet Interpolate(TwoJet v1, TwoJet v2, TwoJet weight) {
+    return Add(
+        Mul(v1, (Add(Mul(weight,-1.0),1.0)) ) , 
+        Mul(v2,weight));
+}
+
+struct ThreeJet {
+    float f, fu, fv;
+    float fuu, fuv, fvv;
+    float fuuv, fuvv;
+};
+TwoJet ThreeJet2TwoJet(ThreeJet v) { return TwoJet(v.f, v.fu, v.fv, v.fuv); }
+
+ThreeJet Mod(ThreeJet self, float d) { self.f = mod(self.f, d); if (self.f < 0.0) self.f += d; return self;}
+ThreeJet Add(ThreeJet x, const ThreeJet y) {
+    ThreeJet result;
+    result.f = x.f + y.f;
+    result.fu = x.fu + y.fu;
+    result.fv = x.fv + y.fv;
+    result.fuu = x.fuu + y.fuu;
+    result.fuv = x.fuv + y.fuv;
+    result.fvv = x.fvv + y.fvv;
+    result.fuuv = x.fuuv + y.fuuv;
+    result.fuvv = x.fuvv + y.fuvv;
+    return result;
+}
+
+ThreeJet Mul(ThreeJet x, const ThreeJet y) {
+    ThreeJet result;
+    result.f = x.f*y.f;
+    result.fu = x.f*y.fu + x.fu*y.f;
+    result.fv = x.f*y.fv + x.fv*y.f;
+    result.fuu = x.f*y.fuu + 2.0*x.fu*y.fu + x.fuu*y.f;
+    result.fuv = x.f*y.fuv + x.fu*y.fv + x.fv*y.fu + x.fuv*y.f;
+    result.fvv = x.f*y.fvv + 2.0*x.fv*y.fv + x.fvv*y.f;
+    result.fuuv = x.f*y.fuuv + 2.0*x.fu*y.fuv + x.fv*y.fuu
+                + 2.0*x.fuv*y.fu + x.fuu*y.fv + x.fuuv*y.f;
+    result.fuvv = x.f*y.fuvv + 2.0*x.fv*y.fuv + x.fu*y.fvv
+                + 2.0*x.fuv*y.fv + x.fvv*y.fu + x.fuvv*y.f;
+    return result;
+}
+ThreeJet Add(const ThreeJet x, float d) {
+    ThreeJet result;
+    result = x;
+    result.f += d;
+    return result;
+}
+
+ThreeJet Mul(const ThreeJet x, float d) {
+    ThreeJet result;
+    result.f = d*x.f;
+    result.fu = d*x.fu;
+    result.fv = d*x.fv;
+    result.fuu = d*x.fuu;
+    result.fuv = d*x.fuv;
+    result.fvv = d*x.fvv;
+    result.fuuv = d*x.fuuv;
+    result.fuvv = d*x.fuvv;
+    return result;
+}
+ThreeJet Sin(const ThreeJet x) {
+    ThreeJet result;
+    ThreeJet t = Mul(x,(2.0*M_PI));
+    float s = sin(t.f);
+    float c = cos(t.f);
+    result.f = s;
+    result.fu = c*t.fu;
+    result.fv = c*t.fv;
+    result.fuu = c*t.fuu - s*t.fu*t.fu;
+    result.fuv = c*t.fuv - s*t.fu*t.fv;
+    result.fvv = c*t.fvv - s*t.fv*t.fv;
+    result.fuuv = c*t.fuuv - s*(2.0*t.fu*t.fuv + t.fv*t.fuu) - c*t.fu*t.fu*t.fv;
+    result.fuvv = c*t.fuvv - s*(2.0*t.fv*t.fuv + t.fu*t.fvv) - c*t.fu*t.fv*t.fv;
+    return result;
+  }
+  
+  ThreeJet Cos(const ThreeJet x) {
+    ThreeJet result;
+    ThreeJet t = Mul(x, (2.0*M_PI));
+    float s = cos(t.f);
+    float c = -sin(t.f);
+    result.f = s;
+    result.fu = c*t.fu;
+    result.fv = c*t.fv;
+    result.fuu = c*t.fuu - s*t.fu*t.fu;
+    result.fuv = c*t.fuv - s*t.fu*t.fv;
+    result.fvv = c*t.fvv - s*t.fv*t.fv;
+    result.fuuv = c*t.fuuv - s*(2.0*t.fu*t.fuv + t.fv*t.fuu) - c*t.fu*t.fu*t.fv;
+    result.fuvv = c*t.fuvv - s*(2.0*t.fv*t.fuv + t.fu*t.fvv) - c*t.fu*t.fv*t.fv;
+    return result;
+  }
+  
+ThreeJet Pow(const ThreeJet x, float n) {
+    float x0 = pow(x.f, n);
+    float x1 = (x.f == 0.0) ? 0.0 : n * x0/x.f;
+    float x2 = (x.f == 0.0) ? 0.0 : (n-1.0) * x1/x.f;
+    float x3 = (x.f == 0.0) ? 0.0 : (n-2.0) * x2/x.f;
+    ThreeJet result;
+    result.f = x0;
+    result.fu = x1*x.fu;
+    result.fv = x1*x.fv;
+    result.fuu = x1*x.fuu + x2*x.fu*x.fu;
+    result.fuv = x1*x.fuv + x2*x.fu*x.fv;
+    result.fvv = x1*x.fvv + x2*x.fv*x.fv;
+    result.fuuv = x1*x.fuuv + x2*(2.0*x.fu*x.fuv + x.fv*x.fuu) + x3*x.fu*x.fu*x.fv;
+    result.fuvv = x1*x.fuvv + x2*(2.0*x.fv*x.fuv + x.fu*x.fvv) + x3*x.fu*x.fv*x.fv;
+    return result;
+}
+TwoJet D(const ThreeJet x, int index) {
+    TwoJet result;
+    if (index == 0) {
+      result.f = x.fu;
+      result.fu = x.fuu;
+      result.fv = x.fuv;
+      result.fuv = x.fuuv;
+    } else if (index == 1) {
+      result.f = x.fv;
+      result.fu = x.fuv;
+      result.fv = x.fvv;
+      result.fuv = x.fuvv;
+    } else {
+      result.f = result.fu = result.fv =
+      result.fuv = 0.0;
+    }
+    return result;
+  }
+  
+ThreeJet Annihilate(const ThreeJet x, int index) {
+    ThreeJet result = ThreeJet(x.f,0.0,0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+    if (index == 0) {
+        result.fv = x.fv;
+        result.fvv = x.fvv;
+    } else if (index == 1) {
+        result.fu = x.fu;
+        result.fuu = x.fuu;
+    }
+    return result;
+}
+
+ThreeJet Interpolate(const ThreeJet v1, const ThreeJet v2, const ThreeJet weight) {
+    return Add( Mul( (v1) , Add( Mul(weight,-1.0) , 1.0)) , Mul(v2,weight));
+}
+struct TwoJetVec {
+    TwoJet x;
+    TwoJet y;
+    TwoJet z;
+};
+TwoJetVec Add(TwoJetVec v, TwoJetVec w) {
+    TwoJetVec result;
+    result.x = Add(v.x, w.x);
+    result.y = Add(v.y ,w.y);
+    result.z = Add(v.z ,w.z);
+    return result;
+}
+
+TwoJetVec Mul(TwoJetVec v, TwoJet  a) {
+    TwoJetVec result;
+    result.x = Mul(v.x,a);
+    result.y = Mul(v.y,a);
+    result.z = Mul(v.z,a);
+    return result;
+}
+
+TwoJetVec Mul(TwoJetVec v, float a) {
+    TwoJetVec result;
+    result.x = Mul(v.x,a);
+    result.y = Mul(v.y,a);
+    result.z = Mul(v.z,a);
+    return result;
+}
+TwoJetVec AnnihilateVec(TwoJetVec v, int index) {
+    TwoJetVec result;
+    result.x = Annihilate(v.x, index);
+    result.y = Annihilate(v.y, index);
+    result.z = Annihilate(v.z, index);
+    return result;
+}
+
+TwoJetVec Cross(TwoJetVec v, TwoJetVec w) {
+    TwoJetVec result;
+    result.x = Add(Mul(v.y,w.z) , Mul(v.z, Mul(w.y,-1.0)));
+    result.y = Add(Mul(v.z,w.x) , Mul(v.x, Mul(w.z,-1.0)));
+    result.z = Add(Mul(v.x,w.y) , Mul(v.y, Mul(w.x,-1.0)));
+    return result;
+}
+
+TwoJet Dot(TwoJetVec v, TwoJetVec w) {
+    return Add(Mul(v.x,w.x) ,Add( Mul(v.y,w.y) , Mul(v.z,w.z)));
+}
+
+TwoJetVec Normalize(TwoJetVec v) {
+    TwoJet a;
+    a = Dot(v,v);
+    if (a.f > 0.0)
+        a = Pow(a,-0.5);
+    else
+        a = TwoJet(0.0, 0.0, 0.0, 0.0);
+    return Mul(v,a);
+}
+
+TwoJetVec RotateZ(TwoJetVec v, TwoJet angle) {
+    TwoJetVec result;
+    TwoJet s,c;
+    s = Sin (angle);
+    c = Cos (angle);
+    result.x =         Add( Mul(v.x,c) , Mul(v.y,s) );
+    result.y = Add( Mul( v.x, Mul(s,-1.0)) , Mul(v.y,c));
+    result.z = v.z;
+    return result;
+}
+
+TwoJetVec RotateY(TwoJetVec v, TwoJet angle) {
+    TwoJetVec result;
+    TwoJet s, c;
+    s = Sin (angle);
+    c = Cos (angle);
+    result.x = Add( Mul(v.x,c) , Mul(v.z, Mul(s,-1.0)));
+    result.y = v.y;
+    result.z = Add(Mul(v.x,s) , Mul(v.z,c) )   ;
+    return result;
+}
+
+TwoJetVec RotateX(TwoJetVec v, TwoJet angle) {
+    TwoJetVec result;
+    TwoJet s,c;
+    s = Sin (angle);
+    c = Cos (angle);
+    result.x = v.x;
+    result.y = Add(Mul(v.y,c) , Mul(v.z,s));
+    result.z = Add( Mul(v.y, Mul(s,-1.0)) , Mul(v.z,c ));
+    return result;
+}
+
+TwoJetVec InterpolateVec(TwoJetVec v1, TwoJetVec v2, TwoJet weight) {
+    return Add(Mul(v1, Add(Mul(weight,-1.0) , 1.0) ) , Mul(v2,weight));
+}
+
+struct ThreeJetVec {
+    ThreeJet x;
+    ThreeJet y;
+    ThreeJet z;
+};
+TwoJetVec ThreeJetVec2TwoJetVec(ThreeJetVec v) { return TwoJetVec(ThreeJet2TwoJet(v.x), ThreeJet2TwoJet(v.y), ThreeJet2TwoJet(v.z)); }
+
+ThreeJetVec Add(ThreeJetVec v, ThreeJetVec w) {
+    ThreeJetVec result;
+    result.x = Add(v.x , w.x);
+    result.y = Add(v.y , w.y);
+    result.z = Add(v.z , w.z);
+    return result;
+}
+
+ThreeJetVec Mul(ThreeJetVec v, ThreeJet  a) {
+    ThreeJetVec result;
+    result.x = Mul(v.x,a);
+    result.y = Mul(v.y,a);
+    result.z = Mul(v.z,a);
+    return result;
+}
+
+ThreeJetVec Mul(ThreeJetVec v, float a) {
+    ThreeJetVec result;
+    result.x = Mul(v.x,a);
+    result.y = Mul(v.y,a);
+    result.z = Mul(v.z,a);
+    return result;
+}
+
+ThreeJetVec AnnihilateVec(ThreeJetVec v, int index) {
+    ThreeJetVec result;
+    result.x = Annihilate(v.x, index);
+    result.y = Annihilate(v.y, index);
+    result.z = Annihilate(v.z, index);
+    return result;
+}
+
+TwoJetVec D(ThreeJetVec x, int index) {
+    TwoJetVec result;
+    result.x = D(x.x, index);
+    result.y = D(x.y, index);
+    result.z = D(x.z, index);
+    return result;
+}
+
+ThreeJetVec Cross(ThreeJetVec v, ThreeJetVec w) {
+    ThreeJetVec result;
+    result.x = Add(Mul(v.y,w.z) , Mul(v.z, Mul(w.y,-1.0)));
+    result.y = Add(Mul(v.z,w.x) , Mul(v.x, Mul(w.z,-1.0)));
+    result.z = Add(Mul(v.x,w.y) , Mul(v.y, Mul(w.x,-1.0)));
+    return result;
+}
+
+ThreeJet Dot(ThreeJetVec v, ThreeJetVec w) {
+    return Add( Mul(v.x,w.x) , Add(Mul(v.y,w.y) , Mul(v.z,w.z)));
+}
+
+ThreeJetVec Normalize(ThreeJetVec v) {
+    ThreeJet a;
+    a = Dot(v,v);
+    if (a.f > 0.0)
+        a = Pow(a,-0.5);
+    else
+        a = ThreeJet(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+    return Mul(v,a);
+}
+
+ThreeJetVec RotateZ(ThreeJetVec v, ThreeJet angle) {
+    ThreeJetVec result;
+    ThreeJet s,c;
+    s = Sin (angle);
+    c = Cos (angle);
+    result.x =        Add(Mul(v.x,c ), Mul(v.y,s));
+    result.y = Add(Mul(v.x, Mul(s,-1.0)) , Mul(v.y,c));
+    result.z = v.z;
+    return result;
+}
+
+ThreeJetVec RotateY(ThreeJetVec v, ThreeJet angle) {
+    ThreeJetVec result;
+    ThreeJet s, c;
+    s = Sin (angle);
+    c = Cos (angle);
+    result.x = Add(Mul(v.x,c) , Mul(v.z, Mul(s,-1.0)) );
+    result.y = v.y;
+    result.z = Add(Mul(v.x,s) , Mul(v.z,c ))   ;
+    return result;
+}
+
+ThreeJetVec RotateX(ThreeJetVec v, ThreeJet angle) {
+    ThreeJetVec result;
+    ThreeJet s,c;
+    s = Sin (angle);
+    c = Cos (angle);
+    result.x = v.x;
+    result.y = Add(Mul(v.y,c ), Mul(v.z,s));
+    result.z = Add(Mul(v.y, Mul(s,-1.0)) , Mul(v.z,c));
+    return result;
+}
+
+ThreeJetVec InterpolateVec(ThreeJetVec v1, ThreeJetVec v2, ThreeJet weight) {
+    return Add (Mul((v1) , Add(Mul(weight,-1.0) , 1.0) ), Mul(v2,weight));
+}
+
+
+TwoJetVec FigureEight(TwoJetVec w, TwoJetVec h, TwoJetVec bend, TwoJet form, TwoJet v) {
+    TwoJet height;
+    v = Mod(v,1.0);
+    height = Mul(Add(Cos (Mul(v,2.0)) , -1.0) , (-1.0));
+    if (v.f > 0.25 && v.f < 0.75)
+       height = Add(Mul(height,-1.0) , 4.0);
+    height = Mul(height,0.6);
+    h = Add(h , Mul(bend,(Mul(height,Mul(height,(1.0/64.0))))));
+    return Add(
+             Mul(w,Sin (Mul(v,2.0))) ,
+             Mul(h, (Interpolate( 
+                         Mul(Add( Cos (v) , -1.0) , (-2.0)), 
+                         height, form)) )
+         );
+ }
+ 
+ TwoJetVec AddFigureEight(ThreeJetVec p, ThreeJet u, TwoJet v, ThreeJet form, ThreeJet scale, int numStrips) {
+
+    ThreeJet size = Mul(form , scale);
+    form = Add( Mul(form,2.0) , Mul(form, Mul(form,-1.0)) );
+    TwoJetVec dv = AnnihilateVec(D(p, 1), 1);
+    p = AnnihilateVec(p, 1);
+    TwoJetVec du = Normalize(D(p, 0));
+    TwoJetVec h = Mul(Normalize(Cross(du, dv)), ThreeJet2TwoJet(size) );
+    TwoJetVec w = Mul( Normalize(Cross(h, du)), Mul(ThreeJet2TwoJet(size),1.1));
+    return RotateZ(
+       Add(ThreeJetVec2TwoJetVec(p) ,
+       FigureEight(w, h, 
+         Mul(du , Mul( D(size, 0) , Pow(D(u, 0),(-1.0)) )), 
+         ThreeJet2TwoJet(form), v)),
+       Mul(v,(1.0/float(numStrips)))
+    );
+ }
+
+
+ThreeJetVec Arc(ThreeJet u, ThreeJet v, float xsize, float ysize, float zsize) {
+    ThreeJetVec result;
+    u = Mul(u,0.25);
+    result.x = Mul(Sin (u) , Mul(Sin (v) , xsize));
+    result.y = Mul(Sin (u) , Mul(Cos (v) , ysize));
+    result.z = Mul(Cos (u) , zsize);
+    return result;
+ }
+ 
+ ThreeJetVec Straight(ThreeJet u, ThreeJet v, float xsize, float ysize, float zsize) { 
+    ThreeJetVec result;
+    u = Mul(u,0.25);
+    result.x = Mul(Sin (v) , xsize);
+    result.y = Mul(Cos (v) , ysize);
+    result.z = Mul(Cos (u) , zsize);
+    return result;
+ }
+
+ ThreeJet Param1(ThreeJet x) {
+    float offset = 0.0;
+    x = Mod(x, 4.0);
+    if (x.f > 2.0) { x = Add(x,(-2.0)); offset = 2.0; }
+    if (x.f <= 1.0) return Add(Mul(x,2.0) , Add( Mul(Pow(x,2.0), -1.0) , offset));
+    else return Add(Pow(x,2.0) , Add(Mul(x,(-2.0)) , (2.0 + offset)));
+ }
+ 
+ ThreeJet Param2(ThreeJet x) {
+    float offset = 0.0;
+    x = Mod(x, 4.0);
+    if (x.f > 2.0) { x = Add(x,-2.0); offset = 2.0; }
+    if (x.f <= 1.0) return Add( Pow(x,2.0) , offset);
+    else return Add( Mul(Pow(x,2.0), -1.0) ,Add( Mul(x,4.0) , (-2.0 + offset) ));
+ }
+ 
+ ThreeJet TInterp(float x) {
+    return ThreeJet(x,0.0,0.0,0.0,0.0,0.0,0.0,0.0);
+ }
+ 
+ ThreeJet UInterp(ThreeJet x) {
+    x = Mod(x,2.0);
+    if (x.f > 1.0)
+       x = Add( Mul(x,-1.0) , 2.0);
+    return Add ( Mul(Pow(x,2.0),3.0) , Mul(Pow(x,3.0) , -2.0) );
+ }
+
+#define FFPOW 3.0
+ThreeJet FFInterp(ThreeJet x) {
+
+   x = Mod(x, 2.0);
+   if (x.f > 1.0)
+      x = Add( Mul(x,-1.0) , 2.0);
+   x = Add( Mul(x,1.06) , -0.05);
+   if (x.f < 0.0) return ThreeJet(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+   else if (x.f > 1.0) return Add(ThreeJet(0.0, 0.0, 0.0, .0, .0, .0, .0, .0) , 1.0);
+   else return Add( Mul(Pow(x , (FFPOW-1.0)) , FFPOW)  , Mul( Pow(x , FFPOW) , -FFPOW + 1.0) );
+}
+
+#define FSPOW 3.0
+ThreeJet FSInterp(ThreeJet x) {
+
+   x = Mod(x,2.0);
+   if (x.f > 1.0)
+      x = Add( Mul(x,-1.0) , 2.0);
+   return Mul( 
+            Add( 
+                Mul(Pow(x , (FSPOW-1.0)) ,FSPOW) , 
+                Mul( Pow(x,FSPOW) ,-FSPOW+1.0)
+              ) 
+          , -0.2);
+}
+ThreeJetVec Stage0(ThreeJet u, ThreeJet v) {
+    return Straight(u, v, 1.0, 1.0, 1.0);
+ }
+ 
+ ThreeJetVec Stage1(ThreeJet u, ThreeJet v) {
+    return Arc(u, v, 1.0, 1.0, 1.0);
+ }
+ 
+ ThreeJetVec Stage2(ThreeJet u, ThreeJet v) {
+    return InterpolateVec(
+       Arc(Param1(u), v, 0.9, 0.9, -1.0),
+       Arc(Param2(u), v, 1.0, 1.0, 0.5),
+       UInterp(u)
+    );
+ }
+ 
+ ThreeJetVec Stage3(ThreeJet u, ThreeJet v) {
+ 
+    return InterpolateVec(
+       Arc(Param1(u), v,-0.9,-0.9,-1.0),
+       Arc(Param2(u), v,-1.0, 1.0,-0.5),
+       UInterp(u)
+    );
+ }
+ 
+ ThreeJetVec Stage4(ThreeJet u, ThreeJet v) {
+    return Arc(u, v, -1.0,-1.0, -1.0);
+ }
+
+ ThreeJetVec Scene01(ThreeJet u, ThreeJet v, float t) {
+    return InterpolateVec(Stage0(u,v), Stage1(u,v), TInterp(t));
+ }
+ 
+ ThreeJetVec Scene12(ThreeJet u, ThreeJet v, float t) {
+    return InterpolateVec(Stage1(u,v), Stage2(u,v), TInterp(t));
+ }
+ 
+ ThreeJetVec Scene23(ThreeJet u, ThreeJet v, float t) {
+ 
+    ThreeJet tmp = TInterp(t);
+    t = tmp.f * 0.5;
+    float tt = (u.f <= 1.0) ? t : -t;
+    return InterpolateVec(
+       RotateZ(Arc(Param1(u), v, 0.9, 0.9,-1.0), ThreeJet(tt,0.0,0.0,.0,.0,.0,.0,.0)),
+       RotateY(Arc(Param2(u), v, 1.0, 1.0, 0.5), ThreeJet(t,0.0,0.0,.0,.0,.0,.0,.0)),
+       UInterp(u)
+   );
+ }
+ 
+ ThreeJetVec Scene34(ThreeJet u, ThreeJet v, float t) {
+    return InterpolateVec(Stage3(u,v), Stage4(u,v), TInterp(t));
+ }
+
+ TwoJetVec BendIn(ThreeJet u, ThreeJet v, float t, int numStrips) {
+
+    ThreeJet tmp = TInterp(t);
+    t = tmp.f;
+    return AddFigureEight(
+       Scene01(u, ThreeJet(0.0, 0.0, 1.0, .0, .0, .0, .0, .0), t),
+       u, ThreeJet2TwoJet(v), ThreeJet(0.0, 0.0, 0.0, .0, .0, .0, .0, .0), FSInterp(u),
+       numStrips
+    );
+ }
+ 
+ TwoJetVec Corrugate(ThreeJet u, ThreeJet v, float t, int numStrips) {
+ 
+    ThreeJet tmp = TInterp(t);
+    t = tmp.f;
+    return AddFigureEight(
+       Stage1(u, ThreeJet(0.0, 0.0, 1.0, .0, .0, .0, .0, .0)),
+        u, ThreeJet2TwoJet(v), Mul(FFInterp(u), ThreeJet(t, 0.0, 0.0, .0, .0, .0, .0, .0)), FSInterp(u),
+       numStrips
+    );
+ }
+ 
+ TwoJetVec PushThrough(ThreeJet u, ThreeJet v, float t, int numStrips) {
+ 
+    return AddFigureEight(
+       Scene12(u,ThreeJet(0.0, 0.0, 1.0, .0, .0, .0, .0, .0),t),
+        u, ThreeJet2TwoJet(v), FFInterp(u), FSInterp(u),
+       numStrips
+    );
+ }
+ 
+ TwoJetVec Twist(ThreeJet u, ThreeJet v, float t, int numStrips) {
+ 
+    return AddFigureEight(
+       Scene23(u,ThreeJet(0.0, 0.0, 1.0, .0, .0, .0, .0, .0),t),
+        u, ThreeJet2TwoJet(v), FFInterp(u), FSInterp(u),
+       numStrips
+    );
+ }
+
+ TwoJetVec UnPush(ThreeJet u, ThreeJet v, float t, int numStrips) {
+
+    return AddFigureEight(
+       Scene34(u,ThreeJet(0.0, 0.0, 1.0, .0, .0, .0, .0, .0),t),
+        u, ThreeJet2TwoJet(v), FFInterp(u), FSInterp(u),
+       numStrips
+    );
+ }
+ 
+ TwoJetVec UnCorrugate(ThreeJet u, ThreeJet v, float t, int numStrips) {
+ 
+    ThreeJet tmp;
+    tmp = TInterp((t) * (-1.0) + 1.0);
+    t = tmp.f;
+ 
+    return AddFigureEight(
+       Stage4(u,ThreeJet(0.0, 0.0, 1.0, .0, .0, .0, .0, .0)),
+        u, ThreeJet2TwoJet(v), Mul(FFInterp(u), ThreeJet(t, 0.0, 0.0, .0, .0, .0, .0, .0)), FSInterp(u),
+       numStrips
+    );
+ }
+
+void printMesh(TwoJetVec p, out vec3 pos, out vec3 normal) {
+    pos.x = p.x.f;
+    pos.y = p.y.f;
+    pos.z = p.z.f;
+    float nx = p.y.fu*p.z.fv-p.z.fu*p.y.fv;
+    float ny = p.z.fu*p.x.fv-p.x.fu*p.z.fv;
+    float nz = p.x.fu*p.y.fv-p.y.fu*p.x.fv;
+    vec3 n = normalize(vec3(nx, ny, nz));
+    normal.x = n.x;
+    normal.y = n.y;
+    normal.z = n.z;
+}
+
+ in vec3 a_position;
+in vec3 a_normal;
+in vec2 a_texcoord;
+
+uniform mat4 u_model;
+uniform mat4 u_projection;
+uniform mat4 u_view;
+uniform float u_t;
+uniform int u_numStrips;
+
+out vec2 v_uv;
+out vec3 v_normal_ws;
+
+void main() {
+    vec3 pos = a_position;
+    vec2 uv = a_texcoord;
+    int numStrips = u_numStrips;
+    float t = u_t;
+    //          values[j][k] = (*func)( ThreeJet(u, 1, 0), ThreeJet(v, 0, 1), t, numStrips );
+    /*
+    if (time >= uncorrStart)
+   printScene(UnCorrugate, u_min, u_max, u_count, v_min, v_max, v_count,
+  (time - uncorrStart) / (1.0 - uncorrStart), geometryMatrix, numStrips );
+else if (time >= unpushStart)
+   printScene(UnPush, u_min, u_max, u_count, v_min, v_max, v_count,
+  (time - unpushStart) / (uncorrStart - unpushStart), geometryMatrix, numStrips );
+else if (time >= twistStart)
+   printScene(Twist, u_min, u_max, u_count, v_min, v_max, v_count,
+  (time - twistStart) / (unpushStart - twistStart), geometryMatrix, numStrips );
+else if (time >= pushStart)
+   printScene(PushThrough, u_min, u_max, u_count, v_min, v_max, v_count,
+  (time - pushStart) / (twistStart - pushStart), geometryMatrix, numStrips );
+else if (time >= corrStart)
+   printScene(Corrugate, u_min, u_max, u_count, v_min, v_max, v_count,
+  (time - corrStart) / (pushStart - corrStart), geometryMatrix, numStrips );
+    */
+
+    float corrStart = 0.0, pushStart = 0.1, twistStart = 0.23, unpushStart = 0.6, uncorrStart = 0.93;
+    TwoJetVec res;
+  
+    if (t >= uncorrStart) {
+        t = (u_t - uncorrStart) / (1.0 - uncorrStart);
+        res = UnCorrugate(ThreeJet(uv.x, 1.0, 0.0, .0, .0, .0, .0, .0), ThreeJet(uv.y, 0.0, 1.0, .0, .0, .0, .0, .0), t, numStrips);
+    }
+    else if (t >= unpushStart) {
+        t = (u_t - unpushStart) / (uncorrStart - unpushStart);
+        res = UnPush(ThreeJet(uv.x, 1.0, 0.0, .0, .0, .0, .0, .0), ThreeJet(uv.y, 0.0, 1.0, .0, .0, .0, .0, .0), t, numStrips);
+    }
+    else if (t >= twistStart) {
+        t = (u_t - twistStart) / (unpushStart - twistStart);
+        res = Twist(ThreeJet(uv.x, 1.0, 0.0, .0, .0, .0, .0, .0), ThreeJet(uv.y, 0.0, 1.0, .0, .0, .0, .0, .0), t, numStrips);
+    }
+    else if (t >= pushStart) {
+        t = (u_t - pushStart) / (twistStart - pushStart);
+        res = PushThrough(ThreeJet(uv.x, 1.0, 0.0, .0, .0, .0, .0, .0), ThreeJet(uv.y, 0.0, 1.0, .0, .0, .0, .0, .0), t, numStrips);
+    }
+    else if (t >= corrStart) {
+        t = (u_t - corrStart) / (pushStart - corrStart);
+        res = Corrugate(ThreeJet(uv.x, 1.0, 0.0, .0, .0, .0, .0, .0), ThreeJet(uv.y, 0.0, 1.0, .0, .0, .0, .0, .0), t, numStrips);
+    }
+
+    // res = BendIn( ThreeJet(uv.x, 1.0, 0.0, .0, .0, .0, .0, .0), ThreeJet(uv.y, 0.0, 1.0, .0, .0, .0, .0, .0), t, numStrips );
+    vec3 normal;
+    printMesh(res, pos, normal);
+
+    gl_Position = u_projection * u_view * u_model * vec4(pos, 1.0);
+    v_uv = a_texcoord;
+    v_normal_ws = mat3(u_model) * a_normal;
+}
+</script>
+
+<script id="model-fragment-shader" type="x-shader/x-fragment"> #version 300 es
+precision highp float;
+
+in vec2 v_uv;
+in vec3 v_normal_ws;
+
+out vec4 FragColor;
+
+void main() {
+
+    FragColor = vec4(v_normal_ws * 0.5+0.5, 1.0);
+}
+</script>
+
+<script type="module">
+function degreeToRad(degree) { return degree*Math.PI/180.0; }
+
+class Camera {
+    constructor() {
+        this.forward = [0,0,-1];    // -z
+        this.right = [1,0,0];       // x
+        this.position = [0,0,0];
+    }
+    moveForward(distance) {
+        this.position = m4.addVectors( this.position, m4.scaleVector(this.forward, distance) );
+    }
+    moveRight(distance) {
+        this.position = m4.addVectors( this.position, m4.scaleVector(this.right, distance) );
+    }
+    moveUp(distance) {
+        this.position = m4.addVectors( this.position, m4.scaleVector([0,1,0], distance) );
+    }
+    getViewMatrix() {
+        var target = m4.addVectors(this.position, this.forward);
+        var transform = m4.lookAt(this.position, target, [0,1,0]);
+        return m4.inverse(transform);
+    }
+}
+
+class UECameraControl {
+    constructor(camera) {
+        this.camera = camera;
+        this.moveSpeed = 2;
+        this.rotateSpeed = 1;
+        this.isMoveForward = false;
+        this.isMoveBackward = false;
+        this.isMoveLeft = false;
+        this.isMoveRight = false;
+        this.isMoveUp = false;
+        this.isMoveDown = false;
+        this.yaw = 0;
+        this.pitch = 0;
+        this.maxPitch = 88;
+        this.isLocked = true;
+    }
+    update(delta_t) {
+        this.updateCameraPosition(delta_t);
+        this.updateCameraRotation(delta_t);
+    }
+    updateCameraPosition(delta_t){
+        var distance = delta_t * this.moveSpeed;
+        if (this.isMoveForward && !this.isMoveBackward) {
+            this.camera.moveForward(distance);
+        }
+        if (!this.isMoveForward && this.isMoveBackward) {
+            this.camera.moveForward(-distance);
+        }
+        if (this.isMoveLeft && !this.isMoveRight) {
+            this.camera.moveRight(-distance);
+        }
+        if (!this.isMoveLeft && this.isMoveRight) {
+            this.camera.moveRight(distance);
+        }
+        if (this.isMoveUp && !this.isMoveDown) {
+            this.camera.moveUp(distance);
+        }
+        if (!this.isMoveUp && this.isMoveDown) {
+            this.camera.moveUp(-distance);
+        }
+    }
+    updateCameraRotation(delta_t){
+        // yaw, pitch to forward & right
+        var sin_pitch = Math.sin(degreeToRad(this.pitch));
+        var sin_yaw = Math.sin(degreeToRad(this.yaw));
+        var cos_yaw = Math.cos(degreeToRad(this.yaw));
+        var xz_len = Math.sqrt(1.0 - sin_pitch*sin_pitch);
+        var fwd = [-xz_len*sin_yaw, sin_pitch, -xz_len*cos_yaw];
+        var right = [cos_yaw, 0, -sin_yaw];
+        camera.forward = fwd;
+        camera.right = right;
+    }
+
+    onKeyDown ( event ) {
+        if (this.isLocked) return;
+        switch ( event.code ) {
+            case 'ArrowUp':
+            case 'KeyW': this.isMoveForward = true; break;
+            case 'ArrowLeft':
+            case 'KeyA': this.isMoveLeft = true; break;
+            case 'ArrowDown':
+            case 'KeyS': this.isMoveBackward = true; break;
+            case 'ArrowRight':
+            case 'KeyD': this.isMoveRight = true; break;
+            case 'KeyE': this.isMoveUp = true; break;
+            case 'KeyQ': this.isMoveDown = true; break;
+        }
+    };
+    onKeyUp ( event ) {
+        switch ( event.code ) {
+            case 'ArrowUp':
+            case 'KeyW': this.isMoveForward = false; break;
+            case 'ArrowLeft':
+            case 'KeyA': this.isMoveLeft = false; break;
+            case 'ArrowDown':
+            case 'KeyS': this.isMoveBackward = false; break;
+            case 'ArrowRight':
+            case 'KeyD': this.isMoveRight = false; break;
+            case 'KeyE': this.isMoveUp = false; break;
+            case 'KeyQ': this.isMoveDown = false; break;
+        }
+    };
+    onPointerMove( event ) {
+        if (this.isLocked) return;
+        const movementX = event.movementX || event.mozMovementX || event.webkitMovementX || 0;
+        const movementY = event.movementY || event.mozMovementY || event.webkitMovementY || 0;
+
+        this.yaw -= movementX * 0.05 * this.rotateSpeed;
+        this.yaw = this.yaw % 360;
+        this.pitch -= movementY * 0.05 * this.rotateSpeed;
+        this.pitch = Math.max( -this.maxPitch, Math.min( this.maxPitch, this.pitch ) );
+    }
+    onPointerDown(event) {
+        if (event.button == 2) {
+            this.isLocked = false;
+        }
+    }
+    onPointerUp(event) {
+        if (event.button == 2) {
+            this.isLocked = true;
+        }
+    }
+    onContextmenu( event ) {
+        event.preventDefault();
+    }
+
+    registerEventHandlers(domElement) {
+        domElement.addEventListener( 'mouseup', this.onPointerUp.bind(this) );
+        domElement.addEventListener( 'mousemove', this.onPointerMove.bind(this) );
+        domElement.addEventListener( 'mousedown', this.onPointerDown.bind(this) );
+        domElement.addEventListener( 'contextmenu', this.onContextmenu.bind(this) );
+        window.addEventListener( 'keydown', this.onKeyDown.bind(this) );
+        window.addEventListener( 'keyup', this.onKeyUp.bind(this) );
+    }
+}
+
+const drawCanvas = document.getElementById('drawCanvas');
+const gl = drawCanvas.getContext("webgl2");
+const ext = gl.getExtension('EXT_color_buffer_float');
+if (!ext) {
+    alert('need EXT_color_buffer_float');
+}
+
+
+var planeBufferInfo = null;
+var cubeBufferInfo = null;
+var skyProgramInfo = null;
+var modelProgramInfo = null;
+var camera = null;
+var cameraControl = null;
+var time = 0;
+var numStrips = 8;
+
+function makeGridPlane(xGrids, yGrids, positionScale, uvScale) {
+    var position = [];
+    var texcoord = [];
+    for (var i = 0; i < yGrids + 1; i++) {
+        for (var j = 0; j < xGrids + 1; j++) {
+            var vert_idx = i*(xGrids+1) + j;
+            position[3*vert_idx + 0] = j * positionScale;
+            position[3*vert_idx + 1] = i * positionScale;
+            position[3*vert_idx + 2] = 0;
+            texcoord[2*vert_idx + 0] = j * uvScale;
+            texcoord[2*vert_idx + 1] = i * uvScale;
+        }
+    }
+    var indices = [];
+    for (var i = 0; i < yGrids; i++) {
+        for (var j = 0; j < xGrids; j++) {
+            var grid_idx = i*xGrids + j;
+            var idx00 = i*(xGrids+1) + j;
+            var idx01 = idx00 + (xGrids+1);
+            var idx10 = idx00 + 1;
+            var idx11 = idx01 + 1;
+            indices[6*grid_idx + 0] = idx00;
+            indices[6*grid_idx + 1] = idx01;
+            indices[6*grid_idx + 2] = idx11;
+            indices[6*grid_idx + 3] = idx00;
+            indices[6*grid_idx + 4] = idx11;
+            indices[6*grid_idx + 5] = idx10;
+        }
+    }
+    return {
+        position: position,
+        texcoord: texcoord,
+        indices: indices,
+    }
+}
+
+function makeWireframeGeometry(geometry) {
+    var ret = Object.assign({}, geometry);  // structuredClone(geometry)
+    var ib = geometry.indices;
+    var indices = [];
+    if (ib) {
+        var faces = Math.floor(ib.length / 3);
+        for (var i = 0; i < faces; i++) {
+            var idx0 = ib[i*3 + 0];
+            var idx1 = ib[i*3 + 1];
+            var idx2 = ib[i*3 + 2];
+            indices[6*i + 0] = idx0;
+            indices[6*i + 1] = idx1;
+            indices[6*i + 2] = idx1;
+            indices[6*i + 3] = idx2;
+            indices[6*i + 4] = idx2;
+            indices[6*i + 5] = idx0;
+        }
+    } else {
+        // for ()
+    }
+    ret.indices = indices;
+    return ret;
+}
+
+async function initScene() {
+    gl.clearColor(0, 0, 0, 1);
+    gl.clearDepth(1.0);
+
+    
+    var planeVB = makeGridPlane(12,12,1,1./12);
+    var planeWireframe = makeWireframeGeometry(planeVB);
+
+    planeBufferInfo = webglUtils.createBufferInfoFromArrays(gl, planeWireframe);
+
+    cubeBufferInfo = webglUtils.createBufferInfoFromArrays(gl, {
+        position: [
+            -1,  1,  1,  
+             1,  1,  1,  
+             1, -1,  1,  
+            -1, -1,  1, 
+             1,  1, -1,  
+            -1,  1, -1,  
+            -1, -1, -1,  
+             1, -1, -1, 
+        ],  
+        indices: [0,1,2,2,3,0,1,4,7,7,2,1,4,5,6,6,7,4,5,0,3,3,6,5,5,4,1,1,0,5,3,2,7,7,6,3],
+    });
+    skyProgramInfo = webglUtils.createProgramInfo(gl, ['sky-vertex-shader', 'sky-fragment-shader']);
+    modelProgramInfo = webglUtils.createProgramInfo(gl, ['model-vertex-shader', 'model-fragment-shader']);
+
+    camera = new Camera();
+    camera.position = [0,10,50];
+
+    cameraControl = new UECameraControl(camera);
+    cameraControl.registerEventHandlers(window);
+    cameraControl.moveSpeed *= 10;
+}
+
+function logicUpdate(delta_t) {
+    time += delta_t;
+    cameraControl.update(delta_t);
+}
+
+function renderMainPass() {
+    var viewMatrix = camera.getViewMatrix();
+    var fov = degreeToRad(45.);
+    var aspect = 1024./768.;
+    var near = 0.1;
+    var far = 1000.0;
+    var projectionMatrix = m4.perspective(fov, aspect, near, far);
+    var worldMatrix =  m4.identity();
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.viewport(0, 0, 1024, 768);
+    gl.clearColor(1,1,1,1);
+    gl.clearDepth(1);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    // sky
+    gl.useProgram(skyProgramInfo.program);
+    webglUtils.setUniforms(skyProgramInfo, {
+        u_view: viewMatrix,
+        u_projection: projectionMatrix,
+    });
+    webglUtils.setBuffersAndAttributes(gl, skyProgramInfo, cubeBufferInfo);
+    gl.disable(gl.DEPTH_TEST);
+    webglUtils.drawBufferInfo(gl, cubeBufferInfo);
+    gl.enable(gl.DEPTH_TEST);
+
+    // model
+    gl.useProgram(modelProgramInfo.program);
+    for (var hemisphere = 0; hemisphere < 2; ++hemisphere) {
+        for (var strip = 0; strip < numStrips; ++strip) {
+            var m1 = m4.yRotate(m4.identity(), hemisphere*Math.PI);
+            var m2 = m4.zRotate(m1, (hemisphere == 0 ? -strip : strip+1)*2.0*Math.PI/numStrips);
+            webglUtils.setUniforms(modelProgramInfo, {
+                u_model: m2, 
+                u_view: viewMatrix,
+                u_projection: projectionMatrix,
+                u_t: Math.sin(time * 0.1)*0.5+0.5,
+                u_numStrips:numStrips,
+            });
+            webglUtils.setBuffersAndAttributes(gl, modelProgramInfo, planeBufferInfo);
+            webglUtils.drawBufferInfo(gl, planeBufferInfo, gl.LINES);
+        }
+    }
+}
+
+function render(delta_t) {
+    renderMainPass();
+}
+
+var last_time = null;
+
+function frameLoop() {
+    var current_time = Date.now();
+    var delta_t = 1./30.;
+    if (last_time != null) {
+        delta_t = (current_time - last_time)/1000.0;
+    }
+    logicUpdate(delta_t);
+    render(delta_t);
+    last_time = current_time;
+    window.requestAnimationFrame(frameLoop);
+}
+
+async function main() {
+    await initScene();
+    frameLoop();
+}
+
+main();
+
+</script>
+
+    
+
+</body>
+</html>

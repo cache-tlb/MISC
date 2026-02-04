@@ -7,7 +7,7 @@
 </head>
 
 <body>
-<canvas id="drawCanvas" width="128" height="128"> </canvas>
+<canvas id="drawCanvas" width="512" height="512"> </canvas>
 
 <script id="post-vertex-shader" type="x-shader/x-vertex">#version 300 es
 precision highp float;
@@ -55,7 +55,6 @@ void main() {
     vec3 c = texture(u_image, v_uv).rgb;
     vec3 ret = c + l*u_lambda;
     fragColor = vec4(ret, 1.0);
-    // fragColor = vec4(v_uv, 0.0, 1.0);
 }
 </script>
 
@@ -100,17 +99,16 @@ function degreeToRad(degree) { return degree*Math.PI/180.0; }
 
 const canvas = document.getElementById('drawCanvas');
 const gl = canvas.getContext("webgl2");
+const ext = gl.getExtension('EXT_color_buffer_float');
+if (!ext) {
+    alert('need EXT_color_buffer_float');
+}
 
 var screenQuadBufferInfo = null;
 var copyProgramInfo = null;
 var laplacianProgramInfo = null;
 var updateProgramInfo = null;
 var setPointsProgramInfo = null;
-
-var texture_last = null;
-var texture_new = null;
-var laplacian_tex = null;
-var points_tex = null;
 
 var fb_laplacian = null;
 var fb_update = null;
@@ -120,38 +118,97 @@ var num_points = 1000;
 var points = [];
 var colors = [];
 
-function createFloatTexture(width, height, data) {
-    const level = 0;
-    const internalFormat = gl.RGBA32F;
-    const format = gl.RGBA;
-    const type = gl.FLOAT;
+function createTexture2D(options) {
+    const width = options.width || 2;
+    const height = options.height || 2;
+    const data = options.data || null;
 
-    var ret = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, ret);
-    gl.texImage2D(gl.TEXTURE_2D, level, internalFormat, width, height, 0, format, type, data);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
-    return ret;
+    let internal_format = options.internal_format || gl.RGBA;
+    let format = options.format || gl.RGBA;
+    let type = options.type || gl.UNSIGNED_BYTE;
+    let wrap_mode = options.wrap_mode || gl.CLAMP_TO_EDGE;
+    let filter_mode = options.filter_mode || gl.NEAREST;
+
+    const tex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texImage2D(
+        gl.TEXTURE_2D,      // target
+        0,                  // mip level
+        internal_format, // internal format
+        width, 
+        height,
+        0,                  // border
+        format, // format
+        type,    // type
+        data);              
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter_mode);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter_mode);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, wrap_mode);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, wrap_mode);
+    return tex;
 }
-
-function createFB(tex) {
-    var ret = gl.createFramebuffer();
-    gl.bindFramebuffer(gl.FRAMEBUFFER, ret);
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
-    var err = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
-    if (err != gl.FRAMEBUFFER_COMPLETE) {
-        if (gl.FRAMEBUFFER_INCOMPLETE_ATTACHMENT == err)
-            console.log("gl.FRAMEBUFFER_INCOMPLETE_ATTACHMENT");
-        else if (gl.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT == err) 
-            console.log("gl.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT");
-        else if (gl.FRAMEBUFFER_INCOMPLETE_DIMENSIONS == err)
-            console.log("gl.FRAMEBUFFER_INCOMPLETE_DIMENSIONS");
-        else if (gl.FRAMEBUFFER_UNSUPPORTED == err)
-            console.log("gl.FRAMEBUFFER_UNSUPPORTED");
-        else console.log("frame buffer error");
+function createDepthBuffer(width, height) {
+    const options = {
+        "width": width,
+        "height": height,
+        "internal_format": gl.DEPTH_COMPONENT32F,
+        "format": gl.DEPTH_COMPONENT,
+        "type": gl.FLOAT,
+        "wrap_mode": gl.CLAMP_TO_EDGE,
+        "filter_mode": gl.NEAREST
+    };
+    return createTexture2D(options);
+}
+function createColorBuffer(width, height) {
+    const options = {
+        "width": width,
+        "height": height,
+        "internal_format": gl.RGBA32F,
+        "format": gl.RGBA,
+        "type": gl.FLOAT,
+        "wrap_mode": gl.REPEAT,
+        "filter_mode": gl.LINEAR
     }
-    return ret;
+    return createTexture2D(options);
+}
+function createFB(width, height) {
+    FB = gl.createFramebuffer();
+    depth = createDepthBuffer(width, height);
+    color_buf = createColorBuffer(width, height);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, FB);
+    gl.framebufferTexture2D(
+        gl.FRAMEBUFFER,       // target
+        gl.DEPTH_ATTACHMENT,  // attachment point
+        gl.TEXTURE_2D,        // texture target
+        depth,         // texture
+        0);                   // mip level
+    gl.framebufferTexture2D(
+        gl.FRAMEBUFFER,        // target
+        gl.COLOR_ATTACHMENT0,  // attachment point
+        gl.TEXTURE_2D,         // texture target
+        color_buf,         // texture
+        0);                    // mip level
+
+    const res = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+    if (res != gl.FRAMEBUFFER_COMPLETE) {
+        console.log('frame buffer status error');
+        if (res == gl.FRAMEBUFFER_INCOMPLETE_ATTACHMENT) {
+            console.log('FRAMEBUFFER_INCOMPLETE_ATTACHMENT');
+        } else if (res == gl.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT) {
+            console.log('FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT');
+        } else if (res == gl.FRAMEBUFFER_INCOMPLETE_DIMENSIONS) {
+            console.log('FRAMEBUFFER_INCOMPLETE_DIMENSIONS');
+        } else if (res == gl.FRAMEBUFFER_UNSUPPORTED) {
+            console.log('FRAMEBUFFER_UNSUPPORTED');
+        }
+    }
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+    return {
+        "fb": FB,
+        "depth": depth,
+        "color": color_buf,
+    };
 }
 
 function generate_points() {
@@ -160,11 +217,10 @@ function generate_points() {
     for (var i = 0; i < num_points; i++) {
         var r0 = Math.random();
         var r1 = Math.random();
-        var x = r0*canvas.width, y = r1*canvas.height;
+        var x = Math.floor(r0*canvas.width), y = Math.floor(r1*canvas.height);
         points.push([x, y]);
         colors.push([Math.random(), Math.random(), Math.random()]);
     }
-
 }
 
 function initScene() {
@@ -194,9 +250,6 @@ function initScene() {
     const width = canvas.width;
     const height = canvas.height;
 
-    texture_last = createFloatTexture(width, height, null);
-    texture_new = createFloatTexture(width, height, null);
-    laplacian_tex = createFloatTexture(width, height, null);
     var dataArray = new Float32Array(width*height*4);
     for (var i = 0; i < num_points; i++) {
         var x = Math.min(points[i][0], width - 1), y = Math.min(points[i][1], height - 1);
@@ -205,18 +258,22 @@ function initScene() {
         dataArray[y*width*4 + x*4 + 2] = colors[i][2];
         dataArray[y*width*4 + x*4 + 3] = 1.0;
     }
-    for (var i = 0; i < width*height; i++) {
-        if (i % 125 != 1) continue;
-        dataArray[i*4+0] = (i%17)/17.0;
-        dataArray[i*4+1] = (i%47)/47.0;
-        dataArray[i*4+2] = (i%97)/97.0;
-        dataArray[i*4+3] = 1.0;
-    }
-    points_tex = createFloatTexture(width, height, dataArray);
 
-    fb_laplacian = createFB(laplacian_tex);
-    fb_update = createFB(texture_new);
-    fb_setPoints = createFB(texture_last);
+    const options = {
+        "width": width,
+        "height": height,
+        "internal_format": gl.RGBA32F,
+        "format": gl.RGBA,
+        "type": gl.FLOAT,
+        "wrap_mode": gl.REPEAT,
+        "filter_mode": gl.LINEAR,
+        "data": dataArray,
+    }
+    points_tex = createTexture2D(options);
+
+    fb_laplacian = createFB(width, height);
+    fb_update = createFB(width, height);
+    fb_setPoints = createFB(width, height);
 }
 
 function logicUpdate(delta_t) {
@@ -228,33 +285,35 @@ function postLogicUpdate(delta_t) {
 function render(delta_t) {
     gl.disable(gl.DEPTH_TEST);
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, fb_laplacian);
+    // texture last -> laplacian_tex
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fb_laplacian["fb"]);
     gl.useProgram(laplacianProgramInfo.program);
     webglUtils.setBuffersAndAttributes(gl, laplacianProgramInfo, screenQuadBufferInfo);
     webglUtils.setUniforms(laplacianProgramInfo, {
-        u_texture: texture_last,
+        u_texture: fb_setPoints["color"],
         u_screenSize: [canvas.width, canvas.height, 1./canvas.width, 1./canvas.height],
     });
     webglUtils.drawBufferInfo(gl, screenQuadBufferInfo);
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, fb_update);
+    // laplacian_tex*lambda + texture last * (1-lambda) -> texture new
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fb_update["fb"]);
     gl.useProgram(updateProgramInfo.program);
     webglUtils.setBuffersAndAttributes(gl, updateProgramInfo, screenQuadBufferInfo);
     webglUtils.setUniforms(updateProgramInfo, {
-        u_laplacian: laplacian_tex,
-        u_image: texture_last,
-        u_lambda: 0.1,
+        u_laplacian: fb_laplacian["color"],
+        u_image: fb_setPoints["color"],
+        u_lambda: 0.01,
         u_screenSize: [canvas.width, canvas.height, 1./canvas.width, 1./canvas.height],
     });
     webglUtils.drawBufferInfo(gl, screenQuadBufferInfo);
 
     // points + new texture -> texture last
-    gl.bindFramebuffer(gl.FRAMEBUFFER, fb_setPoints);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fb_setPoints["fb"]);
     gl.useProgram(setPointsProgramInfo.program);
     webglUtils.setBuffersAndAttributes(gl, setPointsProgramInfo, screenQuadBufferInfo);
     webglUtils.setUniforms(setPointsProgramInfo, {
         u_points: points_tex,
-        u_new_image: texture_new,
+        u_new_image: fb_update["color"],
         u_screenSize: [canvas.width, canvas.height, 1./canvas.width, 1./canvas.height],
     });
     webglUtils.drawBufferInfo(gl, screenQuadBufferInfo);
@@ -264,7 +323,7 @@ function render(delta_t) {
     gl.useProgram(copyProgramInfo.program);
     webglUtils.setBuffersAndAttributes(gl, copyProgramInfo, screenQuadBufferInfo);
     webglUtils.setUniforms(copyProgramInfo, {
-        u_texture: texture_last,
+        u_texture: fb_update["color"],
         u_screenSize: [canvas.width, canvas.height, 1./canvas.width, 1./canvas.height],
     });
     webglUtils.drawBufferInfo(gl, screenQuadBufferInfo);
