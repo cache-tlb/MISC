@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>球面外翻 Sphere Eversion (WebGL)</title>
+<style>
+  html, body { margin: 0; height: 100%; overflow: hidden; background: #10131a; }
+  #c { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
+  #c.dragging { cursor: grabbing; }
+  #panel {
+    position: fixed; top: 12px; left: 12px; z-index: 10;
+    background: rgba(16, 20, 30, 0.82); backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,0.12); border-radius: 10px;
+    color: #dde3ee; font: 13px/1.6 system-ui, "Segoe UI", "Microsoft YaHei", sans-serif;
+    padding: 12px 14px; width: 250px; user-select: none;
+  }
+  #panel h1 { font-size: 15px; margin: 0 0 8px; font-weight: 600; color: #fff; }
+  #panel .row { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+  #panel .row label { flex: 0 0 72px; color: #9fb0c8; }
+  #panel input[type=range] { flex: 1; min-width: 0; accent-color: #e5533d; }
+  #panel select, #panel button {
+    background: #232a3a; color: #dde3ee; border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 6px; padding: 3px 8px; font: inherit; cursor: pointer;
+  }
+  #panel select { flex: 1; }
+  #panel button:hover { background: #2f3950; }
+  #panel .val { flex: 0 0 52px; text-align: right; font-variant-numeric: tabular-nums; color: #fff; }
+  #panel .btns { display: flex; gap: 8px; margin-top: 8px; }
+  #panel .btns button { flex: 1; }
+  #panel .chk { color: #9fb0c8; display: flex; align-items: center; gap: 6px; margin: 4px 0; cursor: pointer; }
+  #help {
+    position: fixed; bottom: 10px; left: 12px; z-index: 10;
+    color: rgba(200,210,230,0.55); font: 12px/1.7 system-ui, "Microsoft YaHei", sans-serif;
+    pointer-events: none;
+  }
+  #phase {
+    position: fixed; top: 14px; right: 16px; z-index: 10;
+    color: rgba(220,228,245,0.85); font: 13px/1.5 system-ui, "Microsoft YaHei", sans-serif;
+    text-align: right; pointer-events: none; font-variant-numeric: tabular-nums;
+  }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="panel">
+  <h1>球面外翻 · Thurston Eversion</h1>
+  <div class="row">
+    <label>时间 t</label>
+    <input id="tSlider" type="range" min="0" max="1" step="0.0005" value="0">
+    <span class="val" id="tVal">0.000</span>
+  </div>
+  <div class="btns">
+    <button id="playBtn">⏸ 暂停</button>
+    <button id="resetBtn">复位视角</button>
+  </div>
+  <div class="row">
+    <label>周期</label>
+    <select id="speedSel">
+      <option value="8">8 秒</option>
+      <option value="16" selected>16 秒</option>
+      <option value="32">32 秒</option>
+    </select>
+  </div>
+  <div class="row">
+    <label>渲染</label>
+    <select id="styleSel">
+      <option value="solid" selected>实体</option>
+      <option value="solidwire">实体 + 网格</option>
+      <option value="wire">线框</option>
+      <option value="bands">条带</option>
+      <option value="alpha">半透明叠加</option>
+    </select>
+  </div>
+  <div class="row">
+    <label>颜色</label>
+    <select id="colorSel">
+      <option value="1,0,0" selected>红 / 青</option>
+      <option value="0,1,0">绿 / 品红</option>
+      <option value="0,0,1">蓝 / 黄</option>
+      <option value="1,1,0">黄 / 蓝</option>
+      <option value="1,0,1">品红 / 绿</option>
+      <option value="0,1,1">青 / 红</option>
+    </select>
+  </div>
+  <div class="row">
+    <label>网格精度</label>
+    <select id="resSel">
+      <option value="12">低 (12×12)</option>
+      <option value="20" selected>中 (20×20)</option>
+      <option value="32">高 (32×32)</option>
+    </select>
+  </div>
+  <div class="row">
+    <label>显示条带</label>
+    <input id="stripSlider" type="range" min="1" max="8" step="1" value="8">
+    <span class="val" id="stripVal">8 / 8</span>
+  </div>
+  <label class="chk"><input id="hemiChk" type="checkbox" checked> 显示南北两半球</label>
+  <label class="chk"><input id="spinChk" type="checkbox"> 自动旋转</label>
+</div>
+
+<div id="phase"></div>
+
+<div id="help">
+  拖动：旋转视角 &nbsp;·&nbsp; Shift + 水平拖动：手动外翻 &nbsp;·&nbsp; 滚轮：缩放 &nbsp;·&nbsp; 空格：播放 / 暂停
+</div>
+
+<script>
+'use strict';
+/* ============================================================
+ * 球面外翻（Thurston eversion）几何计算。
+ * 移植自 sphereEversion-0.4-src/generateGeometry.cpp
+ * （Michael McGuffin，源自 Nathaniel Thurston 的 "evert"）。
+ * 使用 2 阶 / 3 阶 jet（带偏导数的数）做自动微分，
+ * 从而能解析地得到曲面法线。
+ * ============================================================ */
+
+var TAU = Math.PI * 2;
+
+/* ---------- TwoJet: {f, fu, fv, fuv} ---------- */
+function TJ(f, fu, fv, fuv) { return { f: f, fu: fu, fv: fv, fuv: fuv || 0 }; }
+
+function tAdd(x, y) { return TJ(x.f + y.f, x.fu + y.fu, x.fv + y.fv, x.fuv + y.fuv); }
+function tAddC(x, d) { return TJ(x.f + d, x.fu, x.fv, x.fuv); }
+function tMul(x, y) {
+  return TJ(
+    x.f * y.f,
+    x.f * y.fu + x.fu * y.f,
+    x.f * y.fv + x.fv * y.f,
+    x.f * y.fuv + x.fu * y.fv + x.fv * y.fu + x.fuv * y.f
+  );
+}
+function tMulC(x, d) { return TJ(d * x.f, d * x.fu, d * x.fv, d * x.fuv); }
+function tSin(x) {
+  var t = tMulC(x, TAU), s = Math.sin(t.f), c = Math.cos(t.f);
+  return TJ(s, c * t.fu, c * t.fv, c * t.fuv - s * t.fu * t.fv);
+}
+function tCos(x) {
+  var t = tMulC(x, TAU), s = Math.cos(t.f), c = -Math.sin(t.f);
+  return TJ(s, c * t.fu, c * t.fv, c * t.fuv - s * t.fu * t.fv);
+}
+function tPow(x, n) {
+  var x0 = Math.pow(x.f, n);
+  var x1 = (x.f === 0) ? 0 : n * x0 / x.f;
+  var x2 = (x.f === 0) ? 0 : (n - 1) * x1 / x.f;
+  return TJ(x0, x1 * x.fu, x1 * x.fv, x1 * x.fuv + x2 * x.fu * x.fv);
+}
+function tMod(x, d) { var f = x.f % d; if (f < 0) f += d; return TJ(f, x.fu, x.fv, x.fuv); }
+function tInterp(v1, v2, w) {
+  return tAdd(tMul(v1, tAddC(tMulC(w, -1), 1)), tMul(v2, w));
+}
+
+/* ---------- ThreeJet: {f, fu, fv, fuu, fuv, fvv, fuuv, fuvv} ---------- */
+function HJ(f, fu, fv, fuu, fuv, fvv, fuuv, fuvv) {
+  return { f: f, fu: fu, fv: fv, fuu: fuu || 0, fuv: fuv || 0, fvv: fvv || 0, fuuv: fuuv || 0, fuvv: fuvv || 0 };
+}
+function h2t(v) { return TJ(v.f, v.fu, v.fv, v.fuv); }
+
+function hAdd(x, y) {
+  return HJ(x.f + y.f, x.fu + y.fu, x.fv + y.fv, x.fuu + y.fuu,
+            x.fuv + y.fuv, x.fvv + y.fvv, x.fuuv + y.fuuv, x.fuvv + y.fuvv);
+}
+function hAddC(x, d) { return HJ(x.f + d, x.fu, x.fv, x.fuu, x.fuv, x.fvv, x.fuuv, x.fuvv); }
+function hMul(x, y) {
+  return HJ(
+    x.f * y.f,
+    x.f * y.fu + x.fu * y.f,
+    x.f * y.fv + x.fv * y.f,
+    x.f * y.fuu + 2 * x.fu * y.fu + x.fuu * y.f,
+    x.f * y.fuv + x.fu * y.fv + x.fv * y.fu + x.fuv * y.f,
+    x.f * y.fvv + 2 * x.fv * y.fv + x.fvv * y.f,
+    x.f * y.fuuv + 2 * x.fu * y.fuv + x.fv * y.fuu + 2 * x.fuv * y.fu + x.fuu * y.fv + x.fuuv * y.f,
+    x.f * y.fuvv + 2 * x.fv * y.fuv + x.fu * y.fvv + 2 * x.fuv * y.fv + x.fvv * y.fu + x.fuvv * y.f
+  );
+}
+function hMulC(x, d) {
+  return HJ(d * x.f, d * x.fu, d * x.fv, d * x.fuu, d * x.fuv, d * x.fvv, d * x.fuuv, d * x.fuvv);
+}
+function hSin(x) {
+  var t = hMulC(x, TAU), s = Math.sin(t.f), c = Math.cos(t.f);
+  return HJ(
+    s, c * t.fu, c * t.fv,
+    c * t.fuu - s * t.fu * t.fu,
+    c * t.fuv - s * t.fu * t.fv,
+    c * t.fvv - s * t.fv * t.fv,
+    c * t.fuuv - s * (2 * t.fu * t.fuv + t.fv * t.fuu) - c * t.fu * t.fu * t.fv,
+    c * t.fuvv - s * (2 * t.fv * t.fuv + t.fu * t.fvv) - c * t.fu * t.fv * t.fv
+  );
+}
+function hCos(x) {
+  var t = hMulC(x, TAU), s = Math.cos(t.f), c = -Math.sin(t.f);
+  return HJ(
+    s, c * t.fu, c * t.fv,
+    c * t.fuu - s * t.fu * t.fu,
+    c * t.fuv - s * t.fu * t.fv,
+    c * t.fvv - s * t.fv * t.fv,
+    c * t.fuuv - s * (2 * t.fu * t.fuv + t.fv * t.fuu) - c * t.fu * t.fu * t.fv,
+    c * t.fuvv - s * (2 * t.fv * t.fuv + t.fu * t.fvv) - c * t.fu * t.fv * t.fv
+  );
+}
+function hPow(x, n) {
+  var x0 = Math.pow(x.f, n);
+  var x1 = (x.f === 0) ? 0 : n * x0 / x.f;
+  var x2 = (x.f === 0) ? 0 : (n - 1) * x1 / x.f;
+  var x3 = (x.f === 0) ? 0 : (n - 2) * x2 / x.f;
+  return HJ(
+    x0, x1 * x.fu, x1 * x.fv,
+    x1 * x.fuu + x2 * x.fu * x.fu,
+    x1 * x.fuv + x2 * x.fu * x.fv,
+    x1 * x.fvv + x2 * x.fv * x.fv,
+    x1 * x.fuuv + x2 * (2 * x.fu * x.fuv + x.fv * x.fuu) + x3 * x.fu * x.fu * x.fv,
+    x1 * x.fuvv + x2 * (2 * x.fv * x.fuv + x.fu * x.fvv) + x3 * x.fu * x.fv * x.fv
+  );
+}
+function hMod(x, d) { var f = x.f % d; if (f < 0) f += d; return HJ(f, x.fu, x.fv, x.fuu, x.fuv, x.fvv, x.fuuv, x.fuvv); }
+function hInterp(v1, v2, w) {
+  return hAdd(hMul(v1, hAddC(hMulC(w, -1), 1)), hMul(v2, w));
+}
+/* D: 对 ThreeJet 求偏导，得到 TwoJet。index 0 = d/du, 1 = d/dv */
+function hD(x, index) {
+  if (index === 0) return TJ(x.fu, x.fuu, x.fuv, x.fuuv);
+  if (index === 1) return TJ(x.fv, x.fuv, x.fvv, x.fuvv);
+  return TJ(0, 0, 0, 0);
+}
+function hAnnihilate(x, index) {
+  var r = HJ(x.f, 0, 0);
+  if (index === 0) { r.fv = x.fv; r.fvv = x.fvv; }
+  else if (index === 1) { r.fu = x.fu; r.fuu = x.fuu; }
+  return r;
+}
+
+/* ---------- TwoJetVec / ThreeJetVec ---------- */
+function TJV(x, y, z) { return { x: x, y: y, z: z }; }
+
+function tvAdd(v, w) { return TJV(tAdd(v.x, w.x), tAdd(v.y, w.y), tAdd(v.z, w.z)); }
+function tvMul(v, a) { return TJV(tMul(v.x, a), tMul(v.y, a), tMul(v.z, a)); }
+function tvCross(v, w) {
+  return TJV(
+    tAdd(tMul(v.y, w.z), tMulC(tMul(v.z, w.y), -1)),
+    tAdd(tMul(v.z, w.x), tMulC(tMul(v.x, w.z), -1)),
+    tAdd(tMul(v.x, w.y), tMulC(tMul(v.y, w.x), -1))
+  );
+}
+function tvDot(v, w) { return tAdd(tMul(v.x, w.x), tAdd(tMul(v.y, w.y), tMul(v.z, w.z))); }
+function tvNormalize(v) {
+  var a = tvDot(v, v);
+  a = (a.f > 0) ? tPow(a, -0.5) : TJ(0, 0, 0, 0);
+  return tvMul(v, a);
+}
+function tvAnnihilate(v, index) {
+  function ann(x) { return TJ(x.f, index === 1 ? x.fu : 0, index === 0 ? x.fv : 0, 0); }
+  return TJV(ann(v.x), ann(v.y), ann(v.z));
+}
+function tvRotateZ(v, angle) {
+  var s = tSin(angle), c = tCos(angle);
+  return TJV(
+    tAdd(tMul(v.x, c), tMul(v.y, s)),
+    tAdd(tMulC(tMul(v.x, s), -1), tMul(v.y, c)),
+    v.z
+  );
+}
+function tvInterp(v1, v2, w) {
+  return tvAdd(tvMul(v1, tAddC(tMulC(w, -1), 1)), tvMul(v2, w));
+}
+
+function HJV(x, y, z) { return { x: x, y: y, z: z }; }
+function hv2tv(v) { return TJV(h2t(v.x), h2t(v.y), h2t(v.z)); }
+function hvAdd(v, w) { return HJV(hAdd(v.x, w.x), hAdd(v.y, w.y), hAdd(v.z, w.z)); }
+function hvMul(v, a) { return HJV(hMul(v.x, a), hMul(v.y, a), hMul(v.z, a)); }
+function hvD(v, index) { return TJV(hD(v.x, index), hD(v.y, index), hD(v.z, index)); }
+function hvAnnihilate(v, index) {
+  return HJV(hAnnihilate(v.x, index), hAnnihilate(v.y, index), hAnnihilate(v.z, index));
+}
+function hvRotateZ(v, angle) {
+  var s = hSin(angle), c = hCos(angle);
+  return HJV(
+    hAdd(hMul(v.x, c), hMul(v.y, s)),
+    hAdd(hMulC(hMul(v.x, s), -1), hMul(v.y, c)),
+    v.z
+  );
+}
+function hvRotateY(v, angle) {
+  var s = hSin(angle), c = hCos(angle);
+  return HJV(
+    hAdd(hMul(v.x, c), hMulC(hMul(v.z, s), -1)),
+    v.y,
+    hAdd(hMul(v.x, s), hMul(v.z, c))
+  );
+}
+function hvInterp(v1, v2, w) {
+  return hvAdd(hvMul(v1, hAddC(hMulC(w, -1), 1)), hvMul(v2, w));
+}
+
+/* ---------- 外翻的各个阶段 ---------- */
+
+function FigureEight(w, h, bend, form, v) {
+  v = tMod(v, 1);
+  var height = tMulC(tAddC(tCos(tMulC(v, 2)), -1), -1);
+  if (v.f > 0.25 && v.f < 0.75) height = tAddC(tMulC(height, -1), 4);
+  height = tMulC(height, 0.6);
+  h = tvAdd(h, tvMul(bend, tMul(height, tMulC(height, 1 / 64))));
+  return tvAdd(
+    tvMul(w, tSin(tMulC(v, 2))),
+    tvMul(h, tInterp(tMulC(tAddC(tCos(v), -1), -2), height, form))
+  );
+}
+
+function AddFigureEight(p, u, v, form, scale, numStrips) {
+  var size = hMul(form, scale);
+  form = hAdd(hMulC(form, 2), hMul(form, hMulC(form, -1)));
+  var dv = tvAnnihilate(hvD(p, 1), 1);
+  p = hvAnnihilate(p, 1);
+  var du = tvNormalize(hvD(p, 0));
+  var h = tvMul(tvNormalize(tvCross(du, dv)), h2t(size));
+  var w = tvMul(tvNormalize(tvCross(h, du)), tMulC(h2t(size), 1.1));
+  return tvRotateZ(
+    tvAdd(hv2tv(p),
+      FigureEight(w, h,
+        tvMul(du, tMul(hD(size, 0), tPow(hD(u, 0), -1))),
+        h2t(form), v)),
+    tMulC(v, 1 / numStrips)
+  );
+}
+
+function Arc(u, v, xsize, ysize, zsize) {
+  u = hMulC(u, 0.25);
+  return HJV(
+    hMul(hSin(u), hMulC(hSin(v), xsize)),
+    hMul(hSin(u), hMulC(hCos(v), ysize)),
+    hMulC(hCos(u), zsize)
+  );
+}
+function Straight(u, v, xsize, ysize, zsize) {
+  u = hMulC(u, 0.25);
+  return HJV(
+    hMulC(hSin(v), xsize),
+    hMulC(hCos(v), ysize),
+    hMulC(hCos(u), zsize)
+  );
+}
+
+function Param1(x) {
+  var offset = 0;
+  x = hMod(x, 4);
+  if (x.f > 2) { x = hAddC(x, -2); offset = 2; }
+  if (x.f <= 1) return hAddC(hAdd(hMulC(x, 2), hMulC(hPow(x, 2), -1)), offset);
+  return hAddC(hAdd(hPow(x, 2), hMulC(x, -2)), 2 + offset);
+}
+function Param2(x) {
+  var offset = 0;
+  x = hMod(x, 4);
+  if (x.f > 2) { x = hAddC(x, -2); offset = 2; }
+  if (x.f <= 1) return hAddC(hPow(x, 2), offset);
+  return hAddC(hAdd(hMulC(hPow(x, 2), -1), hMulC(x, 4)), -2 + offset);
+}
+function UInterp(x) {
+  x = hMod(x, 2);
+  if (x.f > 1) x = hAddC(hMulC(x, -1), 2);
+  return hAdd(hMulC(hPow(x, 2), 3), hMulC(hPow(x, 3), -2));
+}
+var FFPOW = 3;
+function FFInterp(x) {
+  x = hMod(x, 2);
+  if (x.f > 1) x = hAddC(hMulC(x, -1), 2);
+  x = hAddC(hMulC(x, 1.06), -0.05);
+  if (x.f < 0) return HJ(0, 0, 0);
+  if (x.f > 1) return HJ(1, 0, 0);
+  return hAdd(hMulC(hPow(x, FFPOW - 1), FFPOW), hMulC(hPow(x, FFPOW), -FFPOW + 1));
+}
+var FSPOW = 3;
+function FSInterp(x) {
+  x = hMod(x, 2);
+  if (x.f > 1) x = hAddC(hMulC(x, -1), 2);
+  return hMulC(
+    hAdd(hMulC(hPow(x, FSPOW - 1), FSPOW), hMulC(hPow(x, FSPOW), -FSPOW + 1)),
+    -0.2
+  );
+}
+function TInterp(x) { return HJ(x, 0, 0); }
+
+function Stage1(u, v) { return Arc(u, v, 1, 1, 1); }
+function Stage2(u, v) {
+  return hvInterp(Arc(Param1(u), v, 0.9, 0.9, -1), Arc(Param2(u), v, 1, 1, 0.5), UInterp(u));
+}
+function Stage3(u, v) {
+  return hvInterp(Arc(Param1(u), v, -0.9, -0.9, -1), Arc(Param2(u), v, -1, 1, -0.5), UInterp(u));
+}
+function Stage4(u, v) { return Arc(u, v, -1, -1, -1); }
+
+function Scene12(u, v, t) { return hvInterp(Stage1(u, v), Stage2(u, v), TInterp(t)); }
+function Scene23(u, v, t) {
+  t *= 0.5;
+  var tt = (u.f <= 1) ? t : -t;
+  return hvInterp(
+    hvRotateZ(Arc(Param1(u), v, 0.9, 0.9, -1), HJ(tt, 0, 0)),
+    hvRotateY(Arc(Param2(u), v, 1, 1, 0.5), HJ(t, 0, 0)),
+    UInterp(u)
+  );
+}
+function Scene34(u, v, t) { return hvInterp(Stage3(u, v), Stage4(u, v), TInterp(t)); }
+
+function Corrugate(u, v, t, numStrips) {
+  return AddFigureEight(
+    Stage1(u, HJ(0, 0, 1)),
+    u, h2t(v), hMul(FFInterp(u), HJ(t, 0, 0)), FSInterp(u), numStrips);
+}
+function PushThrough(u, v, t, numStrips) {
+  return AddFigureEight(
+    Scene12(u, HJ(0, 0, 1), t),
+    u, h2t(v), FFInterp(u), FSInterp(u), numStrips);
+}
+function Twist(u, v, t, numStrips) {
+  return AddFigureEight(
+    Scene23(u, HJ(0, 0, 1), t),
+    u, h2t(v), FFInterp(u), FSInterp(u), numStrips);
+}
+function UnPush(u, v, t, numStrips) {
+  return AddFigureEight(
+    Scene34(u, HJ(0, 0, 1), t),
+    u, h2t(v), FFInterp(u), FSInterp(u), numStrips);
+}
+function UnCorrugate(u, v, t, numStrips) {
+  return AddFigureEight(
+    Stage4(u, HJ(0, 0, 1)),
+    u, h2t(v), hMul(FFInterp(u), HJ(1 - t, 0, 0)), FSInterp(u), numStrips);
+}
+
+/* 阶段起始时刻（与原程序一致） */
+var corrStart = 0.00, pushStart = 0.10, twistStart = 0.23,
+    unpushStart = 0.60, uncorrStart = 0.93;
+
+function phaseOf(time) {
+  if (time >= uncorrStart) return ['UnCorrugate', UnCorrugate, (time - uncorrStart) / (1 - uncorrStart), '去皱褶'];
+  if (time >= unpushStart) return ['UnPush', UnPush, (time - unpushStart) / (uncorrStart - unpushStart), '回推'];
+  if (time >= twistStart)  return ['Twist', Twist, (time - twistStart) / (unpushStart - twistStart), '扭转'];
+  if (time >= pushStart)   return ['PushThrough', PushThrough, (time - pushStart) / (twistStart - pushStart), '对穿'];
+  return ['Corrugate', Corrugate, (time - corrStart) / (pushStart - corrStart), '皱褶'];
+}
+
+/*
+ * 生成单个条带（北半球、经度方向 1/numStrips 扇区）的网格。
+ * 输出交错的 [位置xyz, 法线xyz]，共 (uCount+1)*(vCount+1) 个顶点。
+ * 整个球由该条带绕 Z 轴旋转 numStrips 次，再绕 Y 轴旋转 180° 得到。
+ */
+function generateStrip(out, time, numStrips, uCount, vCount) {
+  var ph = phaseOf(Math.min(1, Math.max(0, time)));
+  var func = ph[1], t = ph[2];
+  var idx = 0;
+  for (var j = 0; j <= uCount; ++j) {
+    var u = j / uCount; // u ∈ [0,1]：北极到赤道
+    for (var k = 0; k <= vCount; ++k) {
+      var v = k / vCount; // v ∈ [0,1]：一个条带的经度范围
+      var p = func(HJ(u, 1, 0), HJ(v, 0, 1), t, numStrips);
+      var x = p.x.f, y = p.y.f, z = p.z.f;
+      var nx = p.y.fu * p.z.fv - p.z.fu * p.y.fv;
+      var ny = p.z.fu * p.x.fv - p.x.fu * p.z.fv;
+      var nz = p.x.fu * p.y.fv - p.y.fu * p.x.fv;
+      var s = nx * nx + ny * ny + nz * nz;
+      if (s === 0) {
+        // 极点处 du×dv 退化为零，微移 u 后重新求法线
+        var p2 = func(HJ(u + (j === 0 ? 1e-4 : -1e-4), 1, 0), HJ(v, 0, 1), t, numStrips);
+        nx = p2.y.fu * p2.z.fv - p2.z.fu * p2.y.fv;
+        ny = p2.z.fu * p2.x.fv - p2.x.fu * p2.z.fv;
+        nz = p2.x.fu * p2.y.fv - p2.y.fu * p2.x.fv;
+        s = nx * nx + ny * ny + nz * nz;
+      }
+      if (s > 0) s = 1 / Math.sqrt(s);
+      out[idx++] = x; out[idx++] = y; out[idx++] = z;
+      out[idx++] = -nx * s; out[idx++] = -ny * s; out[idx++] = -nz * s;
+    }
+  }
+}
+
+/* ============================================================
+ * WebGL 渲染
+ * ============================================================ */
+
+var canvas = document.getElementById('c');
+var gl = canvas.getContext('webgl', { antialias: true }) ||
+         canvas.getContext('experimental-webgl', { antialias: true });
+if (!gl) {
+  document.body.innerHTML = '<p style="color:#fff;padding:2em">你的浏览器不支持 WebGL。</p>';
+  throw new Error('no webgl');
+}
+
+var VS = [
+  'attribute vec3 aPos;',
+  'attribute vec3 aNormal;',
+  'uniform mat4 uMV;',
+  'uniform mat4 uProj;',
+  'varying vec3 vNormal;',
+  'varying vec3 vPos;',
+  'void main() {',
+  '  vec4 p = uMV * vec4(aPos, 1.0);',
+  '  vPos = p.xyz;',
+  '  vNormal = mat3(uMV) * aNormal;',
+  '  gl_Position = uProj * p;',
+  '}'
+].join('\n');
+
+var FS = [
+  'precision mediump float;',
+  'uniform vec3 uFront;',
+  'uniform vec3 uBack;',
+  'uniform float uAlpha;',
+  'uniform float uLit;',
+  'varying vec3 vNormal;',
+  'varying vec3 vPos;',
+  'void main() {',
+  '  if (uLit < 0.5) { gl_FragColor = vec4(uFront, 1.0); return; }',
+  '  vec3 n = normalize(vNormal);',
+  '  if (!gl_FrontFacing) n = -n;',
+  '  vec3 V = normalize(-vPos);',
+  '  vec3 L1 = normalize(vec3(0.35, 0.45, 1.0));',
+  '  vec3 L2 = normalize(vec3(-0.6, -0.3, -0.5));',
+  '  float diff = max(dot(n, L1), 0.0) + 0.25 * max(dot(n, L2), 0.0);',
+  '  vec3 H = normalize(L1 + V);',
+  '  float spec = pow(max(dot(n, H), 0.0), 50.0);',
+  '  vec3 base = gl_FrontFacing ? uFront : uBack;',
+  '  vec3 c = base * (0.12 + 0.88 * diff) + vec3(0.55) * spec;',
+  '  gl_FragColor = vec4(c * uAlpha, 1.0);',
+  '}'
+].join('\n');
+
+function compileShader(type, src) {
+  var sh = gl.createShader(type);
+  gl.shaderSource(sh, src);
+  gl.compileShader(sh);
+  if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS))
+    throw new Error(gl.getShaderInfoLog(sh));
+  return sh;
+}
+var prog = gl.createProgram();
+gl.attachShader(prog, compileShader(gl.VERTEX_SHADER, VS));
+gl.attachShader(prog, compileShader(gl.FRAGMENT_SHADER, FS));
+gl.linkProgram(prog);
+if (!gl.getProgramParameter(prog, gl.LINK_STATUS))
+  throw new Error(gl.getProgramInfoLog(prog));
+gl.useProgram(prog);
+
+var loc = {
+  aPos: gl.getAttribLocation(prog, 'aPos'),
+  aNormal: gl.getAttribLocation(prog, 'aNormal'),
+  uMV: gl.getUniformLocation(prog, 'uMV'),
+  uProj: gl.getUniformLocation(prog, 'uProj'),
+  uFront: gl.getUniformLocation(prog, 'uFront'),
+  uBack: gl.getUniformLocation(prog, 'uBack'),
+  uAlpha: gl.getUniformLocation(prog, 'uAlpha'),
+  uLit: gl.getUniformLocation(prog, 'uLit')
+};
+
+/* ---------- 缓冲区 ---------- */
+var vbo = gl.createBuffer();
+var iboAll = gl.createBuffer(), iboEven = gl.createBuffer(),
+    iboOdd = gl.createBuffer(), iboWire = gl.createBuffer();
+var nAll = 0, nEven = 0, nOdd = 0, nWire = 0;
+var vertData = null;
+
+var state = {
+  time: 0,
+  playing: true,
+  playDir: 1,
+  period: 16,          // 完整外翻一个来回中单程的秒数
+  numStrips: 8,
+  stripsShown: 8,
+  hemispheres: 2,
+  uCount: 20,
+  vCount: 20,
+  style: 'solid',
+  front: [1, 0, 0],
+  spin: false,
+  yaw: 0.5, pitch: 0.35, dist: 4.2,
+  geomDirty: true
+};
+
+function idx(j, k) { return j * (state.vCount + 1) + k; }
+
+/* 索引缓冲：全部行 / 偶数行 / 奇数行（条带模式用）+ 线框 */
+function rebuildIndices() {
+  var U = state.uCount, V = state.vCount;
+  var all = [], even = [], odd = [], wire = [];
+  for (var j = 0; j < U; ++j) {
+    var rows = (j & 1) === 0 ? even : odd;
+    for (var k = 0; k < V; ++k) {
+      var a = idx(j, k), b = idx(j + 1, k), c = idx(j, k + 1), d = idx(j + 1, k + 1);
+      // 原程序 glFrontFace(GL_CW) + 三角带 (j,k),(j+1,k),(j,k+1)... 的展开
+      all.push(a, b, c, c, b, d);
+      rows.push(a, b, c, c, b, d);
+    }
+  }
+  for (j = 0; j <= U; ++j)
+    for (k = 0; k < V; ++k) wire.push(idx(j, k), idx(j, k + 1));
+  for (k = 0; k <= V; ++k)
+    for (j = 0; j < U; ++j) wire.push(idx(j, k), idx(j + 1, k));
+
+  function up(buf, arr) {
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(arr), gl.STATIC_DRAW);
+    return arr.length;
+  }
+  nAll = up(iboAll, all); nEven = up(iboEven, even);
+  nOdd = up(iboOdd, odd); nWire = up(iboWire, wire);
+
+  vertData = new Float32Array((U + 1) * (V + 1) * 6);
+  state.geomDirty = true;
+}
+
+function regenGeometry() {
+  generateStrip(vertData, state.time, state.numStrips, state.uCount, state.vCount);
+  gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+  gl.bufferData(gl.ARRAY_BUFFER, vertData, gl.DYNAMIC_DRAW);
+  state.geomDirty = false;
+}
+
+/* ---------- 4x4 矩阵（列主序） ---------- */
+function mat4Mul(a, b) {
+  var o = new Float32Array(16);
+  for (var c = 0; c < 4; ++c)
+    for (var r = 0; r < 4; ++r)
+      o[c * 4 + r] = a[r] * b[c * 4] + a[4 + r] * b[c * 4 + 1] + a[8 + r] * b[c * 4 + 2] + a[12 + r] * b[c * 4 + 3];
+  return o;
+}
+function mat4RotX(a) {
+  var c = Math.cos(a), s = Math.sin(a);
+  return new Float32Array([1, 0, 0, 0, 0, c, s, 0, 0, -s, c, 0, 0, 0, 0, 1]);
+}
+function mat4RotY(a) {
+  var c = Math.cos(a), s = Math.sin(a);
+  return new Float32Array([c, 0, -s, 0, 0, 1, 0, 0, s, 0, c, 0, 0, 0, 0, 1]);
+}
+function mat4RotZ(a) {
+  var c = Math.cos(a), s = Math.sin(a);
+  return new Float32Array([c, s, 0, 0, -s, c, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
+}
+function mat4Translate(x, y, z) {
+  return new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, y, z, 1]);
+}
+function mat4Persp(fovy, aspect, near, far) {
+  var f = 1 / Math.tan(fovy / 2), nf = 1 / (near - far);
+  var o = new Float32Array(16);
+  o[0] = f / aspect; o[5] = f; o[10] = (far + near) * nf; o[11] = -1;
+  o[14] = 2 * far * near * nf;
+  return o;
+}
+
+/* ---------- 绘制 ---------- */
+function bindGeometry(ibo) {
+  gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo);
+  gl.enableVertexAttribArray(loc.aPos);
+  gl.enableVertexAttribArray(loc.aNormal);
+  gl.vertexAttribPointer(loc.aPos, 3, gl.FLOAT, false, 24, 0);
+  gl.vertexAttribPointer(loc.aNormal, 3, gl.FLOAT, false, 24, 12);
+}
+
+function drawSphere(view, mode) {
+  // mode: 'fill' | 'lines'  （bands 模式在 fill 里按行奇偶取索引）
+  var style = state.style;
+  for (var h = 0; h < state.hemispheres; ++h) {
+    var mh = mat4Mul(view, mat4RotY(h * Math.PI));
+    for (var s0 = 0; s0 < state.stripsShown; ++s0) {
+      var ang = (h === 0 ? -s0 : s0 + 1) * TAU / state.numStrips;
+      var mv = mat4Mul(mh, mat4RotZ(ang));
+      gl.uniformMatrix4fv(loc.uMV, false, mv);
+      if (mode === 'lines') {
+        gl.drawElements(gl.LINES, nWire, gl.UNSIGNED_SHORT, 0);
+      } else if (style === 'bands') {
+        // 与原程序一致：只画 (行号 & 1) == 半球号 的纬度带
+        var buf = (h === 0) ? iboEven : iboOdd;
+        var n = (h === 0) ? nEven : nOdd;
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, buf);
+        gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_SHORT, 0);
+      } else {
+        gl.drawElements(gl.TRIANGLES, nAll, gl.UNSIGNED_SHORT, 0);
+      }
+    }
+  }
+}
+
+function render() {
+  var w = canvas.width, hgt = canvas.height;
+  gl.viewport(0, 0, w, hgt);
+  gl.clearColor(0.055, 0.07, 0.10, 1);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+  if (state.geomDirty) regenGeometry();
+
+  var proj = mat4Persp(Math.PI / 5, w / hgt, 0.1, 100);
+  var view = mat4Mul(mat4Translate(0, 0, -state.dist),
+                     mat4Mul(mat4RotX(state.pitch), mat4RotY(state.yaw)));
+
+  gl.uniformMatrix4fv(loc.uProj, false, proj);
+  gl.frontFace(gl.CW); // 与原程序保持一致的正面约定
+  gl.disable(gl.CULL_FACE);
+
+  var fr = state.front;
+  var bk = [1 - fr[0], 1 - fr[1], 1 - fr[2]];
+  var style = state.style;
+  var alphaMode = style === 'alpha';
+
+  if (alphaMode) {
+    gl.disable(gl.DEPTH_TEST);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.ONE, gl.ONE); // 加色混合，与顺序无关，无需排序
+  } else {
+    gl.enable(gl.DEPTH_TEST);
+    gl.depthFunc(gl.LEQUAL);
+    gl.disable(gl.BLEND);
+  }
+
+  gl.uniform3fv(loc.uFront, fr);
+  gl.uniform3fv(loc.uBack, bk);
+  gl.uniform1f(loc.uAlpha, alphaMode ? 0.32 : 1.0);
+  gl.uniform1f(loc.uLit, 1.0);
+
+  if (style !== 'wire') {
+    bindGeometry(iboAll);
+    if (style === 'solidwire') {
+      gl.enable(gl.POLYGON_OFFSET_FILL);
+      gl.polygonOffset(1, 1);
+    }
+    drawSphere(view, 'fill');
+    gl.disable(gl.POLYGON_OFFSET_FILL);
+  }
+
+  if (style === 'wire' || style === 'solidwire') {
+    gl.disable(gl.BLEND);
+    gl.enable(gl.DEPTH_TEST);
+    gl.uniform1f(loc.uLit, 0.0);
+    gl.uniform3fv(loc.uFront, style === 'wire' ? [0.85, 0.9, 1.0] : [0.08, 0.08, 0.1]);
+    bindGeometry(iboWire);
+    drawSphere(view, 'lines');
+  }
+}
+
+/* ---------- UI 与交互 ---------- */
+var $ = function (id) { return document.getElementById(id); };
+var tSlider = $('tSlider'), tVal = $('tVal'), playBtn = $('playBtn'),
+    phaseDiv = $('phase'), stripSlider = $('stripSlider'), stripVal = $('stripVal');
+
+function setTime(t, fromSlider) {
+  t = Math.min(1, Math.max(0, t));
+  if (t !== state.time) { state.time = t; state.geomDirty = true; }
+  if (!fromSlider) tSlider.value = t;
+  tVal.textContent = t.toFixed(3);
+  var ph = phaseOf(t);
+  phaseDiv.innerHTML = '阶段: ' + ph[3] + ' (' + ph[0] + ')<br>t = ' + t.toFixed(4);
+}
+
+tSlider.addEventListener('input', function () { setTime(parseFloat(this.value), true); });
+
+playBtn.addEventListener('click', togglePlay);
+function togglePlay() {
+  state.playing = !state.playing;
+  playBtn.textContent = state.playing ? '⏸ 暂停' : '▶ 播放';
+}
+
+$('resetBtn').addEventListener('click', function () {
+  state.yaw = 0.5; state.pitch = 0.35; state.dist = 4.2;
+});
+$('speedSel').addEventListener('change', function () { state.period = parseFloat(this.value); });
+$('styleSel').addEventListener('change', function () { state.style = this.value; });
+$('colorSel').addEventListener('change', function () {
+  state.front = this.value.split(',').map(Number);
+});
+$('resSel').addEventListener('change', function () {
+  state.uCount = state.vCount = parseInt(this.value, 10);
+  rebuildIndices();
+});
+stripSlider.addEventListener('input', function () {
+  state.stripsShown = parseInt(this.value, 10);
+  stripVal.textContent = state.stripsShown + ' / ' + state.numStrips;
+});
+$('hemiChk').addEventListener('change', function () {
+  state.hemispheres = this.checked ? 2 : 1;
+});
+$('spinChk').addEventListener('change', function () { state.spin = this.checked; });
+
+window.addEventListener('keydown', function (e) {
+  if (e.code === 'Space' && e.target === document.body) { e.preventDefault(); togglePlay(); }
+  else if (e.key === 'ArrowRight') setTime(state.time + 1 / 256);
+  else if (e.key === 'ArrowLeft') setTime(state.time - 1 / 256);
+});
+
+/* 指针：拖动旋转，Shift+水平拖动外翻，滚轮缩放 */
+var dragging = false, lastX = 0, lastY = 0;
+canvas.addEventListener('pointerdown', function (e) {
+  dragging = true; lastX = e.clientX; lastY = e.clientY;
+  canvas.setPointerCapture(e.pointerId);
+  canvas.classList.add('dragging');
+});
+canvas.addEventListener('pointermove', function (e) {
+  if (!dragging) return;
+  var dx = e.clientX - lastX, dy = e.clientY - lastY;
+  lastX = e.clientX; lastY = e.clientY;
+  if (e.shiftKey) {
+    setTime(state.time + dx / 256); // 与原程序相同：256 像素完成一次外翻
+  } else {
+    state.yaw += dx * 0.008;
+    state.pitch += dy * 0.008;
+    var lim = Math.PI / 2 - 0.01;
+    state.pitch = Math.min(lim, Math.max(-lim, state.pitch));
+  }
+});
+function endDrag(e) { dragging = false; canvas.classList.remove('dragging'); }
+canvas.addEventListener('pointerup', endDrag);
+canvas.addEventListener('pointercancel', endDrag);
+canvas.addEventListener('wheel', function (e) {
+  e.preventDefault();
+  state.dist *= Math.exp(e.deltaY * 0.001);
+  state.dist = Math.min(30, Math.max(1.2, state.dist));
+}, { passive: false });
+
+function resize() {
+  var dpr = Math.min(2, window.devicePixelRatio || 1);
+  var w = Math.round(canvas.clientWidth * dpr), h = Math.round(canvas.clientHeight * dpr);
+  if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
+}
+window.addEventListener('resize', resize);
+
+/* ---------- 主循环 ---------- */
+var lastTs = 0;
+function frame(ts) {
+  requestAnimationFrame(frame);
+  var dt = lastTs ? (ts - lastTs) / 1000 : 0;
+  lastTs = ts;
+  if (dt > 0.1) dt = 0.1;
+
+  if (state.playing && !(dragging)) {
+    var t = state.time + state.playDir * dt / state.period;
+    if (t >= 1) { t = 1; state.playDir = -1; }
+    else if (t <= 0) { t = 0; state.playDir = 1; }
+    setTime(t);
+  }
+  if (state.spin) state.yaw += dt * 0.3;
+
+  resize();
+  render();
+}
+
+rebuildIndices();
+setTime(0);
+/* 支持 #t=0.45 直接定位到某一时刻（并暂停播放） */
+var m = /[#&]t=([\d.]+)/.exec(location.hash);
+if (m) {
+  setTime(parseFloat(m[1]));
+  state.playing = false;
+  playBtn.textContent = '▶ 播放';
+}
+resize();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
