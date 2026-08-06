@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 240" width="540" height="240"
+     font-family="system-ui,-apple-system,Segoe UI,Helvetica,sans-serif" font-size="13">
+  <style>
+    .ax { stroke:#9aa0aa; stroke-width:1.2 }
+    .gd { stroke:#9aa0aa; stroke-width:.6; stroke-dasharray:3 4; opacity:.6 }
+    .t  { fill:#808a99 }
+    .an { fill:none; stroke:#3b82f6; stroke-width:2.6 }
+    .st { fill:none; stroke:#f97316; stroke-width:2.2 }
+  </style>
+
+  <!-- grid -->
+  <line class="gd" x1="70" y1="115" x2="470" y2="115"/>
+  <line class="gd" x1="270" y1="40" x2="270" y2="190"/>
+
+  <!-- axes -->
+  <line class="ax" x1="70" y1="190" x2="470" y2="190"/>
+  <line class="ax" x1="70" y1="190" x2="70"  y2="40"/>
+  <text class="t" x="64" y="195" text-anchor="end">0</text>
+  <text class="t" x="64" y="45"  text-anchor="end">1</text>
+  <text class="t" x="34" y="118" text-anchor="middle" transform="rotate(-90 34 118)">覆盖率</text>
+  <text class="t" x="270" y="214" text-anchor="middle">边缘在像素内的位置 →</text>
+
+  <!-- staircase: N-sample winding -->
+  <polyline class="st" points="70,190 120,190 120,168.6 170,168.6 170,147.1 220,147.1 220,125.7
+                               270,125.7 270,104.3 320,104.3 320,82.9 370,82.9 370,61.4 420,61.4 420,40 470,40"/>
+  <!-- analytic ramp -->
+  <line class="an" x1="70" y1="190" x2="470" y2="40"/>
+
+  <!-- legend (placed above the ramp, left half) -->
+  <line x1="95" y1="56" x2="122" y2="56" stroke="#3b82f6" stroke-width="2.6"/>
+  <text class="t" x="129" y="60">Sweeper：解析积分，连续取值</text>
+  <line x1="95" y1="78" x2="122" y2="78" stroke="#f97316" stroke-width="2.2"/>
+  <text class="t" x="129" y="82">N 点采样绕数：仅 N+1 个离散级</text>
+
+  <text class="t" x="270" y="234" text-anchor="middle" font-size="14">
+    抗锯齿不是额外加的一步，而是对整个像素足迹积分的直接结果
+  </text>
+</svg>

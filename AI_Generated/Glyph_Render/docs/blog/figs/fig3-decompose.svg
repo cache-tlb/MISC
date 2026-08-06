@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 290" width="560" height="290"
+     font-family="system-ui,-apple-system,Segoe UI,Helvetica,sans-serif" font-size="13">
+  <style>
+    .win  { fill:none; stroke:#9aa0aa; stroke-dasharray:5 4; stroke-width:1.4 }
+    .t    { fill:#808a99 }
+    .cv   { fill:none; stroke:#3b82f6; stroke-width:2.8 }
+    .chord{ fill:none; stroke:#f97316; stroke-width:1.8; stroke-dasharray:6 4 }
+    .dim  { stroke:#9aa0aa; stroke-width:1 }
+  </style>
+
+  <!-- rectangle part (curve is left of the window on this band) -->
+  <polygon points="120,155 380,155 380,220 120,220" fill="#3b82f6" opacity=".16"/>
+  <!-- trapezoid part (inside the window, chord approximation) -->
+  <polygon points="120,155 300,60 380,60 380,155" fill="#10b981" opacity=".18"/>
+
+  <!-- window -->
+  <rect class="win" x="120" y="60" width="260" height="160"/>
+
+  <!-- the curve and its chord -->
+  <path class="cv" d="M60,210 Q140,120 300,60"/>
+  <line class="chord" x1="120" y1="155" x2="300" y2="60"/>
+
+  <!-- q0 / q1 -->
+  <circle cx="120" cy="155" r="4.5" fill="#f97316"/>
+  <circle cx="300" cy="60"  r="4.5" fill="#f97316"/>
+  <text class="t" x="112" y="152" text-anchor="end" fill="#f97316">q₀</text>
+  <text class="t" x="300" y="52"  text-anchor="middle" fill="#f97316">q₁</text>
+
+  <!-- base annotations -->
+  <line class="dim" x1="120" y1="155" x2="380" y2="155"/>
+  <text class="t" x="250" y="172" text-anchor="middle">b₀ = sₓ − q₀ₓ</text>
+  <line class="dim" x1="300" y1="60" x2="380" y2="60"/>
+  <text class="t" x="340" y="78" text-anchor="middle">b₁ = sₓ − q₁ₓ</text>
+
+  <!-- labels -->
+  <text class="t" x="250" y="200" text-anchor="middle" fill="#3b82f6">矩形部分：曲线位于窗口左侧 → 整窗宽</text>
+  <text class="t" x="333" y="118" text-anchor="middle" fill="#10b981">梯形</text>
+
+  <!-- s_x dimension -->
+  <line class="dim" x1="120" y1="240" x2="380" y2="240"/>
+  <line class="dim" x1="120" y1="235" x2="120" y2="245"/>
+  <line class="dim" x1="380" y1="235" x2="380" y2="245"/>
+  <text class="t" x="250" y="256" text-anchor="middle">窗口宽 sₓ（一个像素在 em 空间的足迹）</text>
+
+  <text class="t" x="280" y="280" text-anchor="middle" font-size="14">
+    单条曲线的扫掠面积 = 矩形 + 梯形，梯形用弦（橙色虚线）近似曲线
+  </text>
+</svg>

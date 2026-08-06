@@ -1,0 +1,923 @@
+               The Scanline Sweeper: A Glyph Rendering Algorithm
+
+The Scanline Sweeper: A Glyph Rendering Algorithm
+
+                                   Scuff3D Rook with Rook & Possum
+
+                                                     (v0.3)
+
+                                                   Abstract
+
+One fundamental building block of Bézier curve rasterization has historically been winding-
+number computation. Winding-number evaluation per-pixel or per-sample permits rasteri
+zation on both the CPU and GPU, but presents implementation challenges due to the need
+for precise quadratic root-finding. Algorithm failures can result in large discrepancies in the
+computed coverage estimate for a pixel, and while solutions for these numerical failures exist,
+a different direction based on continuous coverage estimates is worth exploring.
+
+   In this paper, I present the Scanline Sweeper, a distinct paradigm for Bézier curve raster
+ization that estimates coverage analytically, without computing explicit winding numbers
+and without any tessellation. While the Scanline Sweeper uses quadratic root-finding,
+perturbations in the outcome only modestly perturb final coverage estimates, resulting in a
+numerically robust algorithm.
+
+Author's disclaimer: This is a self-published preprint, not subject to a traditional peer-review,
+and not submitted to any academic journal. While the ideas here are original in the sense that
+I have not seen them elsewhere, my background is primarily in 3D graphics programming for
+AAA games, so it's possible these ideas are already explored in an industry or domain unfamiliar
+to me. Errors will be corrected and amended versions will be posted as time permits.
+
+Citation: Scuff3D Rook, The Scanline Sweeper: A Glyph Rendering Algorithm, Rook &
+Possum, 2026.
+
+Rook & Possum                                                                                      1/16
+               The Scanline Sweeper: A Glyph Rendering Algorithm
+
+          1. Introduction                              Bézier rasterizers. Namely, they operate by com
+                                                       puting winding numbers for sub-pixel samples. Un
+Rendering font glyphs in games and interactive         like CPU-based rasterizers, GPU-based rasterizers
+applications predominantly relies on CPU rasteriza     cannot leverage double-precision arithmetic units
+tion. After rasterization is performed on the CPU,     portably, nor is excessive Bézier curve subdivision
+applications maintain a glyph cache to store texture   practical on the GPU, so care is needed to properly
+fonts that are uploaded and sampled later on the       handle singular events (e.g. curves starting from a
+GPU. Glyph cache maintenance is a tricky affair,       sample point, curves tangent to a ray, curves passing
+since rasterization results can change based on        through a sample point, etc.). Failures in correct
+glyph size and transform. Glyphs are expected to be    winding number computation due to precision can
+positioned on pixel boundaries, and text anti-alias    cause a wide swing in the final result, with cata
+ing artifacts are noticeable in UI engines that don't  strophic errors in the case of low sample counts.
+snap glyphs to the pixel grid. Rendering text in a 3D
+context with CPU-rasterized glyphs is impossible       1.1. Motivation
+without objectionable aliasing artifacts, because the
+CPU rasterizer has no awareness of how the glyph       The Scanline Sweeper was designed to retain all
+will ultimately be projected on the display.           the benefits of GPU-based Bézier curve rasteriza
+                                                       tion, but simplify implementation significantly by
+   To combat aliasing issues in 3D contexts, a pop     reducing the numerical-exactness burden.
+ular preprocessing step is to convert pre-rasterized
+glyphs into a signed-distance field (SDF) represen        Similarly to existing Bézier curve rasterizers,
+tation. Sampling SDFs reduces aliasing by filtering    the Scanline Sweeper operates on glyph curves
+distances on the GPU at sample time. However, the      directly on the GPU, but introduces a different
+filtered result, while smooth, may no longer be an     paradigm for pixel coverage estimation. Instead of
+accurate representation of the original glyph shape.   explicitly computing winding numbers for separate
+Multi-channel distance fields (MSDFs) combat this      sub-pixel samples as a set of discrete events, the
+by reserving two additional channels of information    Scanline Sweeper integrates signed areas swept
+to store distances to multiple edges, but even this    by each curve intersecting the scanline of interest.
+technique cannot maintain accuracy when glyph          By remaining in a continuous domain as opposed
+shape complexity exceeds a certain threshold. Both     to measuring discrete events, the sweeper sidesteps
+SDF and MSDF representations increase the burden       the issue of singular-event handling and numerical
+of glyph cache maintenance, due to the signed-dis      failure altogether.
+tance conversion requirement.
+                                                          Implementation difficulty is, of course, subjec
+   More recently, it has become more popular to        tive, so I would like to remind the reader that the
+rasterize glyphs directly on the GPU from Bézier       simplicity claimed in the approach described here is
+curve data. This approach is attractive for a few      strictly in my own estimation. As this is the only
+reasons:                                               algorithm I have implemented (in this family of GPU
+                                                       Bézier curve rasterizers), I also can't make claims
+· A glyph cache is optional, and if maintained, cache  to how the performance of my approach compares
+  entries are never invalidated due to changes in      to other approaches, except to say that at least
+  font size, DPI, or glyph transforms.                 on paper, I believe the Scanline Sweeper should
+                                                       certainly no worse, and likely better under various
+· As with SVG images, Bézier rasterization is size     conditions.
+  and orientation-independent, and so is particu
+  larly suited for text rasterized in 3D.                        2. Related Work
+
+· Compared to signed-distance representations,         The related work cited here is restricted to algo
+  Bézier rasterization preserves all sharp corners     rithms that permit a GPU-oriented implementation,
+  and edges at arbitrary levels of magnification.      specifically targeting games and other applications
+                                                       with similar interactivity requirements. In particu
+Bézier curve rasterization is the most versatile of    lar, tessellation-based solutions which adaptively
+the methods described so far, but pose several         triangulate glyphs are not considered, in part be
+implementation challenges. Existing methods op
+erate using the similar principles as CPU-based
+
+Rook & Possum                                          2/16
+               The Scanline Sweeper: A Glyph Rendering Algorithm
+
+cause they impose impractical memory or runtime          izontal rays. To combat precision issues when
+costs for games.                                         horizontal rays intersect Bézier curves at glancing
+                                                         angles, [Dobbie 2016] suggests leveraging more rays
+2.1. Texture fonts                                       per pixel and averaging the results, effectively com
+                                                         bating precision issues with compute.
+For traditional texture fonts, [Rougier 2013][1] pro
+vides a useful survey of best-practices, including          Like [Dobbie 2016], [Lengyel 2017][5] leverages
+glyph-packing, texture quad placement, and gamma         root-finding to render glyphs on the GPU from
+correction. In particular, Rougier suggests the usage    curve data embedded in textures. However, [Lengyel
+of FreeType or STB's TrueType rasterizer in con          2017] addresses precision problems by classifying
+junction with Harfbuzz or Pango to handle accurate       Bézier curves into separate equivalence classes. For
+glyph positions present in the GPOS subtable of an       each class, the positive and negative roots are con
+OpenType font file. Rougier argues that ahead-of-        sidered differently to eliminate numerical failures
+time rasterization is to be preferred as analytical-     endemic to the more straightforward root-finding
+methods cannot reasonably respect font hinting and       approach. For example, several classes of curves may
+sub-pixel placement. These recommendations bore          only increment the winding number, while other
+more significant merit at the time (circa 2013) when     curves may only decrement the winding number,
+low-resolution displays were far more prevalent, but     and so on. Anti-aliasing is proposed by super-sam
+may still be applicable for certain applications.        pling within each pixel in a cross-shape to reuse
+                                                         quadratic and linear coefficients in the quadratic
+   Author's note: This paragraph was added               solver, but the technique generalizes in the sense
+2026-07-04, prior to which I was unaware of how STB's    that the implementer is free to use any sample points
+TrueType rasterizer functioned. STB's rasterizer, in     needed.
+particular, bears a fair bit of resemblance to the
+Scanline Sweeper, although this algorithm makes             Practitioners in the industry have implemented
+several specific optimizations and changes for more      variations of this idea. Some useful references
+optimal deployment on a GPU. Structurally, the           include [Osorio 2025][6] as well as [Lague 2024]
+quadrature method is similar.                            [7]. Both citations mention difficulties encountered
+                                                         in tackling problems pertaining to floating-point
+2.2. Signed-distance fonts                               precision, which while solvable with careful imple
+                                                         mentation as demonstrated by [Lengyel 2017], is in
+As an extension to texture fonts, [Green 2007][2]        large part what inspired this work.
+uses a signed-distance representation to leverage
+hardware texture filtering units to anti-alias glyphs       [Ellis et. al. 2019][8] propose an analytical quad
+under minification, magnification, and perspective       rature method to estimate pixel coverage, similar
+projections. The signed-distances sampled in the         to this work. [Author's note: this paper was commu
+shader are used not only to fill in glyph outlines, but  nicated to the author after the initial publication
+also to support various effects such as edge soften      of this paper.] Area is estimated per-curve under
+ing, outlining, and drop-shadows.                        a weak-perspective approximation which permits
+                                                         quadrature via x-aligned trapezoidal segments. To
+   [Chlumský 2015][3] extends the previous SDF           compute the sampling window, the authors derive a
+approach by storing signed distances to multiple         UV transformation that approximates rotation with
+edges in a multi-component SDF (MSDF). The MSDF          shear in such a way that horizontal alignment is
+is constructed such that the median of the three         maintained. The authors also prescribe a method
+sampled distances in a shader recovers the closest       by which each trapezoid can be clipped to the sam
+edge. This method resolves situations of ambiguity       pled window. Compared to [Ellis et. al. 2019], the
+in the single-channel SDF representation where the       Scanline Sweeper avoids the need to clip against
+filtered distance is positive in regions of negative     left-edges by relying on the Jordan Curve Theorem.
+space near corners.                                      Curve monotonicity is also leveraged in this algo
+                                                         rithm to accelerate root finding and avoid needing
+2.3. GPU Bézier Rasterizers                              to locate curve critical points.
+
+[Dobbie 2016][4] introduces a vector texture which
+stores glyph curve data in a texture and performs
+root-finding to evaluate winding numbers for hor
+
+Rook & Possum                                            3/16
+               The Scanline Sweeper: A Glyph Rendering Algorithm
+
+       3. Scanline Sweeper                                  As an optional step, glyph contours may be
+                                                         decomposed to remove contour overlaps. This step
+In the Scanline Sweeper, winding numbers do not          isn't strictly necessary, but improves shader perfor
+play a role in the computation. Instead, each curve      mance and is a practical step to perform ahead-of-
+contributes a signed coverage estimate additively.       time. Section 4.3 describes the adjustment needed if
+Anti-aliasing is an implicit part of the algorithm, and  contour overlaps are permitted in contetn.
+as opposed to integrating the result across separate
+discrete sample points, the sweeper produces an             Because font glyphs are typically defined on
+anti-aliased result for a single rectangular window      a 1024- or 2048-per-em resolution coordinate grid
+of the glyph's coordinate space. Linear combina          (henceforth referred to as em-space), glyph control
+tions of these intermediate results may be combined      points should be uploaded to the GPU as binary16
+to approximate a coverage estimate for more sophis       IEEE floats which can be cheaply unpacked to 32-
+ticated footprints, but are not necessary for the        bit precision in the shader. OpenType font control
+algorithm to work.                                       points are typically snapped directly to the font grid
+                                                         itself, with implicit points occasionally lying directly
+   In this section, I'll describe the algorithm in its   between grid lines. As we aren't retrieving glyph
+most basic form to facilitate a perfectly serviceable    curves through any texture sampling routine, there
+initial implementation. Section 4 will touch on vari     is no benefit to storing control points in a texture,
+ous ways to improve the performance and quality of       and leveraging some sort of storage buffer is recom
+the algorithm with only a modest amount of addi          mended for simplicity.
+tional effort.
+                                                         3.2. Pixel Shading
+3.1. Glyph Preprocessing
+                                                         Pixel shading can be done in either a compute shader
+As a preprocessing step, all cubic Bézier curves of      or a pixel shader. The algorithm requires no special
+each rendered glyph must be approximated as sets         extensions or hardware capabilities, although SM
+of directed piecewise quadratic Béziers according        6.0 wave intrinsics may be used to reduce VGPR
+to some optimality metric not prescribed by this         pressure by enforcing that every pixel in a wave is
+paper, but an excellent technique for performing this    accessing the same curve.
+decomposition while preserving 1 continuity is de
+scribed in [Truong et. al. 2020][9]. Linear segments        Shading begins by computing the size and offset
+(1st order Bézier curves) should also be promoted to     of a rectangular window in em-space corresponding
+quadratic Béziers by adding a control point at the       with the pixel. With an orthographic projection, this
+midpoint of the segment endpoints. The exception         window can be computed at draw time since the
+here are horizontal linear segments that can be          ratio of pixel width and height to a unit in em-space
+removed entirely, as they will not participate in the    is known. In the general case, this window can be
+algorithm.                                               cheaply estimated with the fwidth instrinsic. It's
+                                                         possible to compute a coverage estimate of sophis
+   Next, all quadratic Bézier curves must be subdi       ticated footprints by leveraging multiple windows,
+vided up to 2 times such that each sub-curve of the      but the core technique operates on a rectangular
+decomposition is both y-monotonic and x-monoto           coverage primitive, so we'll continue to focus on that
+nic over the unit interval. This property inflates       in this section. The important point here is that the
+storage requirements, but has a marginal effect on       footprint is dynamically varying per-pixel, as this is
+many fonts, since the majority of the curves in          what permits anti-aliased glyph shading under arbi
+typical fonts are already monotonic. With the mo         trary transformations.
+notonic property, bounds checks can be performed
+against an axis-aligned bounding box defined by
+the first and last control point of each curve. This
+decomposition also ensures that for any curve-line
+intersection, there is at most one root within the
+curve's domain.
+
+Rook & Possum                                            4/16
+               The Scanline Sweeper: A Glyph Rendering Algorithm
+
+Figure 2: The blue Bézier curves would be considered by the algorithm     Figure 3: The blue regions shown depict the areas estimated by the
+and result in a non-zero signed area contribution. The red curves would   sweep operation for each curve. While it may appear that there are
+be culled by comparing the outer control points with the scanline loca    many configurations to handle, in reality, all swept regions can be de
+tions and right window edge. The purple curve would be considered but     composed into a trapezoid-like shape and a rectangle. In some scenarios,
+would ultimately have a zero contribution because its intersections with  the trapezoid may degenerate into a triangle or be missing altogether.
+the scanlines would be constrained to the window boundary.                In other scenarios, the rectangle may be absent.
+
+Without loss of generality, this algorithm assumes                        Consider the area swept by moving the curve to
+we are operating with horizontal scanlines and                            the right and the intersection of this area with the
+performing curve sweeps to the right. This orienta                        window. The next step is to numerically compute
+tion is arbitrary, and the implementer may wish to                        the signed area of this critical region. This quadra
+change this convention if there is a material advan                       ture operation proceeds by first decomposing the
+tage in doing so.                                                         curve into up to two piecewise regions. One region
+                                                                          lies to the left of the window, and its area contribu
+   For each rectangular window, each glyph curve                          tion is simply a rectangular area. The other region
+is first considered with respect to the upper and                         lies within the window itself, and its area can be
+lower bounds of the window. Only curves that inter                        approximated with a trapezoid in the simple case
+sect the scanline are considered. Next, the curve is                      (ref. Figure 3 for a few pictorial representations).
+conceptually swept to the right. Curves that don't                        The sign of the area is determined by the direction
+interact with the window are, again, excluded from                        of the curve. Upwards-moving curves correspond to
+consideration. As an optimization, these bounds                           positive areas, and downwards-moving curves cor
+checks need only consider the first and last control                      respond to negative areas.
+point of each curve, due to the monotonic criterion.
+Every considered curve is thus:                                              To simplify the implementation, an initial ver
+                                                                          sion of this algorithm could simply compute four
+· ... intersecting one or both horizontal scanlines,                      Bézier line intersections for each line enclosing the
+  and                                                                     window. These intersections may lay outside of the
+                                                                          window, but by clamping the results to the pixel
+· ... at least partially to the left of the right window                  window, the area estimation will simply absorb ze
+  boundary                                                                ros for regions that don't occupy any physical area.
+                                                                          This method will also cause triangular regions to be
+as depicted in figure Figure 2.                                           naturally integrated as trapezoidal-like regions with
+                                                                          0 for one of its base lengths.
+
+                                                                             The HLSL monotonic root-finding implemen
+                                                                          tation is provided in Section 8.2. The HLSL
+                                                                          sweep-evaluation implementation is provided in
+                                                                          Section 8.3.
+
+                                                                             The final coverage ratio is computed by summing
+                                                                          the signed area contributions of all considered
+
+Rook & Possum                                                             5/16
+                                                                         The Scanline Sweeper: A Glyph Rendering Algorithm
+
+curves and then dividing by the total window area.                        = (1) - (0)
+This ratio is then modulated by gamma (configured
+either per font or per glyph) and used as the pixel's                    trapezoid  =  (2  -  (0)    -  (1))
+alpha value.                                                                                      2
+
+3.3. Integral Approximation                                              For many applications, this choice is perfectly suit
+                                                                         able. While the estimate may not be objectively
+When estimating the amount by which a Bézier                             accurate, there will be regions where the estimate
+curve sweep overlaps a window, it isn't practical                        is too high, and other regions where the estimate is
+to compute the integral analytically since curves                        too low, and on the whole, the result won't possess
+are parametric paths. There are quite a number of                        noticeable issues except under heavy minification.
+options to tackle this, so we'll cover just a few:                       Under heavy minification though, it could be argued
+                                                                         that more traditional texture font approaches are
+· Linear Approximation                                                   more suitable, since these approaches can support
+· Linear-y Approximation                                                 hinting. Figure 5 shows a sample edge anti-aliased
+· Subdivision                                                            with this method. Note that unlike rasterizers that
+                                                                         compute winding numbers for a set of discrete
+Suppose we have computed two values of  (0 and                           events, the possible coverage estimate values cover
+1) for which a Bézier curve () either intersects                         the entire unit interval.
+any of the sides of a window or reaches a control
+point. Furthermore, suppose that () is not a verti
+cal line segment, such that these intersections must
+occur on two distinct sides of the window (if both
+points do indeed happen to be intersections). Verti
+cal segments can be easily handled as a separate case
+by computing its swept area as a rectangle. Then,
+the area we wish to numerically estimate is the blue
+area traced by contour shown in Figure 4
+
+(0, )                      (, )
+
+               (1)                                                       Figure 5: A single antialiased edge from an `e' glyph rendered with
+                      (0)                                                modest perspective.
+
+(0, 0)                     (, 0)                                         If more accuracy is desired, a stricter approximation
+                                                                         can be made by presuming that () (but not
+Figure 4: The dashed boundary is a depiction of the window under         ()) varies linearly across the window. In such
+consideration and the curve from (0) to (1) is the curve being           a case, the parametric Bézier curve can now be
+swept. This particular curve happens to lie entirely within the window.  represented explicitly as a function of , which then
+                                                                         permits standard integration through a change of
+Note that the following discussion can proceed re                        variables. This approximation can be thought of as
+gardless of which segments (0) and (1) happen                            a refinement between a first-order correction and a
+to fall on. Furthermore, this discussion generalizes                     true second-order evaluation.
+to the case where one or both points are in the
+window interior.
+
+   By far, the simplest approximation is to presume
+that the curve () is approximately linear within
+the window. This approximation yields the trape
+zoidal estimate for the area as:
+
+Rook & Possum                                                                                                 6/16
+                                                                       The Scanline Sweeper: A Glyph Rendering Algorithm
+
+(;  0          1)    (0)    +    - 0   (1)                             are not catastrophic by any means ­ pixels that are
+                                1 - 0                                  fully in the glyph interior will remain fully shaded,
+                                                                       and pixels that are fully outside the glyph interior
+                     (1  -  0)  () - (0)                               will be fully unshaded.
+                                     (1)
+                                                                                   4. Extensions
+                   
+
+        1                                                              This section describes various ways to improve
+                                                                       the performance or flexibility of the algorithm, but
+     ()                                                                nothing mentioned here is strictly necessary for an
+                                                                       initial implementation. The subsections describing
+      0                                                                each extension are listed in subjective priority order.
+                                                                       Optimizations should be carefully weighed against
+          1 - 0        (1)  (- 1())                                    content requirements, because as with most opti
+          (1)                                                          mizations, constant factors play an important role.
+                                                                       Optimizations that benefit wildly complex glyphs
+                                                                       may not be profitable for simpler glyphs, so my
+                     (0)                                               recommendation is to measure and make do with
+                                                                       the simplest implementation first, before adding
+Substituting this approximation for  into ()                           complexity. To that end this section also contains
+yields the approximate () approximation                                more "editorial" suggestions that may or may not
+which can be integrated with (0) and (1) as                            pertain to you, the reader, depending on usage.
+the limits of integration. Unfortunately, this compu
+tation can't be recommended because the evaluation
+requires too much compute relative to the increase
+in accuracy.
+
+   A more practical method to refine the approxi                       4.1. Curve acceleration structure
+mation is with subdivision (ref. Figure 6). This is
+a far more pragmatic endeavor because the refine                       The Scanline Sweeper benefits from any sort of ac
+ment amount can be easily scaled to two or more                        celeration structure that allows the shader to avoid
+additional points of refinement without any code                       loading curves that do not interact with the pixel
+changes. Furthermore, because the quadratic Bézier                     being shaded. On all hardware tested, the principal
+curves were preprocessed to be monotonic, it's                         bottleneck is not ALU but actually memory, since the
+likely that the curves are nearly linear in most prac                  computation needed to discard a spatially irrelevant
+tical scenarios.                                                       curve is miniscule. As such, the goal for most opti
+                                                                       mizations in this algorithm should be to load less
+(0, )                           (, )                                   data.
+
+        (1)                                                                 0 1  2 3
+           ()                                                          0
+                   (0)
+                                                                       1
+
+                                                                       2
+
+(0, 0)                          (, 0)                                                     0 = {0, 1, 2, 3}
+                                                                                          1 = {0, 1, 2, 3}
+Figure 6: Any trapezoid can be subdivided one or more times to refine                     2 = {0, 3}
+the quadrature. In practice, not many refinements are needed because
+curves were already preprocessed to be monotonic. In most cases, no    Figure 7: The simplest curve acceleration structure just partitions the
+refinement is needed at all.                                           glyph into horizontal stripes, and each partition stores all overlapping
+                                                                       curves without any indirection.
+It's important to keep in mind with these approxi
+mations that the coverage estimate pertains to the                     When implementing an acceleration structure, it is
+entire window subject to analysis. Because we are not                  important not to add any indirection to the shader.
+computing a winding number for a specific sample                       That is, an acceleration scheme that stores curve in
+point, we are afforded some leeway when it comes to                    dices for different regions to the glyph will perform
+estimating this quantity. Over and under-estimates
+
+Rook & Possum                                                                                             7/16
+               The Scanline Sweeper: A Glyph Rendering Algorithm
+
+strictly worse than the completely unaccelerated            As an aside, I do not recommend optimizing this
+storage scheme. If the glyph is to be partitioned        shader by attempting to identify pixels on the glyph
+according to some scheme, it's suggested that each       boundary and treating these pixels separately from
+partition loaded contains the entire set of curves       pixels entirely on the glyph interior or exterior.
+pertaining to the partition as seen in Figure 7.         While this may seem like a useful optimization to
+                                                         pursue from an algorithmic-complexity standpoint,
+   This necessarily inflates the data size, but this is  sweeping a curve is so cheap arithmetically that
+easy to manage because glyph curve data can be           elaborate schemes to process glyph boundaries are
+suballocated on an as-needed basis. On the topic of      more liable to be a pessimization to the total
+memory, it's possible to compress the data set by ex     runtime. This is in line with conventional wisdom
+ploiting the fact that many control points are shared    for graphics programmers, where the "superficially
+between curves. One expression of this compression       more efficient" but simultaneously "more divergent"
+is to reserve two binary16 floats per curve stored in    strategy is often not the correct approach due
+each partition. In this scheme, the first control point  to constant factors, synchronization costs, pipeline
+is implicitly the last control point encountered in      context rolls, and other sources of inefficiency.
+the stream, and a sentinel value is used to reset this
+value. I found that this optimization saved roughly      4.3. Permitting Contour Overlaps
+25% of the memory used, but nominally increased
+the cost of the shader by ~5%, which may or may not      The algorithm as described will not function cor
+be a good tradeoff depending on the application.         rectly if there are overlaps in the glyph contours
+                                                         because the area ratio denominator will exceed 1 for
+4.2. Compute Shader Implementation                       windows that intersect the overlap. This restriction
+                                                         can be relaxed by simply considering each contour
+When implemented in a pixel shader, each pixel           separately in the shader. That is, instead of having
+loads curve data into non-uniform registers. This        a global coverage estimate, the shader can simply
+could be scalarized by looping over a superset of all    compute the coverage estimate for each contour
+curves that must be considered in a wave, similar to     separately, and then average the results at the end.
+light-loop scalarization. However, this change isn't     This changes the storage scheme somewhat, but
+always profitable because processing each curve          otherwise, the algorithm is unchanged.
+didn't require many registers to begin with. Further
+more, such scalarization is at odds with a partition        For a game that can ship content with assets
+ing scheme in scenarios where a wave straddles a         that undergo a processing stage before final packag
+partition boundary.                                      ing, I would suggest simply removing the contour
+                                                         overlaps ahead-of-time. Many font processing tools
+   A more fruitful endeavor is to rasterize glyphs       handle this without too much issue, and the opera
+in a compute shader, assigning thread groups to          tion can finish in seconds for most fonts tested. Note
+scanlines. This way, the data loaded in a wave is        that glyph contours in TrueType fonts may advertise
+minimized to the set of curves that overlap the scan     the OVERLAP_SIMPLE flag if overlaps are present, but
+line partition (assuming some acceleration scheme        it may or may not be wise to rely on this flag since
+is used). In this scenario, it's impossible for a wave   its possible the flag is incorrectly unset.
+to straddle a partition boundary, and scalarization is
+far more natural.                                           For applications that prefer to do minimal font
+                                                         preprocessing before rasterization, storing contours
+   In addition, a compute shader can process curves      separately and adding an additional outer loop is
+within each partition cooperatively. For example,        an easy adjustment that adds flexibility without in
+each thread in the wave can be assigned to separate      creasing runtime costs too much.
+curves to compute any values that pertain to the
+entire scanline, before transitioning to a separate      4.4. Accurate Footprint Assembly
+loop for each pixel rasterized. Similarly, the second
+degree coefficients of the quadratic Bézier expansion    If each pixel is associated with a single rectangular
+could be computed cooperatively for each curve           footprint and coverage estimate, the outcome is a
+in parallel and shared either through wave access        simple box-filtered result. Conceptually, this will
+intrinsics, or via groupshared memory.                   result in blurring in cases where the window over
+                                                         laps the exterior of the true footprint. Conversely,
+
+Rook & Possum                                            8/16
+               The Scanline Sweeper: A Glyph Rendering Algorithm
+
+aliasing is expected in cases where the window is            Finally, some combination of all the above tech
+smaller than the true footprint.                          niques are possible. The Scanline Sweeper algo
+                                                          rithm is ultimately concerned with demonstrating
+   If more accurate anti-aliasing is needed, we have      one method to estimate an unweighted box-filter
+many options at our disposal. The simplest option is      coverage value in em-space, which on its own
+to continue to simply rely on fwidth to derive a rec      does not stipulate any particular footprint assembly.
+tangular footprint and do nothing else in particular,     Practitioners should way the costs of footprint as
+with the expectation that results will look the best      sembly against content requirements.
+when viewed orthographically, and look passable
+in other scenarios with blurring or aliasing depend                   5. Limitations
+ing on camera pose. This option, while sounding
+unappealing, is actually fairly passable with this        Even with the extensions prescribed, there are some
+technique. Because the algorithm doesn't compute          limitations to this technique that are worth consid
+binary coverage results for sets of discrete samples,     ering before implementation and deployment.
+blurring and aliasing effects aren't nearly as notice
+able, and the question of necessity should be posed       5.1. Small Font Rendering
+first. Would the player appreciate sharp edges in         In the case of small font rendering, some clarity is
+what is likely unreadable text anyways? Or would          lost compared to rasterizers that can take advantage
+they tolerate slight blurriness for text at extreme       of the hinting interpreter on the CPU. This is best
+glancing angles in exchange for better performance        seen in Figure 8, where various features that would
+in all scenarios?                                         normally snap to pixel boundaries like vertical stems
+                                                          end up straddling the boundaries instead. This is
+   If in spite of that, more accurate filtering is still  likely not a deal-breaker on many modern displays,
+desired, ddx(uv) and ddy(uv) can be used to con           but can pose an issue for deployments that render
+struct vectors in em-space that constitute the major      on low-resolution displays.
+and minor axes of the ellipse of anisotropy, at which
+point any number of methods can be employed to            Figure 8: Without hinting, features like stems cannot be aligned on pixel
+decompose this ellipse into a set of rectangular win      grid boundaries
+dows. A similar technique is employed by [Mavridis
+and Papaioannou 2011][10] to decompose elliptical         As a reminder, a rasterizer that respects hinting
+footprints, and this method can be easily extended        cannot produce results that are correctly antialiased
+to axis-aligned rectangular windows instead.              once the texture-sampling quad is translated off the
+                                                          pixel grid regardless, so this limitation should be
+   If the "weak-perspective approximation"1 is ac         weighed against the need for properly hinted stati
+ceptable (likely the case in all practical scenarios),    cally placed text.
+this method is also compatible with applying shear
+transforms to Bézier control points, similar to the       5.2. Preprocessing Requirements
+domain transformation described by [Ellis et. al.][8].    As mentioned in Section 3.1, some modest Bézier
+I have not explored this direction myself, but think      curve processing is needed to properly feed the
+it's a useful extension to consider, with a nominal       Scanline Sweeper shader. All of the preprocessing
+2 × 2 QR decomposition and shear transformation           requirements are fairly efficient, and an entire font
+cost per control point. The main downside of this         file can be parsed and processed on one thread
+approach is that curves do not retain monotonicity        within a few frames if needed. The exception here
+after shear transforms in the general case, so split      would be contour overlap removal. If your appli
+ting curves at critical points will need to happen in
+the shader itself as opposed to at font processing
+time. In other words, we can gain some anti-aliasing
+accuracy at the expense of some runtime perfor
+mance.
+
+   1In general, squares mapped with a perspective projection are mapped to a trapezoid. The weak-perspective approximation
+approximates the projected regions as parallelograms.
+
+Rook & Possum                                             9/16
+               The Scanline Sweeper: A Glyph Rendering Algorithm
+
+cation cannot process font files ahead-of-time, its      Figure 10: Pangrams rendered in the Miama font at 1440p.
+recommended that the shader operate on separate
+contours independently with a small increase in           Font   RTX 2060 RTX 4090 9070 XT
+runtime cost, as described in Section 4.3.                Geist
+5.3. Performance Considerations                          Miama   240 s  50 s                                       53 s
+A more detailed breakdown of some performance
+measurements are available in the next section                   370 s  70 s                                       87 s
+(Section 6), but this technique (and other similar
+techniques) will be more expensive relative to a         Table 1: Timings recorded for Figure 9 and Figure 10 at 1440p with stable
+baseline implementation that simply samples a tex        power states. NVIDIA timings are reported with 10 s granularity.
+ture rasterized on the CPU. UI renderers already
+benefit from some form of a compositor that can          For each font, I rendered a pangram at varying sizes
+cache partial UI layouts in rendered textures, but if    across a 1440p display and captured timings on an
+no compositor is available, this technique may need      NVIDIA RTX 2060 budget card, an NVIDIA RTX
+to be supplemented with a glyph cache instead. In        4090, and an AMD 9070 XT with stable power states
+fact, both a glyph cache and a UI compositor can         active. The shader profiled was a pixel shader with
+ship along with this solution in a complementary         a basic horizontal partitioning scheme. Timings are
+fashion.                                                 reported in Table 1 with microsecond granularity,
+                                                         but note that NVIDIA's Nsight Graphics profiler
+            6. Evaluation                                snaps to 10 microsecond boundaries.
+
+The tests here are not exhaustive in any way, but           While I have not performed the same test with
+are here simply to give a representation of expected     ray-stabbing Bézier rasterizers, my intuition is that
+memory and runtime characteristics you will need         performance should be similar, based on the follow
+to extrapolate for your content. For this test, I eval   ing assumptions:
+uated only two separate fonts:
+· Geist as a base case font (Figure 9).                  · The evaluation of a curve's coverage estimate
+· Miama as a difficult font with 4 times as many           is similar to evaluating the winding number of
+                                                           roughly four sample points in a cross-pattern,
+  curves per glyph as the other fonts (Figure 10).         since the underlying math is identical.
+
+Figure 9: Pangrams rendered in the Geist font at 1440p.  · Accumulating a coverage area is similar to incre
+                                                           menting and decrementing winding point values.
+
+                                                         Furthermore, I would expect that Scanline
+                                                         Sweeper performance may outpace other solutions
+                                                         in a good implementation where curves are loaded
+                                                         and cooperatively processed in a wave-uniform
+                                                         fashion, as described in Section 4.2, with the caveat
+                                                         being that many these optimizations may not be
+                                                         unique to this algorithm. The other point to con
+                                                         sider is that the Scanline Sweeper effectively takes
+                                                         many implicit samples with a single evaluation, so
+                                                         there is a performance crossover point where this
+                                                         algorithm likely performs better when compared
+                                                         to a ray-stabbing implementation when the sample
+                                                         count exceeds some threshold.
+
+Rook & Possum                                                                                                      10/16
+               The Scanline Sweeper: A Glyph Rendering Algorithm
+
+                  Font VRAM bytes                                           fects," Aug. 05, 2007, Valve Corporation. doi:
+                  Geist 17.3 KiB                                            10.1145/1281500.1281665.
+                 Miama 43.4 KiB
+                                                                      [3] V. Chlumský, "Shape Decomposition for
+ Table 2: Video memory needed to render all ASCII characters of each        Multi-channel Distance Fields," Master's the
+ associated font.                                                           sis, Czech Technical University in Prague,
+                                                                            Faculty of Information Technology, 2015.
+Table 2 shows video memory usage for the same
+fonts with the entire ASCII character set uploaded.                   [4] W. Dobbie, "GPU text rendering with vec
+In a general production setting, glyph data could be                        tor textures." [Online]. Available: https://
+suballocated and uploaded on demand, which may                              wdobbie.com/post/gpu-text-rendering-with-
+be necessary for languages with many more glyphs.                           vector-textures/
+Even then, storing 100 times as many glyphs would
+still impose only a modest footprint.                                 [5] E. Lengyel, "GPU-Centered Font Rendering
+                                                                            Directly from Glyph Outlines," Journal of Com
+            7. Conclusion                                                   puter Graphics Techniques (JCGT), vol. 6, no.
+                                                                            2, pp. 31­47, Jun. 2017, [Online]. Available:
+In this paper, I've presented what I believe to be a                        https://jcgt.org/published/0006/02/02/
+different take on Bézier curve rasterization on the
+GPU. The primary goal was to derive a technique                       [6] R. L. Osorio, "Rendering Crispy Text on the
+that avoided needing to track discrete events to                            GPU." Accessed: Jun. 24, 2026. [Online]. Avail
+estimate coverage. Instead, by staying in a continu                         able: https://osor.io/text
+ous domain, the Scanline Sweeper sidesteps issues
+pertaining to singular events while offering high-                    [7] S. Lague, Coding Adventure: Rendering Text,
+quality anti-aliasing with relatively little effort.                        (Apr. 13, 2024). [Online Video]. Avail
+                                                                            able: https://www.youtube.com/watch?v=SO
+   Extensions to the technique are fairly natural,                          83KQuuZvg
+since linear combinations of rectangular coverage
+estimates can be quickly assembled to form more                       [8] A. Ellis, W. Hunt, and J. Hart, "Real-Time
+exotic footprints.                                                          Analytic Antialiased Text for 3-D Environ
+                                                                            ments," Computer Graphics Forum, vol. 38,
+   Future work in this space may include but is not                         no. 8, pp. 23­32, Nov. 2019, [Online]. Avail
+limited to:                                                                 able: https://onlinelibrary.wiley.com/doi/abs/
+                                                                            10.1111/cgf.13757
+· Adaptive subdivision that can subdivide curves
+  only if the curvature is high relative to the window                [9] N. Truong, C. Yuksel, and L. Seiler, "Quadratic
+  size.                                                                     Approximation of Cubic Curves," Proc. ACM
+                                                                            Comput. Graph. Interact. Tech., no. 16, pp. 1­17,
+· Basic hinting to align vertical line segments or                          Aug. 2020, doi: 10.1145/3406178.
+  other glyph features to pixel boundaries.
+                                                                      [10] P. Mavridis and G. Papaioannou, "High
+· Alternative acceleration structures that either                           quality elliptical texture filtering on GPU,"
+  provide faster glyph curve access or tighter mem                          I3D '11 Symposium on Interactive 3D Graph
+  ory requirements.                                                         ics and Games, pp. 23­30, Feb. 2011, doi:
+                                                                            10.1145/1944745.1944749.
+· Optimizations that leverage FP16 units on modern
+  GPUs in cases where full 32-bit precision is not                    [11] T. W. Sederberg, Computer Aided Geo
+  needed.                                                                   metric Design. BYU ScholarsArchive, 2012.
+                                                                            [Online]. Available: https://scholarsarchiv
+            Bibliography                                                    e.byu.edu/cgi/viewcontent.cgi?article=1000&
+                                                                            context=facpub
+[1] N. P. Rougier, "Higher Quality 2D Text Render
+      ing," Journal of Computer Graphics Techniques                   [12] F. Goualard, "The Ins and Outs of Solving Qua
+      (JCGT), vol. 2, no. 1, pp. 50­64, Apr. 2013.                          dratic Equations with Floating-Point Arith
+                                                                            metic," 2023.
+[2] C. Green, "Improved Alpha-Tested Magnifi
+      cation for Vector Textures and Special Ef
+
+Rook & Possum                                                         11/16
+               The Scanline Sweeper: A Glyph Rendering Algorithm
+
+               8. Appendix
+
+Code listings in this section are compiled with DXC with HLSL2021 as the language mode. While not required
+for code listings presented here, the shaders benchmarked for this paper were compiled with SM6.7. Absent
+from these code listings are code snippets needed to load glyph data from buffers or convert pixel texture
+coordinates to em-space, both of which are considered details that will vary for each implementer.
+
+   For a general background on the mathematics needed to manipulate Bézier curves numerically, I suggest
+consulting [Sederberg 2012][11] as a comprehensive reference.
+
+   All source code is subject to the terms of the Mozilla Public License, v. 2.0. This license can be obtained at
+https://mozilla.org/MPL/2.0/.
+
+8.1. Quadratic Bézier form
+
+The code listings here relies on the following re-expression of a quadratic Bézier curve evaluation and the
+corresponding gradient:
+
+                                  () = (1 - )((1 - )0 + 1) + ((1 - )1 + 2)
+                                        = (0 + 2 - 21)2 + 2(1 - 0) + 0
+
+                                ()
+                                   = 2(0 + 2 - 21) + 2(1 - 0)
+
+The code listings also rely on this simple helper function for evaluating a Bézier curve for a given parameter :
+
+// p0 and p2 always refer to the curve endpoints.
+// p0, p1, and p2 are the curve control points in order of increasing t.
+float2 evaluate_bezier(float2 p0, float2 p1, float2 p2, float t)
+{
+
+   float2 a = lerp(p0, p1, t);
+   float2 b = lerp(p1, p2, t);
+   return lerp(a, b, t);
+}
+
+8.2. Monotonic Root Finding
+
+This routine computes the parameter of intersection for a specific dimension of a Bézier curve. This can
+compute vertical or horizontal intersections. A general quadratic root-finder needs to apply extraodinary
+care to be numerically robust (ref [12] for an exhaustive treatment of numerically robust quadratic root-
+finding). However, we can sidestep many of the issues that plague a general solver:
+
+· Our control points are constrained to the vicinity of the em-square, so discriminant overflow isn't possible.
+· Errors due to discriminant underflow are absorbed in the final coverage estimate, since the alpha value
+
+  will be quantized to 8 bits anyways.
+· We could use the citardauq form of the quadratic formula to avoid catastrophic cancellation when - and
+
+     2 - 4 have opposing signs, but this isn't necessary due to the same quantization.
+· Because we only deal with monotonic curves, we never need to solve for both roots. As such, approaches
+
+  to improve precision by computing the precise root and leveraging Vieta's formula to derive the other root
+  aren't useful.
+
+       // Preconditions:
+       // - qa is the second-degree coefficient.
+       // - c0, c1, and c2 are the coordinate values of the first,
+       // second, and third control points respectively.
+       // - target is the desired line of intersection.
+       //
+       // This routine assumes that c0 <= target <= c2. That is, the
+       // caller has done bounds checks that guarantee that this
+
+Rook & Possum               12/16
+               The Scanline Sweeper: A Glyph Rendering Algorithm
+
+       // routine is needed already.
+       //
+       // This routine also assumes monotonicity:
+       // c0 <= c1 <= c2.
+       //
+       // Returns the value of t where the intersection occurs.
+       float intersect_monotonic(
+
+          float qa,
+          float c0,
+          float c1,
+          float c2,
+          float target)
+       {
+          if (abs(qa) < 1e-3f)
+          {
+
+              // Approximately linear case. Threshold can be adjusted
+              // as needed.
+              return (target - c0) / (c2 - c0);
+          }
+
+          // First-degree coefficient.
+          float qb = mad(2.f, c1, -2.f * c0);
+
+          float qc = c0 - target;
+
+          float d = mad(qb, qb, -4.f * qa * qc);
+
+          // Clamping d above 0 is OK because of our established
+          // precondition that c0 <= target <= c2.
+          float sqrt_d = d < 0.f ? 0.f : sqrt(d);
+
+          float inv_2a = 0.5f / qa;
+
+          // The sign dictates whether we need the positive or
+          // negative root. Because of the monotonic assumption,
+          // only one root ever needs consideration for each
+          // curve.
+          return mad(-qb, inv_2a, sign(c2 - c0) * sqrt_d * inv_2a);
+       }
+
+8.3. Scanline Sweep Implementation
+
+This code listing provides the core routine of the algorithm. The caller is expected to provide a window size
+and offset, as well as the control points of a monotonic quadratic Bézier curve. The function sweeps the curve
+to the right and estimates the area covered by the sweep constrained to the window. The approximation used
+is a trapezoidal approximation, but extensions to this are possible, as described in Section 3.3.
+
+   // Preconditions:
+   // - size is the size of the window to be considered
+   // - offset is the position of the lower-left window corner
+   // - p0, p1, and p2 are control points of a monotonic Bézier curve
+   //
+   // The curve must be monotonic, such that all(p0 <= p1) and
+   // all(p1 <= p2) are true.
+   //
+   // Returns the estimated covered area of the window if the curve
+   // is swept to the right. This is a signed quantity that is
+   // positive for upwards moving curves, and negative for downwards
+   // moving curves.
+
+Rook & Possum  13/16
+The Scanline Sweeper: A Glyph Rendering Algorithm
+
+   float scanline_sweep(                                                         14/16
+       float2 size,
+       float2 offset,
+       float2 p0,
+       float2 p1,
+       float2 p2)
+
+   {
+       // Discard curves above or below the scanline.
+       if (max(p0.y, p2.y) <= offset.y || min(p0.y, p2.y) >= offset.y + size.y)
+       {
+          return 0.f;
+       }
+
+       float2 delta = p2 - p0;
+
+       // Shift all control points to a coordinate system with the
+       // window at the origin.
+       p0 -= offset;
+       p1 -= offset;
+       p2 -= offset;
+
+       // Fast path for strictly vertical segments, common in many fonts.
+       if (p0.x == p1.x && p0.x == p2.x)
+       {
+
+          if (p0.x >= size.x)
+          {
+
+              // Segment is to the right of the window. Nothing to do.
+              return 0.f;
+          }
+
+          float top = min(max(p0.y, p2.y), size.y);
+          float bottom = max(min(p0.y, p2.y), 0.f);
+
+          float h = top - bottom;
+          float b = min(size.x, size.x - p0.x);
+
+          // Signed area of the swept rectangle.
+          return sign(delta.y) * b * h;
+       }
+
+       // qa is the second-degree coefficient for the y-coordinate
+       // quadratic.
+       float qa = mad(-2.f, p1.y, p0.y + p2.y);
+       float bt = intersect_monotonic(qa, p0.y, p1.y, p2.y, 0.f);
+       float tt = intersect_monotonic(qa, p0.y, p1.y, p2.y, size.y);
+
+       // v_min_t and v_max_t are the crossings where the curve enters
+       // and exits the scanline.
+       float v_min_t = delta.y > 0.f ? bt : tt;
+       float v_max_t = delta.y > 0.f ? tt : bt;
+
+       float2 v_min = evaluate_bezier(p0, p1, p2, saturate(v_min_t));
+       float2 v_max = evaluate_bezier(p0, p1, p2, saturate(v_max_t));
+
+       if (max(v_min.x, v_max.x) <= 0.f)
+       {
+
+          // Fast path for curves entirely to the left of the window
+          // within the scanline. Note that the area sign is
+          // incorporated in the result.
+
+Rook & Possum
+The Scanline Sweeper: A Glyph Rendering Algorithm
+
+          return (v_max.y - v_min.y) * size.x;                                      15/16
+       }
+
+       if (min(v_min.x, v_max.x) >= size.x)
+       {
+
+          // The curve is entirely to the right of the window within
+          // the scanline, so it can be ignored.
+          return 0.f;
+       }
+
+       // Solve for roots along x.
+       qa = mad(-2.f, p1.x, p0.x + p2.x);
+
+       // As with v_min_t and v_max_t, we now need the values of t where
+       // the curve enters and exits the window moving horizontally.
+       float h_min_t;
+       float h_max_t;
+
+       // This check vector stores the following quantities in each component:
+       // - lower x bound
+       // - upper x bound
+       // - target value
+       // - parameter associated with the lower x bound (0 or 1)
+       //
+       // Packing the values in this way simplifies bounds checks and intersection
+       // testing, and the values depend on the direction the curve moves.
+       float4 h_check = delta.x > 0.f
+
+          ? float4(p0.x, p2.x, 0.f, 0.f)
+          : float4(p2.x, p0.x, size.x, 1.f);
+
+       if (h_check.x >= h_check.z)
+       {
+
+          h_min_t = h_check.w;
+       }
+       else if (h_check.y <= h_check.z)
+       {
+
+          h_min_t = 1.f - h_check.w;
+       }
+       else
+       {
+
+          h_min_t = intersect_monotonic(qa, p0.x, p1.x, p2.x, h_check.z);
+       }
+
+       h_check.z = size.x - h_check.z;
+
+       if (h_check.x >= h_check.z)
+       {
+
+          h_max_t = h_check.w;
+       }
+       else if (h_check.y <= h_check.z)
+       {
+
+          h_max_t = 1.f - h_check.w;
+       }
+       else
+       {
+
+          h_max_t = intersect_monotonic(qa, p0.x, p1.x, p2.x, h_check.z);
+       }
+
+       // Now, we can compute the values of t for which the curve enters
+
+Rook & Possum
+                                                             The Scanline Sweeper: A Glyph Rendering Algorithm
+
+   // and leaves the window in any direction. Note that these values
+   // are constrained to the unit interval, so it's ok if the curve
+   // stops or ends within the window.
+   float min_t = saturate(max(v_min_t, h_min_t));
+   float max_t = saturate(min(v_max_t, h_max_t));
+
+   // Evaluate the curve at new intersection points if needed based
+   // on the newly constrained interval.
+   float2 q0 = v_min_t >= h_min_t ? v_min : evaluate_bezier(p0, p1, p2, min_t);
+   float2 q1 = v_max_t <= h_max_t ? v_max : evaluate_bezier(p0, p1, p2, max_t);
+
+   float coverage = 0.f;
+
+   if (min_t > 0.f && delta.x > 0.f)
+   {
+
+       // We enter the pixel from the left, so we need to integrate the
+       // swept rectangle below the entry point.
+       float h = delta.y > 0.f
+
+          ? q0.y - max(0.f, p0.y)
+          : min(size.y, p0.y) - q0.y;
+
+       coverage = sign(delta.y) * h * size.x;
+   }
+
+   if (max_t < 1.f && delta.x < 0.f)
+   {
+
+       // We exit the pixel on the left side, so we need to integrate the
+       // swept rectangle after the exit point.
+       float h = delta.y > 0.f
+
+          ? min(size.y, p2.y) - q1.y
+          : q1.y - max(0.f, p2.y);
+
+       coverage += sign(delta.y) * h * size.x;
+   }
+
+   // This implements the simple trapezoidal approximation for the
+   // portion of the curve within the window.
+   float h = q1.y - q0.y;
+
+   // Sum of trapezoid bases divided by two. If q0.x or q1.x happen
+   // to equal size.x, the trapezoidal area is effectively a triangle.
+   float b = mad(-0.5f, q0.x + q1.x, size.x);
+
+   coverage += b * h;
+
+   // The caller is expected to accumulate this coverage for each curve,
+   // and divide the final result by the window area.
+   return coverage;
+}
+
+Rook & Possum  16/16
+

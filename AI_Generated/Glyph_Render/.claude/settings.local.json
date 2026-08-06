@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node \"C:/Users/liubin/AppData/Local/Temp/claude/D--tmp-Glyph-Render/eda7f9a9-4ca4-4825-be08-f88cf052de90/scratchpad/repro.mjs\")",
+      "Bash(node \"C:/Users/liubin/AppData/Local/Temp/claude/D--tmp-Glyph-Render/eda7f9a9-4ca4-4825-be08-f88cf052de90/scratchpad/diag.mjs\")",
+      "Bash(node \"C:/Users/liubin/AppData/Local/Temp/claude/D--tmp-Glyph-Render/eda7f9a9-4ca4-4825-be08-f88cf052de90/scratchpad/confirm.mjs\")",
+      "Bash(node \"C:/Users/liubin/AppData/Local/Temp/claude/D--tmp-Glyph-Render/eda7f9a9-4ca4-4825-be08-f88cf052de90/scratchpad/validate.mjs\")",
+      "Bash(powershell -NoProfile -Command 'Get-Process node -ErrorAction SilentlyContinue | Where-Object { $_.StartTime -gt \\(Get-Date\\).AddMinutes\\(-20\\) } | Stop-Process -Force')",
+      "Bash(node \"C:/Users/liubin/AppData/Local/Temp/claude/D--tmp-Glyph-Render/eda7f9a9-4ca4-4825-be08-f88cf052de90/scratchpad/validate2.mjs\")",
+      "Bash(node \"C:/Users/liubin/AppData/Local/Temp/claude/D--tmp-Glyph-Render/eda7f9a9-4ca4-4825-be08-f88cf052de90/scratchpad/serve.mjs\")",
+      "Bash(node \"C:/Users/liubin/AppData/Local/Temp/claude/D--tmp-Glyph-Render/eda7f9a9-4ca4-4825-be08-f88cf052de90/scratchpad/timeit.mjs\")",
+      "Bash(cp js/sweeper-core.js /tmp/core-fixed.bak)",
+      "Bash(python -c ' *)",
+      "Bash(cp /tmp/core-fixed.bak js/sweeper-core.js)",
+      "Bash(rm /tmp/core-fixed.bak)",
+      "Bash(node \"C:/Users/liubin/AppData/Local/Temp/claude/D--tmp-Glyph-Render/eda7f9a9-4ca4-4825-be08-f88cf052de90/scratchpad/glslcheck.mjs\")",
+      "Bash(powershell -NoProfile -Command 'Get-NetTCPConnection -LocalPort 8977 -State Listen -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }')",
+      "Bash(curl -s -o /dev/null -w \"index:%{http_code} \" http://localhost:8977/index.html)",
+      "Bash(curl -s -o /dev/null -w \"check:%{http_code} \" http://localhost:8977/__check/gpucheck.html)",
+      "Bash(curl -s -o /dev/null -w \"font:%{http_code}\\\\n\" http://localhost:8977/fonts/Tinos-Regular.ttf)",
+      "Bash(curl -s -o /dev/null -w \"js:%{http_code}\\\\n\" http://localhost:8977/js/sweeper-renderer.js)",
+      "Bash(\"/c/Program Files/Google/Chrome/Application/chrome.exe\" --headless=new --disable-gpu --enable-unsafe-swiftshader --no-sandbox --virtual-time-budget=30000 --user-data-dir=./cprof --dump-dom \"http://localhost:8977/__check/gpucheck.html\")",
+      "Bash(\"/c/Program Files/Google/Chrome/Application/chrome.exe\" --headless=new --no-sandbox --user-data-dir=./cprof2 --dump-dom \"data:text/html,<p>hello-from-chrome</p>\")",
+      "PowerShell(Set-Location \"C:/Users/liubin/AppData/Local/Temp/claude/D--tmp-Glyph-Render/eda7f9a9-4ca4-4825-be08-f88cf052de90/scratchpad\"; & \"C:\\\\Program Files\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe\" --headless=new --disable-gpu --enable-unsafe-swiftshader --no-sandbox --virtual-time-budget=30000 --user-data-dir=./cprof3 --dump-dom \"http://localhost:8977/__check/gpucheck.html\" | Out-File -Encoding utf8 dom.txt; \"exit=$LASTEXITCODE\"; \\(Get-Item dom.txt\\).Length)",
+      "Bash(node -e ' *)",
+      "Bash(glslangValidator -S frag shader.frag)",
+      "Bash(echo \"frag exit=$?\")",
+      "Bash(glslangValidator -S vert shader.vert)",
+      "Bash(echo \"vert exit=$?\")",
+      "Bash(sed 's|float den=-qb-sign\\(c2-c0\\)\\\\*sqrt\\(d\\);|float den=-qb-sign\\(c2-c0\\)*sqrt\\(d\\)|' shader.frag)",
+      "Bash(glslangValidator -S frag bad.frag)",
+      "Bash(echo \"bad exit=$? \\(nonzero = validator is really compiling\\)\")",
+      "Bash(node \"C:/Users/liubin/AppData/Local/Temp/claude/D--tmp-Glyph-Render/eda7f9a9-4ca4-4825-be08-f88cf052de90/scratchpad/overlap.mjs\")"
+    ]
+  }
+}

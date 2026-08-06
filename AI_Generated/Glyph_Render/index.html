@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Scanline Sweeper vs SDF/MSDF · 字形渲染对比</title>
+<script src="./vendor/opentype.min.js"></script>
+<style>
+  :root{--panel:#1b1d22;--ink:#e9e9ec;--muted:#9aa0aa;--accent:#4aa3ff}
+  html,body{margin:0;height:100%;background:#0e0f12;color:var(--ink);font:13px/1.5 system-ui,"Microsoft YaHei",sans-serif}
+  #app{display:grid;grid-template-columns:300px 1fr;height:100%}
+  #panel{background:var(--panel);padding:14px;overflow:auto;box-shadow:2px 0 8px #0007;z-index:2}
+  #panel h1{font-size:14px;margin:0 0 10px}
+  #panel label{display:block;margin:12px 0 4px;color:var(--muted)}
+  #panel select,#panel input[type=range],#panel textarea,#panel input[type=file]{width:100%;box-sizing:border-box}
+  #panel textarea{height:90px;background:#0e0f12;color:var(--ink);border:1px solid #333;border-radius:6px;padding:6px;resize:vertical;font-family:inherit}
+  .row{display:flex;gap:8px;align-items:center}
+  #reset{background:#0e0f12;color:var(--ink);border:1px solid #333;border-radius:6px;padding:6px 10px;cursor:pointer}
+  .seg{display:flex;border:1px solid #333;border-radius:6px;overflow:hidden}
+  .seg button{flex:1;background:#0e0f12;color:var(--ink);border:0;padding:6px;cursor:pointer}
+  .seg button.on{background:var(--accent);color:#012}
+  #stage{position:relative;overflow:hidden}
+  #gl{width:100%;height:100%;display:block;cursor:grab}
+  #gl.drag{cursor:grabbing}
+  #divider{position:absolute;top:0;bottom:0;width:2px;background:var(--accent);transform:translateX(-1px);cursor:ew-resize;z-index:3}
+  #divider::after{content:"⇄";position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--accent);color:#012;border-radius:10px;padding:2px 6px;font-size:12px}
+  #labels{position:absolute;top:8px;left:0;right:0;display:flex;justify-content:space-between;padding:0 12px;pointer-events:none;color:var(--muted);z-index:3;font-weight:600}
+  #info{margin-top:14px;color:var(--muted);font-size:12px;white-space:pre-line;border-top:1px solid #2a2d33;padding-top:10px}
+  .val{color:var(--ink)}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="panel">
+    <h1>字形渲染对比 · Scanline Sweeper vs SDF</h1>
+
+    <label>字体 Font</label>
+    <select id="font">
+      <option value="fonts/Tinos-Regular.ttf">Tinos (≈Times New Roman)</option>
+      <option value="fonts/Geist-Regular.ttf">Geist (Sans)</option>
+      <option value="fonts/DancingScript.ttf">Dancing Script (脚本)</option>
+      <option value="fonts/NotoSansSC-Subset.ttf">Noto Sans SC (中文子集)</option>
+    </select>
+    <label>上传字体 Upload .ttf/.otf</label>
+    <input id="fontFile" type="file" accept=".ttf,.otf"/>
+
+    <label>右侧 SDF 模式</label>
+    <div class="seg" id="mode"><button data-m="sdf" class="on">Single SDF</button><button data-m="msdf">MSDF</button></div>
+
+    <label>SDF 分辨率 <span class="val" id="resVal">32</span> px/em</label>
+    <select id="res"><option>16</option><option>24</option><option selected>32</option><option>48</option><option>64</option></select>
+
+    <label>字号 <span class="val" id="sizeVal">120</span> px</label>
+    <input id="size" type="range" min="8" max="500" value="120"/>
+
+    <label>Gamma (Sweeper) <span class="val" id="gammaVal">1.00</span></label>
+    <input id="gamma" type="range" min="0.5" max="2.5" step="0.05" value="1.0"/>
+
+    <label>文本 Text（多行 / CJK）</label>
+    <textarea id="text">Ravage 42
+Sphinx of black quartz
+汉字 字形 渲染</textarea>
+
+    <div class="row" style="margin-top:10px"><button id="reset">重置视图 Reset view</button></div>
+    <div id="info"></div>
+  </div>
+
+  <div id="stage">
+    <canvas id="gl"></canvas>
+    <div id="labels"><span>◀ Scanline Sweeper</span><span id="rlabel">SDF ▶</span></div>
+    <div id="divider"></div>
+  </div>
+</div>
+<script type="module">import './js/main.js';</script>
+</body>
+</html>
