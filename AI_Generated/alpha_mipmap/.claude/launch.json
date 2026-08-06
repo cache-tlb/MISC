@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "alpha-mipmap-demo",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8113"],
+      "port": 8113
+    }
+  ]
+}

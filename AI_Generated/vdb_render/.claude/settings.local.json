@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xxd -l 256 /d/tmp/vdb_render/assets/bunny_cloud.vdb)",
+      "WebFetch(domain:alextardif.com)",
+      "Bash(node probe_vdb.js)",
+      "Bash(awk '{c[$1]++} END {for \\(k in c\\) print k, c[k]}' assets/teapot/teapot.obj)",
+      "Bash(awk '/^v /{if\\(NR==0\\){} ; x=$2;y=$3;z=$4; if\\(n++==0\\){minx=maxx=x;miny=maxy=y;minz=maxz=z} ; if\\(x<minx\\)minx=x; if\\(x>maxx\\)maxx=x; if\\(y<miny\\)miny=y; if\\(y>maxy\\)maxy=y; if\\(z<minz\\)minz=z; if\\(z>maxz\\)maxz=z} END{printf \"verts=%d\\\\nbbox min = %.3f %.3f %.3f\\\\nbbox max = %.3f %.3f %.3f\\\\nsize = %.3f %.3f %.3f\\\\n\", n, minx,miny,minz, maxx,maxy,maxz, maxx-minx, maxy-miny, maxz-minz}' assets/teapot/teapot.obj)",
+      "Bash(xxd -l 64 assets/teapot/default.png)",
+      "Bash(node --test tests/blosc.test.js)",
+      "Bash(node --max-old-space-size=4096 --test tests/vdb-loader.test.js)",
+      "Bash(node --test tests/obj-loader.test.js)",
+      "Bash(awk '/^f /{print NF-1}' assets/teapot/teapot.obj)",
+      "Bash(node --max-old-space-size=4096 --test tests/)",
+      "Bash(node --max-old-space-size=4096 --test \"tests/*.test.js\")",
+      "Bash(rm -f shot.png)",
+      "Bash(\"/c/Program Files/Google/Chrome/Application/chrome.exe\" --headless=new --no-sandbox --enable-unsafe-swiftshader --use-angle=swiftshader --hide-scrollbars --window-size=1280,800 --virtual-time-budget=90000 --screenshot=shot.png \"http://localhost:8000/index.html\")",
+      "Bash(node --check /d/tmp/vdb_render/src/gl-helpers.js)",
+      "Bash(node --check /d/tmp/vdb_render/src/renderer.js)",
+      "Bash(node cdp.js \"http://localhost:8000/index.html\" 30000 \"C:/Users/liubin/AppData/Local/Temp/claude/D--tmp-vdb-render/1fcbae4b-33a1-423f-8773-5ed230f8304b/scratchpad/shot.png\")",
+      "Bash(node cdp2.js \"C:/Users/liubin/AppData/Local/Temp/claude/D--tmp-vdb-render/1fcbae4b-33a1-423f-8773-5ed230f8304b/scratchpad\")",
+      "Bash(node --check src/shaders.js)",
+      "Bash(node dump_shaders.js)",
+      "Bash(cp shader_opaqueFS.glsl t.frag)",
+      "Bash(glslangValidator t.frag)",
+      "Bash(node cdp3.js)"
+    ]
+  }
+}

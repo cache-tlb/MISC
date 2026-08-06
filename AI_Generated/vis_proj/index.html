@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>球极投影形变演示 · Stereographic projection</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<aside id="panel">
+  <header>
+    <h1>球极投影形变</h1>
+    <button id="collapse" type="button" title="折叠 / 展开"><span>–</span></button>
+  </header>
+
+  <div id="panel-body">
+    <div id="transform-controls"></div>
+    <button id="reset" type="button">重置全部参数</button>
+
+    <div class="group">
+      <h3>显示</h3>
+      <div id="display-controls"></div>
+    </div>
+
+    <div class="note">
+      <p>M 是 <b>17×17</b> 顶点的正方形平面。每个顶点先经模型矩阵得到世界坐标，再在
+         S、P 各自的 vertex shader 里被变换：</p>
+      <p><code>S: (x,y,z) / L</code>，<code>L = √(x²+y²+z²)</code></p>
+      <p><code>P: (x₁h/(h−z₁), y₁h/(h−z₁), 0)</code></p>
+      <p>投影中心是 <code>(0,0,h)</code>（黄色十字，随 h 移动）。橙色射线从原点射向 M，穿过球面即得 S；
+         青色射线从投影中心射向 S，穿过 <code>z = 0</code> 平面即得 P。</p>
+      <p>M 是纯灰白棋盘，S 偏暖、P 偏冷，只为区分三者。<b>不论 h 取何值</b>，南极恒映到原点、
+         赤道恒映到单位圆（<code>z₁ = 0</code> 时系数为 1），h 只改变两者之间的疏密。</p>
+      <p><code>h = 1</code> 即经典球极投影。<code>h &gt; 1</code> 时中心在球外，整个球面映成有界图形，
+         <code>h</code> 越大越接近正交投影；<code>h &lt; 1</code> 时中心落进球内，球面上
+         <code>z₁ = h</code> 那一圈的射线与平面平行，被拉向无穷远。</p>
+    </div>
+  </div>
+</aside>
+
+<div id="hud">
+  <div class="row">
+    <kbd>右键</kbd> 拖动看向四周 ·
+    <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 平移 ·
+    <kbd>E</kbd><kbd>Q</kbd> 升降 ·
+    <kbd>滚轮</kbd> 调速
+  </div>
+  <div class="row">
+    顶点 <b id="stat-vertices">–</b> · 三角形 <b id="stat-triangles">–</b> ·
+    相机 <b id="stat-camera">–</b> · 速度 <b id="stat-speed">–</b> ·
+    <b id="stat-fps">–</b> fps
+  </div>
+</div>
+
+<div id="error" hidden></div>
+
+<script src="src/m4.js"></script>
+<script src="src/webgl-utils.js"></script>
+<script src="src/camera.js"></script>
+<script src="src/geometry.js"></script>
+<script src="src/renderer.js"></script>
+<script src="src/app.js"></script>
+<script>startApp();</script>
+
+</body>
+</html>

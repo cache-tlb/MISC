@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.ludicon.com)",
+      "Bash(grep -nE \"^\\\\s*\\(return \\\\{|[a-zA-Z0-9_]+:\\\\s*[a-zA-Z0-9_]+,\\)\" src/webgl-utils.js)",
+      "Bash(python -c ' *)",
+      "Bash(node -e ' *)",
+      "Bash(python -m http.server 8113 --bind 127.0.0.1)",
+      "Bash(curl -s -o /dev/null -w \"index.html %{http_code}\\\\n\" http://127.0.0.1:8113/index.html)",
+      "Bash(curl -s -o /dev/null -w \"Tree.obj   %{http_code}  %{size_download} bytes\\\\n\" http://127.0.0.1:8113/assets/Tree.obj)",
+      "Bash(curl -s -o /dev/null -w \"mask png   %{http_code}  %{size_download} bytes\\\\n\" http://127.0.0.1:8113/assets/DB2X2_L01.png)",
+      "Bash(curl -s -o /dev/null -w \"renderer   %{http_code}\\\\n\" http://127.0.0.1:8113/src/renderer.js)",
+      "Bash(node -e \"try{require.resolve\\('puppeteer'\\);console.log\\('puppeteer: yes'\\)}catch\\(e\\){console.log\\('puppeteer: no'\\)}\")",
+      "Bash(node -e \"console.log\\('global WebSocket:', typeof WebSocket\\)\")",
+      "Bash(node smoke.js)",
+      "Bash(node probe.js '\\(\\(\\) => { *)",
+      "Bash(node probe.js 'objLoader.loadObj\\('\\\\''assets/Tree.obj'\\\\''\\).then\\(m => { *)",
+      "PowerShell(Get-Process chrome -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowTitle -eq '' } | Stop-Process -Force -ErrorAction SilentlyContinue; Start-Sleep -Seconds 2; \"cleaned up\")",
+      "Bash(node compare.js)",
+      "PowerShell(Get-Process chrome -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowTitle -eq '' } | Stop-Process -Force -ErrorAction SilentlyContinue; Start-Sleep -Seconds 2; \"ok\")",
+      "Bash(curl -s -o /dev/null -w \"server: %{http_code}\\\\n\" http://127.0.0.1:8113/index.html)",
+      "Bash(\"/c/Program Files/Google/Chrome/Application/chrome.exe\" --headless=new --remote-debugging-port=9350 --user-data-dir=\"C:/Users/liubin/AppData/Local/Temp/claude/D--tmp-alpha-mipmap/a92d88b5-87a5-4de7-bb01-3d67f62398ba/scratchpad/prof1\" --no-first-run about:blank)",
+      "Bash(curl -s http://127.0.0.1:9350/json/version)",
+      "Bash(rm -rf prof1)"
+    ]
+  }
+}

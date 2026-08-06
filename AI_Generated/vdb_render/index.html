@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Participating Media &mdash; WebGL2</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>&#9729;</text></svg>">
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    background: #101216;
+    color: #e8eaed;
+    font: 13px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  #canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  #gui {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    z-index: 10;
+    max-height: calc(100% - 24px);
+    overflow-y: auto;
+    border-radius: 6px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45);
+  }
+  #gui .lil-gui.root { border-radius: 6px; }
+
+  #legend {
+    position: absolute;
+    left: 12px;
+    bottom: 12px;
+    z-index: 10;
+    padding: 9px 13px;
+    border-radius: 7px;
+    background: rgba(18, 20, 25, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #9aa7b8;
+    font-size: 12px;
+  }
+  #legend b { color: #d7dee8; font-weight: 600; }
+
+  #overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: #101216;
+    text-align: center;
+    padding: 24px;
+  }
+  #overlay.hidden { display: none; }
+  #overlay h1 { margin: 0; font-size: 17px; font-weight: 600; }
+  #overlay p { margin: 0; color: #8b98a9; max-width: 460px; }
+  #overlay.error h1 { color: #ff8a80; }
+  #bar {
+    width: 260px;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.12);
+    overflow: hidden;
+  }
+  #bar div {
+    height: 100%;
+    width: 0;
+    background: #5aa9f0;
+    transition: width 0.15s linear;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<div id="gui"></div>
+
+<div id="legend">
+  <b>Right mouse</b> look &nbsp;&middot;&nbsp;
+  <b>W/S</b> forward &nbsp;&middot;&nbsp;
+  <b>A/D</b> strafe &nbsp;&middot;&nbsp;
+  <b>E/Q</b> up/down &nbsp;&middot;&nbsp;
+  <b>Wheel</b> speed &nbsp;&middot;&nbsp;
+  <b>Shift</b> boost
+</div>
+
+<div id="overlay">
+  <h1 id="overlay-title">Loading</h1>
+  <div id="bar"><div id="bar-fill"></div></div>
+  <p id="overlay-text">Fetching assets&hellip;</p>
+</div>
+
+<script src="src/m4.js"></script>
+<script src="src/webgl-utils.js"></script>
+<script src="src/camera.js"></script>
+<script src="src/blosc.js"></script>
+<script src="src/vdb-loader.js"></script>
+<script src="src/obj-loader.js"></script>
+<script src="src/gl-helpers.js"></script>
+<script src="src/shaders.js"></script>
+<script src="src/scene.js"></script>
+<script src="src/renderer.js"></script>
+<script src="vendor/lil-gui.umd.js"></script>
+<script src="src/ui.js"></script>
+<script src="src/main.js"></script>
+
+</body>
+</html>
