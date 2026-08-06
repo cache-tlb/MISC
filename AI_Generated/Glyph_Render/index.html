@@ -34,6 +34,19 @@
   <div id="panel">
     <h1>字形渲染对比 · Scanline Sweeper vs SDF</h1>
 
+    <label>视图 View</label>
+    <div class="seg" id="viewMode"><button data-v="2d" class="on">2D 正交</button><button data-v="3d">3D 平面</button></div>
+
+    <div id="cam3d" style="display:none">
+      <label>机位 Camera</label>
+      <div class="seg" id="preset"><button data-p="front">正面</button><button data-p="angled" class="on">45°</button><button data-p="grazing">掠射</button></div>
+      <label>视场角 FOV <span class="val" id="fovVal">50</span>°</label>
+      <input id="fov" type="range" min="20" max="90" step="1" value="50"/>
+    </div>
+
+    <label>各向异性窗口上限 N <span class="val" id="anisoVal">4</span></label>
+    <input id="aniso" type="range" min="1" max="8" step="1" value="4"/>
+
     <label>字体 Font</label>
     <select id="font">
       <option value="fonts/Tinos-Regular.ttf">Tinos (≈Times New Roman)</option>

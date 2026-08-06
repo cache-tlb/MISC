@@ -9,20 +9,18 @@ const TEX_W = 1024;
 const VS = `#version 300 es
 in vec2 a_corner; in vec2 a_emOrigin; in vec2 a_quadMin; in vec2 a_quadMax;
 in float a_curveStart; in float a_curveCount;
-uniform float u_pxPerEm; uniform vec2 u_originDev; uniform vec2 u_backing;
+uniform mat4 u_mvp;
 out vec2 v_localEm; flat out float v_curveStart; flat out float v_curveCount;
 void main(){
   vec2 localEm = mix(a_quadMin, a_quadMax, a_corner);
   v_localEm = localEm; v_curveStart = a_curveStart; v_curveCount = a_curveCount;
-  vec2 worldEm = localEm + a_emOrigin;
-  vec2 dev = u_originDev + vec2(worldEm.x*u_pxPerEm, -worldEm.y*u_pxPerEm);
-  gl_Position = vec4(dev.x/u_backing.x*2.0-1.0, 1.0 - dev.y/u_backing.y*2.0, 0.0, 1.0);
+  gl_Position = u_mvp * vec4(localEm + a_emOrigin, 0.0, 1.0);
 }`;
 
 const FS = `#version 300 es
 precision highp float;
 uniform sampler2D u_curveTex; uniform int u_curveTexW;
-uniform float u_emPerPixel; uniform float u_gamma; uniform vec4 u_color;
+uniform int u_maxWindows; uniform float u_gamma; uniform vec4 u_color;
 in vec2 v_localEm; flat in float v_curveStart; flat in float v_curveCount;
 out vec4 fragColor;
 vec4 fetch(int idx){ return texelFetch(u_curveTex, ivec2(idx % u_curveTexW, idx / u_curveTexW), 0); }
@@ -64,14 +62,35 @@ float sweep(vec2 size, vec2 offset, vec2 P0, vec2 P1, vec2 P2){
   cvg += (size.x-0.5*(q0.x+q1.x))*(q1.y-q0.y);
   return cvg;
 }
+// Mirrors footprintWindows in sweeper-footprint.js — keep the two in sync.
+// The pixel's em-space footprint is the parallelogram spanned by dFdx/dFdy of
+// v_localEm; since that varying is perspective-correct, the two derivatives
+// carry the projection for free — no camera parameters reach this shader.
+// fwidth would give that parallelogram's AABB, which is exact head-on but
+// several times too large at glancing angles. So slice it into N slabs across
+// the long axis and sweep each slab's AABB. N==1 is exactly fwidth again.
+const int MAX_WINDOWS = 8;
 void main(){
-  vec2 size=vec2(u_emPerPixel); vec2 offset=v_localEm-0.5*size;
+  vec2 ddx = dFdx(v_localEm), ddy = dFdy(v_localEm);
+  float lx = length(ddx), ly = length(ddy);
+  vec2 major = lx >= ly ? ddx : ddy;
+  vec2 minor = lx >= ly ? ddy : ddx;
+  float lo = min(lx, ly);
+  float ratio = lo > 0.0 ? max(lx, ly)/lo : 1.0;
+  int N = clamp(int(ceil(ratio - 1e-3)), 1, clamp(u_maxWindows, 1, MAX_WINDOWS));
+  vec2 size = abs(major)/float(N) + abs(minor);
+  float invArea = 1.0/(size.x*size.y);
+
   int start=int(v_curveStart+0.5), count=int(v_curveCount+0.5);
-  float area=0.0;
-  for (int i=0;i<4096;i++){ if (i>=count) break;
-    vec4 t0=fetch(start+i*2); vec4 t1=fetch(start+i*2+1);
-    area += sweep(size, offset, t0.xy, t0.zw, t1.xy); }
-  float cov=clamp(area/(size.x*size.y),0.0,1.0);
+  float cov=0.0;
+  for (int w=0; w<MAX_WINDOWS; w++){ if (w>=N) break;
+    vec2 offset = v_localEm + major*((float(w)+0.5)/float(N) - 0.5) - 0.5*size;
+    float area=0.0;
+    for (int i=0;i<4096;i++){ if (i>=count) break;
+      vec4 t0=fetch(start+i*2); vec4 t1=fetch(start+i*2+1);
+      area += sweep(size, offset, t0.xy, t0.zw, t1.xy); }
+    cov += clamp(area*invArea,0.0,1.0); }   // clamp per window, then average
+  cov /= float(N);
   cov=pow(cov, 1.0/u_gamma);
   fragColor=vec4(u_color.rgb, u_color.a*cov);
 }`;
@@ -84,7 +103,7 @@ export class SweeperRenderer {
     this.vao = gl.createVertexArray();
     this.instBuf = gl.createBuffer();
     this.u = {};
-    for (const n of ['u_pxPerEm','u_originDev','u_backing','u_curveTex','u_curveTexW','u_emPerPixel','u_gamma','u_color'])
+    for (const n of ['u_mvp','u_curveTex','u_curveTexW','u_maxWindows','u_gamma','u_color'])
       this.u[n] = gl.getUniformLocation(this.prog, n);
     this.instanceCount = 0;
     this.stats = { curveCount:0, texW:TEX_W, texH:0, instanceCount:0 };
@@ -165,10 +184,8 @@ export class SweeperRenderer {
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.curveTex);
     gl.uniform1i(this.u.u_curveTex, 0);
     gl.uniform1i(this.u.u_curveTexW, TEX_W);
-    gl.uniform1f(this.u.u_pxPerEm, view.pxPerEm);
-    gl.uniform2f(this.u.u_originDev, view.originDev[0], view.originDev[1]);
-    gl.uniform2f(this.u.u_backing, view.backing[0], view.backing[1]);
-    gl.uniform1f(this.u.u_emPerPixel, view.emPerPixel);
+    gl.uniformMatrix4fv(this.u.u_mvp, false, view.mvp);
+    gl.uniform1i(this.u.u_maxWindows, view.maxWindows ?? 1);
     gl.uniform1f(this.u.u_gamma, view.gamma);
     gl.uniform4fv(this.u.u_color, view.color);
     gl.enable(gl.BLEND);

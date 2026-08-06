@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { loadOt } from './_helpers.mjs';
+import { loadOt, supersampledCoverage } from './_helpers.mjs';
 import { wrapFont } from '../js/font-loader.js';
 import { preprocessGlyph } from '../js/sweeper-preprocess.js';
 import { bboxOfCommands, flattenCommands, evalQuad } from '../js/geom.js';
@@ -41,27 +41,7 @@ test('unit square coverage inside/outside/straddle', () => {
   assert.ok(edge > 0.35 && edge < 0.65, `edge ${edge}`);
 });
 
-// Ground truth: 16x supersampled non-zero winding on a real glyph.
-function windingInside(edges, px, py) {
-  let w = 0;
-  for (const e of edges) {
-    const [ax,ay]=e.a, [bx,by]=e.b;
-    if ((ay <= py) !== (by <= py)) {
-      const tx = ax + (py-ay)/(by-ay)*(bx-ax);
-      if (tx > px) w += (by > ay) ? 1 : -1;
-    }
-  }
-  return w !== 0;
-}
-function supersampledCoverage(edges, cx, cy, w, N=4) {
-  let hit = 0;
-  for (let j=0;j<N;j++) for (let i=0;i<N;i++){
-    const px = cx - w/2 + (i+0.5)/N*w, py = cy - w/2 + (j+0.5)/N*w;
-    if (windingInside(edges, px, py)) hit++;
-  }
-  return hit/(N*N);
-}
-
+// Ground truth (shared with the footprint tests): supersampled non-zero winding.
 test('glyph coverage matches supersampled ground truth', () => {
   const font = wrapFont(loadOt('fonts/Tinos-Regular.ttf'));
   const gid = font.glyphIdForChar('e');

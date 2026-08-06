@@ -30,7 +30,18 @@
       "Bash(sed 's|float den=-qb-sign\\(c2-c0\\)\\\\*sqrt\\(d\\);|float den=-qb-sign\\(c2-c0\\)*sqrt\\(d\\)|' shader.frag)",
       "Bash(glslangValidator -S frag bad.frag)",
       "Bash(echo \"bad exit=$? \\(nonzero = validator is really compiling\\)\")",
-      "Bash(node \"C:/Users/liubin/AppData/Local/Temp/claude/D--tmp-Glyph-Render/eda7f9a9-4ca4-4825-be08-f88cf052de90/scratchpad/overlap.mjs\")"
+      "Bash(node \"C:/Users/liubin/AppData/Local/Temp/claude/D--tmp-Glyph-Render/eda7f9a9-4ca4-4825-be08-f88cf052de90/scratchpad/overlap.mjs\")",
+      "Bash(node --test test/mat4.test.mjs)",
+      "Bash(node --test test/sweeper-footprint.test.mjs)",
+      "Bash(node --test test/scene3d.test.mjs test/layout.test.mjs)",
+      "Bash(echo \"exit=$? \\(1 = no leftovers, good\\)\")",
+      "Bash(node --test test/scene3d.test.mjs)",
+      "Bash(python -m http.server 8080)",
+      "Bash(python -c \"import moderngl\")",
+      "Bash(node -e \"try{require\\('gl'\\);console.log\\('headless-gl ok'\\)}catch\\(e\\){console.log\\('no headless-gl'\\)}\")",
+      "Bash(curl -s -o /dev/null -w \"server HTTP %{http_code}\\\\n\" http://localhost:8080/)",
+      "Bash(taskkill //F //FI \"WINDOWTITLE eq *http.server*\")",
+      "Bash(powershell -NoProfile -Command 'Get-CimInstance Win32_Process -Filter \"Name='\\\\''python.exe'\\\\''\" | Where-Object { $_.CommandLine -like '\\\\''*http.server 8080*'\\\\'' } | ForEach-Object { Stop-Process -Id $_.ProcessId -Force; \"stopped pid $\\($_.ProcessId\\)\" }')"
     ]
   }
 }

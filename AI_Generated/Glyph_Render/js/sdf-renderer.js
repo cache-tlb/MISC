@@ -6,26 +6,30 @@ const ATLAS_W = 2048;
 const VS = `#version 300 es
 in vec2 a_corner; in vec2 a_emOrigin; in vec2 a_tileMin; in vec2 a_tileMax;
 in vec4 a_rect; in float a_spread;
-uniform float u_pxPerEm; uniform vec2 u_originDev; uniform vec2 u_backing;
-out vec2 v_uv; flat out float v_spread;
+uniform mat4 u_mvp;
+out vec2 v_uv; out vec2 v_localEm; flat out float v_spread;
 void main(){
   vec2 localEm = mix(a_tileMin, a_tileMax, a_corner);
   v_uv = mix(a_rect.xy, a_rect.zw, a_corner);  // corner.y up == v up (row0 = em bottom)
+  v_localEm = localEm;
   v_spread = a_spread;
-  vec2 worldEm = localEm + a_emOrigin;
-  vec2 dev = u_originDev + vec2(worldEm.x*u_pxPerEm, -worldEm.y*u_pxPerEm);
-  gl_Position = vec4(dev.x/u_backing.x*2.0-1.0, 1.0 - dev.y/u_backing.y*2.0, 0.0, 1.0);
+  gl_Position = u_mvp * vec4(localEm + a_emOrigin, 0.0, 1.0);
 }`;
 
 const FS = `#version 300 es
 precision highp float;
-uniform sampler2D u_atlas; uniform int u_msdf; uniform float u_emPerPixel; uniform vec4 u_color;
-in vec2 v_uv; flat in float v_spread; out vec4 fragColor;
+uniform sampler2D u_atlas; uniform int u_msdf; uniform vec4 u_color;
+in vec2 v_uv; in vec2 v_localEm; flat in float v_spread; out vec4 fragColor;
 void main(){
   vec3 s = texture(u_atlas, v_uv).rgb;
   float m = u_msdf==1 ? max(min(s.r,s.g), min(max(s.r,s.g), s.b)) : s.r;
   float dEm = (m-0.5)*2.0*v_spread;
-  float aa = 0.5*u_emPerPixel;
+  // Per-pixel em footprint, same source as the sweeper. Under the 2D matrix
+  // fwidth(v_localEm) is (emPerPixel, emPerPixel), so this is numerically the
+  // old u_emPerPixel. A distance field carries one isotropic distance per texel,
+  // so there is nothing here to decompose anisotropically — that asymmetry is
+  // exactly what the grazing-angle comparison is meant to show.
+  float aa = 0.5*max(fwidth(v_localEm).x, fwidth(v_localEm).y);
   float cov = clamp(0.5 + dEm/(2.0*aa), 0.0, 1.0);
   fragColor = vec4(u_color.rgb, u_color.a*cov);
 }`;
@@ -38,7 +42,7 @@ export class SdfRenderer {
     this.vao = gl.createVertexArray();
     this.instBuf = gl.createBuffer();
     this.u = {};
-    for (const n of ['u_pxPerEm','u_originDev','u_backing','u_atlas','u_msdf','u_emPerPixel','u_color'])
+    for (const n of ['u_mvp','u_atlas','u_msdf','u_color'])
       this.u[n] = gl.getUniformLocation(this.prog, n);
     this._font = null; this._instances = null; this._res = 32; this.mode = 'sdf';
     this.instanceCount = 0;
@@ -118,10 +122,7 @@ export class SdfRenderer {
     gl.useProgram(this.prog); gl.bindVertexArray(this.vao);
     gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, this.atlasTex); gl.uniform1i(this.u.u_atlas,0);
     gl.uniform1i(this.u.u_msdf, this.mode==='msdf'?1:0);
-    gl.uniform1f(this.u.u_pxPerEm, view.pxPerEm);
-    gl.uniform2f(this.u.u_originDev, view.originDev[0], view.originDev[1]);
-    gl.uniform2f(this.u.u_backing, view.backing[0], view.backing[1]);
-    gl.uniform1f(this.u.u_emPerPixel, view.emPerPixel);
+    gl.uniformMatrix4fv(this.u.u_mvp, false, view.mvp);
     gl.uniform4fv(this.u.u_color, view.color);
     gl.enable(gl.BLEND);
     gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);

@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" width="900" height="300"
+     font-family="system-ui,-apple-system,Segoe UI,Helvetica,sans-serif" font-size="13">
+  <style>
+    .win   { fill:none; stroke:#9aa0aa; stroke-dasharray:5 4; stroke-width:1.4 }
+    .t     { fill:#808a99 }
+    .hd    { fill:#e9e9ec; font-size:14px; font-weight:600 }
+    .pgram { fill:#3b82f6; fill-opacity:.30; stroke:#3b82f6; stroke-width:2 }
+    .waste { fill:#f97316; fill-opacity:.20 }
+    .slab  { fill:#10b981; fill-opacity:.14; stroke:#10b981; stroke-width:1; stroke-dasharray:3 3 }
+    .axis  { stroke:#f97316; stroke-width:1.6; marker-end:url(#ah) }
+  </style>
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#f97316"/>
+    </marker>
+  </defs>
+
+  <!-- ============ panel 1: head-on ============ -->
+  <text class="hd" x="150" y="34" text-anchor="middle">正入射</text>
+  <rect class="waste" x="118" y="108" width="64" height="64"/>
+  <rect class="pgram" x="118" y="108" width="64" height="64"/>
+  <rect class="win"   x="118" y="108" width="64" height="64"/>
+  <line class="axis" x1="150" y1="140" x2="206" y2="140"/>
+  <line class="axis" x1="150" y1="140" x2="150" y2="196"/>
+  <text class="t" x="212" y="144" fill="#f97316">ddx</text>
+  <text class="t" x="150" y="212" text-anchor="middle" fill="#f97316">ddy</text>
+  <text class="t" x="150" y="240" text-anchor="middle">足迹就是正方形</text>
+  <text class="t" x="150" y="258" text-anchor="middle">AABB 面积 = 足迹面积，无损</text>
+
+  <!-- ============ panel 2: grazing, one window ============ -->
+  <text class="hd" x="445" y="34" text-anchor="middle">掠射 · 单窗口（fwidth）</text>
+  <rect class="waste" x="361.5" y="96.5" width="167" height="87"/>
+  <polygon class="pgram" points="361.5,156.5 511.5,96.5 528.5,123.5 378.5,183.5"/>
+  <rect class="win"   x="361.5" y="96.5" width="167" height="87"/>
+  <text class="t" x="398" y="112" fill="#f97316">多采进来的墨</text>
+  <text class="t" x="445" y="240" text-anchor="middle">fwidth 给的是平行四边形的 AABB</text>
+  <text class="t" x="445" y="258" text-anchor="middle">ρ≈5 时它有真足迹的 2.9 倍大 → 发糊</text>
+
+  <!-- ============ panel 3: grazing, N windows ============ -->
+  <text class="hd" x="740" y="34" text-anchor="middle">掠射 · 多窗口（N = ⌈ρ⌉）</text>
+  <rect class="slab" x="656.5" y="144.5" width="47" height="39"/>
+  <rect class="slab" x="686.5" y="132.5" width="47" height="39"/>
+  <rect class="slab" x="716.5" y="120.5" width="47" height="39"/>
+  <rect class="slab" x="746.5" y="108.5" width="47" height="39"/>
+  <rect class="slab" x="776.5" y="96.5"  width="47" height="39"/>
+  <polygon class="pgram" points="656.5,156.5 806.5,96.5 823.5,123.5 673.5,183.5"/>
+  <text class="t" x="740" y="240" text-anchor="middle">沿长轴切 N 片，每片取自身 AABB</text>
+  <text class="t" x="740" y="258" text-anchor="middle">逐窗口 sweep，先 clamp 再平均</text>
+
+  <text class="t" x="450" y="288" text-anchor="middle" font-size="14">
+    一个像素在 em 空间的足迹由 dFdx / dFdy 给出；N = 1 时窗口正是 fwidth，所以 2D 正交下这条路径零开销
+  </text>
+</svg>
