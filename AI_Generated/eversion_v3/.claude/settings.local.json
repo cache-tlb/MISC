@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \"import pypdf; print\\(pypdf.__version__\\)\")",
+      "Bash(python -c ' *)",
+      "Bash(node proto.js 3)",
+      "Bash(node proto.js 4)",
+      "Bash(node flow.js 3 200 0.02 6)",
+      "Bash(node -e ' *)",
+      "Bash(node full.js)",
+      "Bash(taskkill //F //FI \"IMAGENAME eq node.exe\" //FI \"MEMUSAGE gt 200000\")",
+      "Bash(node glsim.js)",
+      "Bash(node weier.js)",
+      "Bash(node genfig.js)",
+      "Bash(node svgpreview.js \"D:/tmp/eversion_v3/fig/12-energy.svg\" prev12.png)",
+      "Bash(node svgpreview.js \"D:/tmp/eversion_v3/fig/11-stages.svg\" prev11.png)",
+      "Bash(node schem.js)",
+      "Bash(node svgpreview.js \"D:/tmp/eversion_v3/fig/09-stiffness.svg\" prev09.png)",
+      "Bash(node checkmd.js)",
+      "Bash(node svgpreview.js \"D:/tmp/eversion_v3/fig/02-minimax.svg\" p_02-minimax.png)"
+    ]
+  }
+}

@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>球面外翻 · Analytic Sphere Eversion</title>
+<style>
+  :root{
+    --panel-bg: rgba(14,17,26,.85);
+    --panel-border: rgba(255,255,255,.09);
+    --fg: #dde3ee;
+    --fg-dim: #8b93a7;
+    --accent: #ffa14e;
+    --accent2: #4da3ff;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ width:100%; height:100%; overflow:hidden; background:#0b0e15;
+    font-family: system-ui, "Segoe UI", "Microsoft YaHei", sans-serif; color:var(--fg); }
+  #glcanvas{ position:absolute; inset:0; width:100%; height:100%; display:block; touch-action:none; }
+
+  #panel{
+    position:absolute; top:14px; left:14px; width:330px; max-width:calc(100vw - 28px);
+    max-height:calc(100vh - 110px); overflow:auto;
+    background:var(--panel-bg); border:1px solid var(--panel-border); border-radius:12px;
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    padding:14px 16px; font-size:13px; line-height:1.55;
+  }
+  #panel h1{ font-size:16px; font-weight:700; letter-spacing:.5px; }
+  #panel .sub{ color:var(--fg-dim); font-size:11.5px; margin:2px 0 10px; }
+  #phaseName{ font-size:14px; font-weight:600; color:var(--accent); margin-top:2px; }
+  #phaseDesc{ color:var(--fg-dim); font-size:12px; min-height:34px; }
+
+  #readout{ display:grid; grid-template-columns:repeat(4,1fr); gap:2px 8px;
+    font-family:Consolas, monospace; font-size:11.5px; color:#aeb7c9;
+    background:rgba(255,255,255,.04); border-radius:8px; padding:7px 9px; margin:9px 0; }
+  #readout b{ color:#e8edf6; font-weight:600; }
+
+  .row{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:7px 0; }
+  button, select{
+    background:rgba(255,255,255,.08); color:var(--fg); border:1px solid var(--panel-border);
+    border-radius:7px; padding:5px 12px; font-size:13px; cursor:pointer;
+  }
+  button:hover{ background:rgba(255,255,255,.16); }
+  button.primary{ background:var(--accent); border-color:transparent; color:#1a1206; font-weight:700; }
+  label.chk{ display:flex; align-items:center; gap:5px; cursor:pointer; color:#c3cadb;
+    font-size:12.5px; user-select:none; }
+  input[type=checkbox]{ accent-color: var(--accent); }
+  input[type=radio]{ accent-color: var(--accent); }
+  input[type=range]{ accent-color: var(--accent); }
+
+  .legend{ display:flex; gap:14px; margin:8px 0 2px; font-size:12px; color:#c3cadb; }
+  .chip{ display:inline-block; width:11px; height:11px; border-radius:3px; margin-right:5px; vertical-align:-1px; }
+
+  details{ margin-top:8px; color:#b9c1d2; font-size:12px; }
+  details summary{ cursor:pointer; color:var(--fg-dim); }
+  details p{ margin:6px 0; }
+  code{ font-family:Consolas, monospace; background:rgba(255,255,255,.07); padding:0 4px; border-radius:4px; font-size:11px; }
+
+  #timebar{
+    position:absolute; left:0; right:0; bottom:0; padding:10px 18px 14px;
+    background:linear-gradient(transparent, rgba(8,10,16,.9) 40%);
+    display:flex; align-items:center; gap:12px;
+  }
+  #playBtn{ width:42px; height:34px; font-size:15px; flex:none; }
+  #trackwrap{ position:relative; flex:1; height:34px; }
+  #scrub{ position:absolute; inset:0; width:100%; margin:0; }
+  #ticks{ position:absolute; left:8px; right:8px; top:0; height:8px; pointer-events:none; }
+  #ticks .tick{ position:absolute; top:0; width:1px; height:7px; background:rgba(255,255,255,.35); }
+  #ticks .mid{ background:var(--accent); width:2px; height:9px; }
+  #midlbl{ position:absolute; top:-13px; transform:translateX(-50%); font-size:10px; color:var(--accent); white-space:nowrap; }
+  #speedSel{ flex:none; }
+  #err{
+    position:absolute; inset:0; display:none; align-items:center; justify-content:center;
+    background:#0b0e15; color:#f88; font-size:15px; padding:30px; text-align:center;
+  }
+  #hint{ position:absolute; right:16px; top:12px; color:rgba(255,255,255,.35); font-size:11.5px;
+    text-align:right; pointer-events:none; }
+  @media (max-width:640px){ #panel{ font-size:12px; width:280px; } #hint{ display:none; } }
+</style>
+</head>
+<body>
+<canvas id="glcanvas"></canvas>
+<div id="err">当前浏览器不支持 WebGL，无法运行本演示。</div>
+<div id="hint">拖动旋转 · 滚轮缩放 · 双击复位<br>空格 播放/暂停 · ←→ 微调</div>
+
+<div id="panel">
+  <h1>球面外翻 <span style="font-weight:400;color:var(--fg-dim)">Sphere Eversion</span></h1>
+  <div class="sub">解析直纹面方法 · A. Bednorz &amp; W. Bednorz, arXiv:1711.10466</div>
+  <div id="phaseName">—</div>
+  <div id="phaseDesc">—</div>
+  <div id="readout"></div>
+
+  <div class="row">
+    <button id="btnPlay2" class="primary">⏸ 暂停</button>
+    <button id="btnReset">↺ 重置</button>
+    <span style="color:var(--fg-dim);font-size:12px">速度</span>
+    <select id="speedSel2">
+      <option value="0.35">0.35×</option>
+      <option value="0.6">0.6×</option>
+      <option value="1" selected>1×</option>
+      <option value="2">2×</option>
+    </select>
+  </div>
+
+  <div class="row" style="gap:12px">
+    <span style="color:var(--fg-dim);font-size:12px">曲面族</span>
+    <label class="chk"><input type="radio" name="nsel" value="2" checked> n=2 最简外翻</label>
+    <label class="chk"><input type="radio" name="nsel" value="3"> n=3 Boy 曲面</label>
+  </div>
+
+  <div class="row" style="gap:10px">
+    <label class="chk"><input type="checkbox" id="ckXray"> X 射线</label>
+    <label class="chk"><input type="checkbox" id="ckGrid"> 参数线</label>
+    <label class="chk"><input type="checkbox" id="ckClip"> 剖切</label>
+    <label class="chk"><input type="checkbox" id="ckSpin"> 自动旋转</label>
+    <label class="chk"><input type="checkbox" id="ckLoop" checked> 循环</label>
+  </div>
+  <div class="row" id="clipRow" style="display:none">
+    <span style="color:var(--fg-dim);font-size:12px;flex:none">剖切深度</span>
+    <input type="range" id="clipSlider" min="0.05" max="0.95" step="0.01" value="0.5" style="flex:1">
+  </div>
+
+  <div class="legend">
+    <span><span class="chip" style="background:#ff8c42"></span>初始外侧</span>
+    <span><span class="chip" style="background:#409fff"></span>初始内侧（结束时朝外）</span>
+  </div>
+
+  <details>
+    <summary>方法说明</summary>
+    <p>论文给出球面外翻的<b>全解析</b>参数化，映射管线为
+    <code>(θ,φ)→(h,φ)→r→r′→r″</code>：直纹面族（式 4）生成带扭转的柱面，
+    阻尼映射（式 7）与指数反演（式 8）把两端伸向无穷远的"虫洞"闭合成紧致曲面，
+    式 (12)(15) 的 λ 参数最终把它舒展成圆球。</p>
+    <p>动画按论文<b>表 1</b> 调度参数（Q=2/3, ω=2, η=1）：
+    t 从 −3/2 扫到 +3/2 时穿过 t=0 <b>半程模型</b>——外翻的对称中点，
+    含四重点 Q 与 D₁ 等最少拓扑事件。首尾对比：同一张球面，内外两色互换，
+    全程光滑、无折痕（允许自交）。</p>
+    <p>顶点着色器使用论文附录 G 的缩放公式（91–95）求值，
+    保证极点 h→∞ 处数值稳定；α→0 的反演极限采用闭式正则化。n=3 时
+    t=0 的半程模型为二重覆盖的 Boy 曲面（实射影平面）。</p>
+  </details>
+</div>
+
+<div id="timebar">
+  <button id="playBtn">⏸</button>
+  <div id="trackwrap">
+    <div id="ticks"></div>
+    <input type="range" id="scrub" min="0" max="1" step="0.0002" value="0">
+  </div>
+  <select id="speedSel" style="display:none"></select>
+</div>
+
+<script>
+"use strict";
+/* ================= 论文公式管线（附录 G 缩放形式，极点稳定） =================
+   参数: n, t, q, p, λ, ξ, η, α, β, ω;  κ=(n−1)/2n
+   C=cos²θ, Z=sinθ, W=e^{iφ}cosθ, A=w·cos^{n+1}θ, R=Cⁿ|w|², R′=ξCⁿ+ηR
+   w″= A·R′^κ·e^{γz′}/D,  D = CαR′^{2κ}+βR,  γ=2√(αβ),  z′=zCⁿ/R′
+   z″= [(CαR′^{2κ}−βR)/D]·z′·E₁(γz′) + √(αβ)(CR′^{2κ}−R)/(D(α+β))
+   其中 E₁(v)=(eᵛ−1)/v；该式为式(8)的等价重排，在 α→0 时光滑退化为式(9)。 */
+
+const VSRC = `
+precision highp float;
+attribute vec2 aTP;
+uniform mat4 uProj, uView;
+uniform float uN,uT,uQ,uP,uLam,uXi,uEta,uAlpha,uBeta,uOmega;
+varying vec3 vN; varying vec3 vP;
+
+vec3 everse(float th, float ph){
+  float n=uN;
+  float c=cos(th); float Z=sin(th); float C=c*c;
+  float cn=pow(max(c,0.0),n); float Cn=cn*cn; float kap=(n-1.0)/(2.0*n);
+  float a=uLam*cn+(1.0-uLam); float b=uLam*uOmega*Z; float cnp1=cn*c;
+  float snp=sin(n*ph), cnp=cos(n*ph);
+  float sn1=sin((n-1.0)*ph), cn1=cos((n-1.0)*ph);
+  float Wx=c*cos(ph), Wy=c*sin(ph);
+  float Ax=uT*a*Wx + uP*cnp1*sn1 - b*Wy;
+  float Ay=uT*a*Wy + uP*cnp1*cn1 + b*Wx;
+  float R=uT*uT*a*a + b*b + uP*uP*Cn + 2.0*uP*cn*(b*cnp + uT*a*snp);
+  float zCn=uLam*(uOmega*Z*cn*snp - uT*cn*(cn*cnp/n + uQ*uOmega*Z))
+          - (1.0-uLam)*pow(uEta,1.0+kap)*uT*pow(abs(uT),2.0*kap)*Z;
+  float Rp=uXi*Cn+uEta*R;
+  float zp=zCn/Rp;
+  float Rp2k=pow(Rp,2.0*kap);
+  float gam=2.0*sqrt(uAlpha*uBeta);
+  float D=C*uAlpha*Rp2k+uBeta*R;
+  float egz=exp(gam*zp);
+  float rpk=pow(Rp,kap);
+  float v=gam*zp;
+  float E1 = (abs(v)>1e-4) ? (exp(v)-1.0)/v : 1.0+v*(0.5+v/6.0);
+  float zpp=(C*uAlpha*Rp2k-uBeta*R)/D*zp*E1
+           + sqrt(uAlpha*uBeta)*(C*Rp2k-R)/(D*(uAlpha+uBeta));
+  return vec3(Ax*rpk*egz/D, Ay*rpk*egz/D, zpp);
+}
+
+void main(){
+  float th=aTP.x, ph=aTP.y;
+  vec3 P=everse(th,ph);
+  float e=8e-4;
+  float thn=clamp(th,-1.5707963+2.0*e, 1.5707963-2.0*e);
+  vec3 t1=everse(thn+e,ph)-everse(thn-e,ph);
+  vec3 t2=everse(thn,ph+e)-everse(thn,ph-e);
+  vec3 N=cross(t1,t2);
+  mat3 Rv=mat3(uView[0].xyz,uView[1].xyz,uView[2].xyz);
+  vec4 vp=uView*vec4(P,1.0);
+  vP=vp.xyz;
+  vN=Rv*N;
+  gl_Position=uProj*vp;
+}`;
+
+const FSRC = `
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif
+varying vec3 vN; varying vec3 vP;
+uniform vec3 uColF,uColB;
+uniform vec4 uLineCol;
+uniform float uXray,uClipOn,uClipZ,uLineMode;
+void main(){
+  if(uClipOn>0.5 && vP.z>uClipZ) discard;
+  if(uLineMode>0.5){ gl_FragColor=uLineCol; return; }
+  vec3 N=normalize(vN);
+  vec3 V=normalize(-vP);
+  if(!gl_FrontFacing) N=-N;
+  vec3 base = gl_FrontFacing ? uColF : uColB;
+  if(uXray>0.5){
+    float f = 0.045 + 0.28*pow(1.0-abs(dot(N,V)),2.2);
+    gl_FragColor = vec4(base*f, 1.0);
+    return;
+  }
+  vec3 L1=normalize(vec3(0.45,0.55,0.75));
+  vec3 L2=normalize(vec3(-0.6,-0.25,0.35));
+  float dif = max(dot(N,L1),0.0)*0.9 + max(dot(N,L2),0.0)*0.32 + 0.14;
+  vec3 H=normalize(L1+V);
+  float spec=pow(max(dot(N,H),0.0),56.0)*0.45;
+  float rim=pow(1.0-max(dot(N,V),0.0),3.0)*0.22;
+  vec3 col=base*dif + vec3(spec) + base*rim;
+  gl_FragColor=vec4(col,1.0);
+}`;
+
+/* ============================ WebGL 初始化 ============================ */
+const canvas=document.getElementById('glcanvas');
+let gl=canvas.getContext('webgl2',{antialias:true});
+let isGL2=!!gl, hasUint=true;
+if(!gl){
+  gl=canvas.getContext('webgl',{antialias:true})||canvas.getContext('experimental-webgl',{antialias:true});
+  if(gl) hasUint=!!gl.getExtension('OES_element_index_uint');
+}
+if(!gl){ document.getElementById('err').style.display='flex'; throw new Error('no webgl'); }
+
+function compile(type,src){
+  const s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s);
+  if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+  return s;
+}
+const prog=gl.createProgram();
+gl.attachShader(prog,compile(gl.VERTEX_SHADER,VSRC));
+gl.attachShader(prog,compile(gl.FRAGMENT_SHADER,FSRC));
+gl.linkProgram(prog);
+if(!gl.getProgramParameter(prog,gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+gl.useProgram(prog);
+const U={};
+['uProj','uView','uN','uT','uQ','uP','uLam','uXi','uEta','uAlpha','uBeta','uOmega',
+ 'uColF','uColB','uLineCol','uXray','uClipOn','uClipZ','uLineMode']
+ .forEach(k=>U[k]=gl.getUniformLocation(prog,k));
+
+/* 参数网格：θ∈[−π/2,π/2] × φ∈[−π,π]，接缝复制一列 */
+const TH = hasUint?200:128, PH = hasUint?400:256;
+const NV=(TH+1)*(PH+1);
+const verts=new Float32Array(NV*2);
+{
+  let k=0;
+  for(let i=0;i<=TH;i++){
+    const th=-Math.PI/2 + Math.PI*i/TH;
+    for(let j=0;j<=PH;j++){
+      verts[k++]=th; verts[k++]=-Math.PI + 2*Math.PI*j/PH;
+    }
+  }
+}
+function buildIdx(i0,i1){
+  const arr = hasUint? new Uint32Array((i1-i0)*PH*6) : new Uint16Array((i1-i0)*PH*6);
+  let k=0;
+  for(let i=i0;i<i1;i++) for(let j=0;j<PH;j++){
+    const a=i*(PH+1)+j, b=(i+1)*(PH+1)+j, c=b+1, d=a+1;
+    arr[k++]=a; arr[k++]=b; arr[k++]=c;   // 定向：法向 = ∂θ×∂φ
+    arr[k++]=a; arr[k++]=c; arr[k++]=d;
+  }
+  return arr;
+}
+const idx=buildIdx(0,TH);
+/* 奇数 n 时上下两个极帽的像近乎重合：t≈0 只画 θ≥0 半域（Boy 曲面为其单层覆盖全像），
+   其余时刻上下半域分两次绘制并用 polygonOffset 打破深度平局 */
+const idxUp=buildIdx(TH/2,TH), idxLo=buildIdx(0,TH/2);
+/* 参数线（LINES 索引）：每 20 格取一条 θ 线 / φ 线 */
+const lineIdxArr=[];
+const LSTEP=hasUint?20:16;
+for(let i=0;i<=TH;i+=LSTEP) for(let j=0;j<PH;j++){ lineIdxArr.push(i*(PH+1)+j, i*(PH+1)+j+1); }
+for(let j=0;j<=PH;j+=LSTEP) for(let i=0;i<TH;i++){ lineIdxArr.push(i*(PH+1)+j, (i+1)*(PH+1)+j); }
+const lineIdx = hasUint? new Uint32Array(lineIdxArr) : new Uint16Array(lineIdxArr);
+
+const vbo=gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER,vbo);
+gl.bufferData(gl.ARRAY_BUFFER,verts,gl.STATIC_DRAW);
+const aTP=gl.getAttribLocation(prog,'aTP');
+gl.enableVertexAttribArray(aTP);
+gl.vertexAttribPointer(aTP,2,gl.FLOAT,false,0,0);
+const ibo=gl.createBuffer();
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ibo);
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,idx,gl.STATIC_DRAW);
+const iboUp=gl.createBuffer();
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,iboUp);
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,idxUp,gl.STATIC_DRAW);
+const iboLo=gl.createBuffer();
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,iboLo);
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,idxLo,gl.STATIC_DRAW);
+const lbo=gl.createBuffer();
+gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,lbo);
+gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,lineIdx,gl.STATIC_DRAW);
+const IDX_TYPE = hasUint?gl.UNSIGNED_INT:gl.UNSIGNED_SHORT;
+
+/* ======================= 参数调度（论文表 1） ======================= */
+const Q=2/3, TMAX=1/Q, OMEGA=2, ETA=1;
+const KF=[ // t, q, λ, ξ, α, β ；p=1−|qt| 推得，η=1, ω=2 恒定
+  {t:-TMAX,q:Q,lam:0,xi:0,alpha:0,beta:1},
+  {t:-TMAX,q:Q,lam:1,xi:0,alpha:0,beta:1},
+  {t:-TMAX,q:Q,lam:1,xi:1,alpha:1,beta:0.04},
+  {t:-TMAX,q:0,lam:1,xi:1,alpha:1,beta:0.04},
+  {t: TMAX,q:0,lam:1,xi:1,alpha:1,beta:0.04},
+  {t: TMAX,q:Q,lam:1,xi:1,alpha:1,beta:0.04},
+  {t: TMAX,q:Q,lam:1,xi:0,alpha:0,beta:1},
+  {t: TMAX,q:Q,lam:0,xi:0,alpha:0,beta:1},
+];
+const PHASES=[
+  {w:0.10, name:'① 球面 → 反演虫洞',   desc:'λ: 0→1 · 式(12)(15)——圆球被拉伸扭转，折叠成反演后的虫洞形态'},
+  {w:0.075,name:'② 反演虫洞 → 展开虫洞',desc:'α: 0→1, ξ: 0→1 · 式(7)(8)——切换反演映射参数'},
+  {w:0.095,name:'③ 展开虫洞 → 闭合虫洞',desc:'q: 2/3→0（p: 0→1）· 式(4)——中部卷起，出现自交'},
+  {w:0.46, name:'④ 中心翻转',           desc:'t: −3/2 → +3/2 · 式(3)——穿过 t=0 半程模型（四重点 Q、D₁ 事件），完成内外交换'},
+  {w:0.095,name:'⑤ 闭合虫洞 → 展开虫洞',desc:'q: 0→2/3——解开自交'},
+  {w:0.075,name:'⑥ 展开虫洞 → 反演虫洞',desc:'α: 1→0, ξ: 1→0'},
+  {w:0.10, name:'⑦ 反演虫洞 → 球面',   desc:'λ: 1→0——外翻完成！蓝色面（原内侧）已朝外'},
+];
+const CUM=[0]; PHASES.forEach(p=>CUM.push(CUM[CUM.length-1]+p.w));
+
+function paramsAt(s){
+  s=Math.min(1,Math.max(0,s));
+  let seg=PHASES.length-1;
+  for(let i=0;i<PHASES.length;i++) if(s<=CUM[i+1]){ seg=i; break; }
+  const u=(s-CUM[seg])/PHASES[seg].w;
+  const e=0.5-0.5*Math.cos(Math.PI*Math.min(1,Math.max(0,u)));   // 阶段内余弦缓动
+  const A=KF[seg], B=KF[seg+1], P={};
+  for(const k in A) P[k]=A[k]+(B[k]-A[k])*e;
+  P.p=Math.max(0,1-Math.abs(P.q*P.t));
+  P.eta=ETA; P.omega=OMEGA; P.n=state.n;
+  // 奇数 n 在 t=0 时为二重覆盖曲面（两层完全重合），加微小偏移避免 z-fighting
+  P.halfDomain = (P.n%2===1 && Math.abs(P.t)<0.02);
+  P.phase=seg;
+  return P;
+}
+
+/* ================== CPU 端同款公式（用于自动取景包围盒） ================== */
+function everseJS(th,ph,P){
+  const n=P.n,t=P.t,q=P.q,p=P.p,lam=P.lam,xi=P.xi,eta=P.eta,al=P.alpha,be=P.beta,om=P.omega;
+  const c=Math.cos(th),Z=Math.sin(th),C=c*c;
+  const cn=Math.pow(Math.max(c,0),n),Cn=cn*cn,kap=(n-1)/(2*n);
+  const a=lam*cn+(1-lam),b=lam*om*Z,cnp1=cn*c;
+  const snp=Math.sin(n*ph),cnp=Math.cos(n*ph);
+  const sn1=Math.sin((n-1)*ph),cn1=Math.cos((n-1)*ph);
+  const Wx=c*Math.cos(ph),Wy=c*Math.sin(ph);
+  const Ax=t*a*Wx+p*cnp1*sn1-b*Wy, Ay=t*a*Wy+p*cnp1*cn1+b*Wx;
+  const R=t*t*a*a+b*b+p*p*Cn+2*p*cn*(b*cnp+t*a*snp);
+  const zCn=lam*(om*Z*cn*snp-t*cn*(cn*cnp/n+q*om*Z))
+           -(1-lam)*Math.pow(eta,1+kap)*t*Math.pow(Math.abs(t),2*kap)*Z;
+  const Rp=xi*Cn+eta*R, zp=zCn/Rp, Rp2k=Math.pow(Rp,2*kap);
+  const gam=2*Math.sqrt(al*be), D=C*al*Rp2k+be*R, egz=Math.exp(gam*zp);
+  const rpk=Math.pow(Rp,kap), v=gam*zp;
+  const E1=Math.abs(v)>1e-6?(Math.exp(v)-1)/v:1+v*(0.5+v/6);
+  const zpp=(C*al*Rp2k-be*R)/D*zp*E1+Math.sqrt(al*be)*(C*Rp2k-R)/(D*(al+be));
+  return [Ax*rpk*egz/D, Ay*rpk*egz/D, zpp];
+}
+function boundsFor(P){
+  let lo=[1e9,1e9,1e9],hi=[-1e9,-1e9,-1e9];
+  for(let i=0;i<=22;i++){
+    const th=-Math.PI/2+Math.PI*i/22;
+    for(let j=0;j<44;j++){
+      const v=everseJS(th,-Math.PI+2*Math.PI*j/44,P);
+      for(let k=0;k<3;k++){ if(v[k]<lo[k])lo[k]=v[k]; if(v[k]>hi[k])hi[k]=v[k]; }
+    }
+  }
+  const c=[(lo[0]+hi[0])/2,(lo[1]+hi[1])/2,(lo[2]+hi[2])/2];
+  const r=0.55*Math.hypot(hi[0]-lo[0],hi[1]-lo[1],hi[2]-lo[2]);
+  return {c,r:Math.max(r,0.6)};
+}
+
+/* ============================ 矩阵工具 ============================ */
+function persp(out,fovy,asp,near,far){
+  const f=1/Math.tan(fovy/2), nf=1/(near-far);
+  out.set([f/asp,0,0,0, 0,f,0,0, 0,0,(far+near)*nf,-1, 0,0,2*far*near*nf,0]);
+}
+function lookAt(out,eye,ctr,up){
+  let zx=eye[0]-ctr[0],zy=eye[1]-ctr[1],zz=eye[2]-ctr[2];
+  let l=1/Math.hypot(zx,zy,zz); zx*=l;zy*=l;zz*=l;
+  let xx=up[1]*zz-up[2]*zy, xy=up[2]*zx-up[0]*zz, xz=up[0]*zy-up[1]*zx;
+  l=Math.hypot(xx,xy,xz); if(l<1e-8){xx=1;xy=0;xz=0;} else {xx/=l;xy/=l;xz/=l;}
+  const yx=zy*xz-zz*xy, yy=zz*xx-zx*xz, yz=zx*xy-zy*xx;
+  out.set([xx,yx,zx,0, xy,yy,zy,0, xz,yz,zz,0,
+    -(xx*eye[0]+xy*eye[1]+xz*eye[2]),
+    -(yx*eye[0]+yy*eye[1]+yz*eye[2]),
+    -(zx*eye[0]+zy*eye[1]+zz*eye[2]),1]);
+}
+
+/* ============================ 状态与交互 ============================ */
+const state={
+  s:0, playing:true, speed:1, n:2, duration:36,
+  xray:false, grid:false, clip:false, clipPos:0.5, spin:false, loop:true,
+  yaw:-0.7, pitch:0.42, zoom:1,
+  dist:8, tgt:[0,0,0], boundR:3, holdUntil:0,
+};
+let MAXFRAMES=Infinity;
+(function(){ // 支持 #s=0.5&pause=1&maxframes=3 直接定位（便于截图/调试）
+  const m=Object.fromEntries(location.hash.replace(/^#/,'').split('&').filter(Boolean).map(x=>x.split('=')));
+  if(m.s!==undefined){ state.s=parseFloat(m.s)||0; }
+  if(m.pause==='1') state.playing=false;
+  if(m.maxframes) MAXFRAMES=parseInt(m.maxframes);
+  if(m.n) state.n=parseInt(m.n);
+  if(m.xray==='1') state.xray=true;
+  if(m.grid==='1') state.grid=true;
+  if(m.clip==='1') state.clip=true;
+})();
+
+const proj=new Float32Array(16), view=new Float32Array(16);
+
+let dragging=false,lastX=0,lastY=0;
+const pointers=new Map(); let pinchD0=0,zoom0=1;
+canvas.addEventListener('pointerdown',e=>{
+  canvas.setPointerCapture(e.pointerId);
+  pointers.set(e.pointerId,[e.clientX,e.clientY]);
+  if(pointers.size===1){ dragging=true; lastX=e.clientX; lastY=e.clientY; }
+  else if(pointers.size===2){
+    const p=[...pointers.values()];
+    pinchD0=Math.hypot(p[0][0]-p[1][0],p[0][1]-p[1][1]); zoom0=state.zoom;
+  }
+});
+canvas.addEventListener('pointermove',e=>{
+  if(!pointers.has(e.pointerId)) return;
+  pointers.set(e.pointerId,[e.clientX,e.clientY]);
+  if(pointers.size===2){
+    const p=[...pointers.values()];
+    const d=Math.hypot(p[0][0]-p[1][0],p[0][1]-p[1][1]);
+    if(pinchD0>0) state.zoom=Math.min(6,Math.max(0.15,zoom0*pinchD0/d));
+  } else if(dragging){
+    state.yaw -=(e.clientX-lastX)*0.008;
+    state.pitch+=(e.clientY-lastY)*0.008;
+    state.pitch=Math.min(1.52,Math.max(-1.52,state.pitch));
+    lastX=e.clientX; lastY=e.clientY;
+  }
+});
+function endPtr(e){ pointers.delete(e.pointerId); if(pointers.size===0) dragging=false; }
+canvas.addEventListener('pointerup',endPtr);
+canvas.addEventListener('pointercancel',endPtr);
+canvas.addEventListener('wheel',e=>{
+  e.preventDefault();
+  state.zoom=Math.min(6,Math.max(0.15,state.zoom*Math.exp(e.deltaY*0.0012)));
+},{passive:false});
+canvas.addEventListener('dblclick',()=>{ state.yaw=-0.7; state.pitch=0.42; state.zoom=1; });
+
+/* UI 绑定 */
+const $=id=>document.getElementById(id);
+const scrub=$('scrub'), playBtn=$('playBtn'), playBtn2=$('btnPlay2');
+function setPlaying(p){
+  state.playing=p;
+  playBtn.textContent=p?'⏸':'▶';
+  playBtn2.textContent=p?'⏸ 暂停':'▶ 播放';
+}
+playBtn.onclick=()=>setPlaying(!state.playing);
+playBtn2.onclick=()=>setPlaying(!state.playing);
+$('btnReset').onclick=()=>{ state.s=0; setPlaying(true); };
+scrub.addEventListener('input',()=>{ state.s=parseFloat(scrub.value); setPlaying(false); });
+$('speedSel2').onchange=e=>state.speed=parseFloat(e.target.value);
+document.querySelectorAll('input[name=nsel]').forEach(r=>r.onchange=e=>{ state.n=parseInt(e.target.value); });
+$('ckXray').onchange=e=>state.xray=e.target.checked;
+$('ckGrid').onchange=e=>state.grid=e.target.checked;
+$('ckSpin').onchange=e=>state.spin=e.target.checked;
+$('ckLoop').onchange=e=>state.loop=e.target.checked;
+$('ckClip').onchange=e=>{ state.clip=e.target.checked; $('clipRow').style.display=state.clip?'flex':'none'; };
+$('clipSlider').oninput=e=>state.clipPos=parseFloat(e.target.value);
+/* 将 URL 钩子设置的初始状态反映到控件 */
+{
+  const r=document.querySelector(`input[name=nsel][value="${state.n}"]`); if(r) r.checked=true;
+  $('ckXray').checked=state.xray; $('ckGrid').checked=state.grid;
+}
+window.addEventListener('keydown',e=>{
+  if(e.code==='Space'){ e.preventDefault(); setPlaying(!state.playing); }
+  else if(e.key==='ArrowRight'){ state.s=Math.min(1,state.s+0.004); setPlaying(false); }
+  else if(e.key==='ArrowLeft'){ state.s=Math.max(0,state.s-0.004); setPlaying(false); }
+});
+
+/* 阶段刻度 */
+{
+  const ticks=$('ticks');
+  for(let i=1;i<PHASES.length;i++){
+    const d=document.createElement('div');
+    d.className='tick'; d.style.left=(CUM[i]*100)+'%'; ticks.appendChild(d);
+  }
+  const mid=document.createElement('div');
+  mid.className='tick mid'; mid.style.left='50%'; ticks.appendChild(mid);
+  const lbl=document.createElement('div');
+  lbl.id='midlbl'; lbl.style.left='50%'; lbl.textContent='半程模型 t=0'; ticks.appendChild(lbl);
+}
+
+/* 读数 */
+const roDiv=$('readout');
+function fmtRO(P){
+  const it=[['t',P.t],['q',P.q],['p',P.p],['λ',P.lam],['ξ',P.xi],['α',P.alpha],['β',P.beta],['n',P.n]];
+  roDiv.innerHTML=it.map(([k,v])=>`<span>${k}=<b>${(typeof v==='number'?v.toFixed(2):v)}</b></span>`).join('');
+}
+const phaseNameEl=$('phaseName'), phaseDescEl=$('phaseDesc');
+let lastPhase=-1, lastROt=0;
+
+/* ============================ 渲染循环 ============================ */
+function resize(){
+  const dpr=Math.min(2,window.devicePixelRatio||1);
+  const w=Math.round(canvas.clientWidth*dpr), h=Math.round(canvas.clientHeight*dpr);
+  if(canvas.width!==w||canvas.height!==h){ canvas.width=w; canvas.height=h; }
+}
+const COL_F=[1.0,0.549,0.259], COL_B=[0.251,0.624,1.0];
+let prevT=performance.now();
+
+let frameCount=0;
+function frame(now){
+  if(++frameCount<MAXFRAMES) requestAnimationFrame(frame);
+  const dt=Math.min(0.05,(now-prevT)/1000); prevT=now;
+  resize();
+
+  if(state.playing && now>=state.holdUntil){
+    state.s+=dt*state.speed/state.duration;
+    if(state.s>=1){
+      if(state.loop){ state.s=1; state.holdUntil=now+1400; setTimeout(()=>{if(state.playing&&state.s>=1)state.s=0;},1400); }
+      else { state.s=1; setPlaying(false); }
+    }
+  }
+  scrub.value=state.s;
+
+  const P=paramsAt(state.s);
+  if(P.phase!==lastPhase){
+    lastPhase=P.phase;
+    phaseNameEl.textContent=PHASES[P.phase].name;
+    phaseDescEl.textContent=PHASES[P.phase].desc;
+  }
+  if(now-lastROt>120){ lastROt=now; fmtRO(P); }
+
+  /* 自动取景 */
+  const bb=boundsFor(P);
+  const k=frameCount<=1?1:1-Math.exp(-dt*3.5);
+  state.boundR+=(bb.r-state.boundR)*k;
+  for(let i=0;i<3;i++) state.tgt[i]+=(bb.c[i]-state.tgt[i])*k;
+  const targetDist=state.boundR*2.7*state.zoom;
+  state.dist+=(targetDist-state.dist)*k;
+
+  if(state.spin && !dragging) state.yaw+=dt*0.25;
+
+  const cp=Math.cos(state.pitch), sp=Math.sin(state.pitch);
+  const eye=[
+    state.tgt[0]+state.dist*cp*Math.cos(state.yaw),
+    state.tgt[1]+state.dist*cp*Math.sin(state.yaw),
+    state.tgt[2]+state.dist*sp];
+  lookAt(view,eye,state.tgt,[0,0,1]);
+  persp(proj,42*Math.PI/180,canvas.width/canvas.height,
+        Math.max(0.01,state.dist*0.02), state.dist+state.boundR*30);
+
+  gl.viewport(0,0,canvas.width,canvas.height);
+  gl.clearColor(0.043,0.055,0.082,1);
+  gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+  gl.disable(gl.CULL_FACE);
+
+  gl.uniformMatrix4fv(U.uProj,false,proj);
+  gl.uniformMatrix4fv(U.uView,false,view);
+  gl.uniform1f(U.uN,P.n); gl.uniform1f(U.uT,P.t); gl.uniform1f(U.uQ,P.q);
+  gl.uniform1f(U.uP,P.p); gl.uniform1f(U.uLam,P.lam); gl.uniform1f(U.uXi,P.xi);
+  gl.uniform1f(U.uEta,P.eta); gl.uniform1f(U.uAlpha,P.alpha); gl.uniform1f(U.uBeta,P.beta);
+  gl.uniform1f(U.uOmega,P.omega);
+  gl.uniform3fv(U.uColF,COL_F); gl.uniform3fv(U.uColB,COL_B);
+  gl.uniform1f(U.uXray,state.xray?1:0);
+  gl.uniform1f(U.uClipOn,state.clip?1:0);
+  gl.uniform1f(U.uClipZ,-state.dist+state.boundR*(1.1-2.2*state.clipPos));
+  gl.uniform1f(U.uLineMode,0);
+
+  if(state.xray){
+    gl.enable(gl.BLEND); gl.blendFunc(gl.ONE,gl.ONE);
+    gl.disable(gl.DEPTH_TEST); gl.depthMask(false);
+  } else {
+    gl.disable(gl.BLEND);
+    gl.enable(gl.DEPTH_TEST); gl.depthMask(true);
+    gl.enable(gl.POLYGON_OFFSET_FILL); gl.polygonOffset(1,1);
+  }
+  if(P.halfDomain && !state.xray){
+    // t≈0 只画下半域：与下方双 pass 分支中赢得深度平局的可见层一致，颜色随 t 连续
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,iboLo);
+    gl.drawElements(gl.TRIANGLES,idxLo.length,IDX_TYPE,0);
+  } else if(P.n%2===1 && !state.xray){
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,iboLo);
+    gl.drawElements(gl.TRIANGLES,idxLo.length,IDX_TYPE,0);
+    gl.polygonOffset(3,220);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,iboUp);
+    gl.drawElements(gl.TRIANGLES,idxUp.length,IDX_TYPE,0);
+  } else {
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,ibo);
+    gl.drawElements(gl.TRIANGLES,idx.length,IDX_TYPE,0);
+  }
+  gl.disable(gl.POLYGON_OFFSET_FILL);
+
+  if(state.grid){
+    gl.uniform1f(U.uLineMode,1);
+    if(state.xray){ gl.uniform4f(U.uLineCol,0.16,0.18,0.21,1); }
+    else{
+      gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+      gl.uniform4f(U.uLineCol,0.02,0.03,0.05,0.5);
+    }
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,lbo);
+    gl.drawElements(gl.LINES,lineIdx.length,IDX_TYPE,0);
+    gl.disable(gl.BLEND);
+    gl.uniform1f(U.uLineMode,0);
+  }
+}
+setPlaying(state.playing);
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

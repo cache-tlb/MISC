@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>极小极大球面外翻 · The Minimax Sphere Eversion</title>
+<style>
+  :root{
+    --bg:#0d0e14; --panel:#161822; --panel2:#1e2130; --line:#2c3044;
+    --fg:#e8e9f0; --dim:#9298b0; --accent:#ffc24a; --accent2:#8b7bff;
+    --front:#f7b733; --back:#8a5cf6;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    overflow:hidden;-webkit-font-smoothing:antialiased}
+  #app{display:flex;height:100%;width:100%}
+  #stage{flex:1;position:relative;min-width:0}
+  #gl{display:block;width:100%;height:100%;cursor:grab}
+  #gl:active{cursor:grabbing}
+  #hud{position:absolute;left:16px;top:14px;pointer-events:none;line-height:1.5}
+  #hud h1{margin:0;font-size:15px;font-weight:600;letter-spacing:.02em}
+  #hud .sub{font-size:11.5px;color:var(--dim);margin-top:2px}
+  #stagelbl{position:absolute;left:16px;bottom:88px;pointer-events:none}
+  #stagelbl .big{font-size:19px;font-weight:600;letter-spacing:.01em}
+  #stagelbl .desc{font-size:12px;color:var(--dim);max-width:420px;margin-top:3px;line-height:1.55}
+  #readout{position:absolute;right:16px;top:14px;text-align:right;pointer-events:none;
+    font-variant-numeric:tabular-nums;font-size:12px;color:var(--dim);line-height:1.7}
+  #readout b{color:var(--fg);font-weight:600;font-size:13px}
+  #transport{position:absolute;left:0;right:0;bottom:0;padding:12px 16px 14px;
+    background:linear-gradient(transparent,rgba(13,14,20,.9)35%);display:flex;gap:12px;align-items:center}
+  #tslider{flex:1;height:22px}
+  #panel{width:308px;flex:none;background:var(--panel);border-left:1px solid var(--line);
+    overflow-y:auto;padding:14px 15px 40px;font-size:12.5px}
+  #panel h2{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--dim);
+    margin:20px 0 9px;font-weight:600}
+  #panel h2:first-child{margin-top:0}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:7px 0}
+  .row label{color:var(--dim);flex:none}
+  .row .val{font-variant-numeric:tabular-nums;color:var(--fg);width:44px;text-align:right;font-size:11.5px}
+  input[type=range]{-webkit-appearance:none;appearance:none;background:transparent;flex:1;min-width:0}
+  input[type=range]::-webkit-slider-runnable-track{height:3px;background:var(--line);border-radius:2px}
+  input[type=range]::-moz-range-track{height:3px;background:var(--line);border-radius:2px}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;
+    background:var(--accent);margin-top:-5px;cursor:pointer}
+  input[type=range]::-moz-range-thumb{width:13px;height:13px;border:0;border-radius:50%;background:var(--accent);cursor:pointer}
+  button{background:var(--panel2);color:var(--fg);border:1px solid var(--line);border-radius:6px;
+    padding:6px 11px;font-size:12px;cursor:pointer;font-family:inherit}
+  button:hover{border-color:#414765;background:#252939}
+  button.primary{background:var(--accent);color:#231a00;border-color:var(--accent);font-weight:600}
+  button.primary:hover{background:#ffcf6b}
+  button:disabled{opacity:.4;cursor:default}
+  .btnrow{display:flex;gap:6px;flex-wrap:wrap}
+  .seg{display:flex;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  .seg button{border:0;border-radius:0;flex:1;padding:6px 4px;font-size:11.5px}
+  .seg button.on{background:var(--accent);color:#231a00;font-weight:600}
+  label.chk{display:flex;align-items:center;gap:7px;color:var(--dim);cursor:pointer;margin:6px 0}
+  label.chk input{accent-color:var(--accent);width:14px;height:14px;cursor:pointer}
+  #plot{width:100%;height:96px;display:block;background:var(--panel2);border:1px solid var(--line);border-radius:6px}
+  .note{color:var(--dim);font-size:11.5px;line-height:1.65}
+  .note code{color:#c8d0ea;font-size:11px}
+  .formula{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:9px 10px;
+    font-family:"Cambria Math",Cambria,Georgia,serif;font-size:13px;text-align:center;color:#dfe4f5;margin:8px 0;overflow-x:auto}
+  .kv{display:flex;justify-content:space-between;color:var(--dim);margin:3px 0;font-size:11.5px}
+  .kv b{color:var(--fg);font-weight:500;font-variant-numeric:tabular-nums}
+  #prog{height:3px;background:var(--line);border-radius:2px;overflow:hidden;margin:8px 0 4px}
+  #progbar{height:100%;width:0;background:var(--accent);transition:width .12s linear}
+  .swatch{display:inline-block;width:9px;height:9px;border-radius:2px;vertical-align:middle;margin-right:5px}
+  #overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    background:rgba(13,14,20,.62);text-align:center;padding:24px;pointer-events:none}
+  #overlay .box{max-width:430px}
+  #overlay h3{margin:0 0 8px;font-size:17px}
+  #overlay p{color:var(--dim);font-size:12.5px;line-height:1.7;margin:0 0 16px}
+  #err{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:30px;text-align:center}
+  @media (max-width:900px){#app{flex-direction:column}#panel{width:100%;height:44%;border-left:0;border-top:1px solid var(--line)}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+    <canvas id="gl"></canvas>
+    <div id="hud">
+      <h1>极小极大球面外翻</h1>
+      <div class="sub">The Minimax Sphere Eversion &middot; Francis, Sullivan, Kusner, Brakke, Hartman, Chappell (1996)</div>
+    </div>
+    <div id="readout">
+      <div>t = <b id="rt">−1.000</b></div>
+      <div>W = ∫H²dA = <b id="rw">12.57</b></div>
+      <div id="rwpi">= 4.00 π</div>
+      <div id="rdblrow" style="display:none">自交曲线 <b id="rdbl">—</b></div>
+    </div>
+    <div id="stagelbl">
+      <div class="big" id="stname">圆球 · round sphere</div>
+      <div class="desc" id="stdesc"></div>
+    </div>
+    <div id="transport">
+      <button id="play">▶</button>
+      <input id="tslider" type="range" min="-1000" max="1000" value="-1000" step="1">
+      <button id="rev">⇄</button>
+    </div>
+    <div id="overlay"><div class="box">
+      <h3 id="ovt">正在计算外翻过程…</h3>
+      <p id="ovp">从半程模型出发，沿弹性弯曲能 W 的梯度下降。<br>这是论文所述方法本身在您的浏览器中运行。</p>
+      <div id="prog"><div id="progbar"></div></div>
+      <div class="kv"><span>弯曲能 W</span><b id="ovw">—</b></div>
+      <div class="kv"><span>迭代 / 关键帧</span><b id="ovi">—</b></div>
+    </div></div>
+    <div id="err"><div><h3>无法初始化 WebGL</h3><p class="note">请使用支持 WebGL 的浏览器打开本页面。</p></div></div>
+  </div>
+
+  <div id="panel">
+    <h2>方法 Method</h2>
+    <div class="note">
+      半程模型 h₀ 取 Kusner 的 4 重对称 Willmore 球面：把带 4 个平面端的极小曲面
+      <div class="formula">h̃(w) = Re&thinsp;<span style="font-size:15px">(</span>&thinsp;i(w³−w),&nbsp; w³+w,&nbsp; <sup>i</sup>⁄<sub>2</sub>(w⁴+1)&thinsp;<span style="font-size:15px">)</span> &divide; (w⁴ + 2√3&thinsp;w² − 1)</div>
+      经以 (0,0,s) 为心的反演变换（s = 0.35）得到 W = 16π 的紧致 Morin 曲面。随后对离散弯曲能
+      <b style="color:#dfe4f5">W = Σᵥ |Kᵥ|²/(4Aᵥ)</b> 作预条件共轭梯度下降，直到落回 W = 4π 的圆球。
+      负半程由论文的时间对称 <code>h₋ₜ(w) = ρ₄(hₜ(−i/w̄))</code> 生成 —— 即绕 z 轴转 90° 并交换内外颜色。
+    </div>
+
+    <h2>弯曲能 W(t)</h2>
+    <canvas id="plot"></canvas>
+    <div class="kv"><span>半程模型（鞍点）</span><b>16π ≈ 50.27</b></div>
+    <div class="kv"><span>原肠胚（颈部）</span><b>≈ 8π ≈ 25.13</b></div>
+    <div class="kv"><span>圆球（极小）</span><b>4π ≈ 12.57</b></div>
+
+    <h2>计算 Computation</h2>
+    <div class="row"><label>分辨率</label></div>
+    <div class="seg" id="resseg">
+      <button data-lv="8">512 面</button>
+      <button data-lv="12">1152 面</button>
+      <button data-lv="16" class="on">2048 面</button>
+      <button data-lv="24">4608 面</button>
+    </div>
+    <div class="note" style="margin-top:7px">论文全程保持 1000–2000 个三角面。4608 面质量最好但要等一两分钟。</div>
+    <div class="btnrow" style="margin-top:9px">
+      <button class="primary" id="recompute">重新计算</button>
+      <button id="stopbtn">停止</button>
+    </div>
+    <div class="kv" style="margin-top:9px"><span>顶点 / 面</span><b id="kmesh">—</b></div>
+    <div class="kv"><span>关键帧（topes）</span><b id="kframes">—</b></div>
+    <div class="kv"><span>迭代次数</span><b id="kiter">—</b></div>
+    <div class="kv"><span>计算耗时</span><b id="ktime">—</b></div>
+
+    <h2>显示 Display</h2>
+    <div class="row"><label>播放速度</label><input type="range" id="speed" min="5" max="200" value="55"><span class="val" id="vspeed">0.55</span></div>
+    <div class="row"><label>面片收缩</label><input type="range" id="shrink" min="20" max="100" value="100"><span class="val" id="vshrink">1.00</span></div>
+    <div class="row"><label>剖切平面</label><input type="range" id="clip" min="0" max="100" value="100"><span class="val" id="vclip">off</span></div>
+    <label class="chk"><input type="checkbox" id="smooth"> 光滑着色（默认按论文保留面片）</label>
+    <label class="chk"><input type="checkbox" id="wire"> 三角网格线</label>
+    <label class="chk"><input type="checkbox" id="dbl"> 自交曲线 double locus</label>
+    <label class="chk"><input type="checkbox" id="spin" checked> 自动旋转</label>
+    <div class="btnrow" style="margin-top:8px">
+      <button id="vaxis">轴向视图</button>
+      <button id="vside">侧视图</button>
+      <button id="vreset">复位</button>
+    </div>
+
+    <h2>图例 Legend</h2>
+    <div class="kv"><span><span class="swatch" style="background:linear-gradient(90deg,#f26b21,#ffd23f)"></span>原来的外侧 · t = −1 时朝外</span><b></b></div>
+    <div class="kv"><span><span class="swatch" style="background:linear-gradient(90deg,#22c4d6,#8a5cf6)"></span>原来的内侧 · t = +1 时朝外</span><b></b></div>
+    <div class="note" style="margin-top:6px">同一色系内的深浅由面片法向与对称轴的夹角决定，便于辨认自交处 —— 与论文的着色约定一致。</div>
+
+    <h2>操作 Controls</h2>
+    <div class="note">拖动旋转 · 滚轮缩放 · 空格播放/暂停 · ←/→ 单帧步进</div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* =====================================================================
+   极小极大球面外翻 —— 完全按论文方法在浏览器中现算
+   The Minimax Sphere Eversion, Francis-Sullivan-Kusner-Brakke-Hartman-Chappell,
+   in: Visualization and Mathematics, Springer 1997, pp. 3-20.
+   无任何外部依赖：网格、Weierstrass 表示、Willmore 梯度流、WebGL 渲染全部手写。
+   ===================================================================== */
+
+/* ---------------------------------------------------------------- 小工具 */
+const $ = id => document.getElementById(id);
+const TWO_PI = Math.PI * 2, SQRT3 = Math.sqrt(3);
+const W_SPHERE = 4 * Math.PI, W_HALFWAY = 16 * Math.PI;
+
+/* ================================================================
+   1.  参数域网格：正八面体每面剖分成 k² 个三角形后投影到球面
+   八面体在 σ(X,Y,Z) = (−Y, X, −Z)（即 w ↦ i/w̄ 在 S² 上的表现）下不变，
+   重心网格与 σ 可交换，故顶点集也严格不变 —— 这正是保持 4 重对称所必需的。
+   面数 = 8k²，顶点数 = 4k²+2。
+   ================================================================ */
+function buildSphere(k){
+  const base=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]];
+  const bf=[[0,2,4],[2,1,4],[1,3,4],[3,0,4],[2,0,5],[1,2,5],[3,1,5],[0,3,5]];
+  const P=[], map=new Map(), F=[];
+  const key=(x,y,z)=>Math.round(x*1e9)+'|'+Math.round(y*1e9)+'|'+Math.round(z*1e9);
+  const add=(x,y,z)=>{
+    const r=Math.hypot(x,y,z); x/=r; y/=r; z/=r;
+    const s=key(x,y,z); let i=map.get(s);
+    if(i===undefined){ i=P.length/3; P.push(x,y,z); map.set(s,i); }
+    return i;
+  };
+  for(const f of bf){
+    const A=base[f[0]], B=base[f[1]], C=base[f[2]];
+    const g=[];
+    for(let i=0;i<=k;i++){
+      g.push([]);
+      for(let j=0;j<=k-i;j++){
+        const w=k-i-j;
+        g[i].push(add((w*A[0]+i*B[0]+j*C[0])/k,
+                      (w*A[1]+i*B[1]+j*C[1])/k,
+                      (w*A[2]+i*B[2]+j*C[2])/k));
+      }
+    }
+    for(let i=0;i<k;i++) for(let j=0;j<k-i;j++){
+      F.push(g[i][j],g[i+1][j],g[i][j+1]);
+      if(j<k-i-1) F.push(g[i+1][j],g[i+1][j+1],g[i][j+1]);
+    }
+  }
+  return {P:Float64Array.from(P),F:Int32Array.from(F),n:P.length/3,m:F.length/3};
+}
+
+/* 顶点 -> 关联面（CSR）。对每个顶点 i 存 (j,k)，使 (i,j,k) 为正向面。 */
+function buildAdj(n,F){
+  const m=F.length/3, cnt=new Int32Array(n);
+  for(let t=0;t<3*m;t++) cnt[F[t]]++;
+  const off=new Int32Array(n+1);
+  for(let i=0;i<n;i++) off[i+1]=off[i]+cnt[i];
+  const cur=off.slice(0,n), vj=new Int32Array(off[n]), vk=new Int32Array(off[n]);
+  for(let f=0;f<m;f++){
+    const a=F[3*f],b=F[3*f+1],c=F[3*f+2];
+    vj[cur[a]]=b; vk[cur[a]++]=c;
+    vj[cur[b]]=c; vk[cur[b]++]=a;
+    vj[cur[c]]=a; vk[cur[c]++]=b;
+  }
+  return {off:off,vj:vj,vk:vk};
+}
+
+/* σ 在参数球面上的置换：σ(X,Y,Z) = (−Y, X, −Z)，四阶（σ² = 绕 z 轴 180°）。 */
+function sigmaPerm(P,n){
+  const key=(x,y,z)=>Math.round(x*1e6)+'|'+Math.round(y*1e6)+'|'+Math.round(z*1e6);
+  const map=new Map();
+  for(let i=0;i<n;i++) map.set(key(P[3*i],P[3*i+1],P[3*i+2]),i);
+  const perm=new Int32Array(n);
+  for(let i=0;i<n;i++){
+    const j=map.get(key(-P[3*i+1],P[3*i],-P[3*i+2]));
+    if(j===undefined) throw new Error('symmetry permutation failed');
+    perm[i]=j;
+  }
+  return perm;
+}
+
+/* ================================================================
+   2.  半程模型 h₀ = (以 (0,0,s) 为心的反演) ∘ h̃ ∘ (球极投影)
+
+       h̃(w) = Re[ ( i(w³−w), w³+w, (i/2)(w⁴+1) ) / (w⁴ + 2√3 w² − 1) ]
+
+   为避开 w = ∞ 与极点，用齐次坐标 w = A/B 计算（分子分母同为 4 次）。
+   反演：(x,y,z) ↦ (x/r², y/r², s + (z−s)/r²),  r² = x²+y²+(z−s)²。
+   ================================================================ */
+const MOBIUS_S = 0.35;                      // 论文所取值（纯为美观）
+function halfwayModel(P,n,out){
+  const X = out || new Float64Array(3*n);
+  for(let i=0;i<n;i++){
+    const px=P[3*i], py=P[3*i+1], pz=P[3*i+2];
+    // w = (X+iY)/(1−Z) = (1+Z)/(X−iY)，取条件数好的那支
+    let ar,ai,br,bi;
+    if(Math.abs(1-pz) > Math.hypot(px,py)){ ar=px; ai=py; br=1-pz; bi=0; }
+    else                                  { ar=1+pz; ai=0; br=px; bi=-py; }
+    const sc=1/Math.max(Math.hypot(ar,ai),Math.hypot(br,bi));
+    ar*=sc; ai*=sc; br*=sc; bi*=sc;
+    const a2r=ar*ar-ai*ai,   a2i=2*ar*ai;
+    const a3r=a2r*ar-a2i*ai, a3i=a2r*ai+a2i*ar;
+    const a4r=a2r*a2r-a2i*a2i, a4i=2*a2r*a2i;
+    const b2r=br*br-bi*bi,   b2i=2*br*bi;
+    const b3r=b2r*br-b2i*bi, b3i=b2r*bi+b2i*br;
+    const b4r=b2r*b2r-b2i*b2i, b4i=2*b2r*b2i;
+    const a3br=a3r*br-a3i*bi,  a3bi=a3r*bi+a3i*br;
+    const ab3r=ar*b3r-ai*b3i,  ab3i=ar*b3i+ai*b3r;
+    const a2b2r=a2r*b2r-a2i*b2i, a2b2i=a2r*b2i+a2i*b2r;
+    const n1r=-(a3bi-ab3i),  n1i=(a3br-ab3r);       // i(A³B − AB³)
+    const n2r=a3br+ab3r,     n2i=a3bi+ab3i;         // A³B + AB³
+    const n3r=-0.5*(a4i+b4i),n3i=0.5*(a4r+b4r);     // (i/2)(A⁴ + B⁴)
+    const dr=a4r+2*SQRT3*a2b2r-b4r, di=a4i+2*SQRT3*a2b2i-b4i;
+    const d2=dr*dr+di*di;
+    let x,y,z;
+    if(d2<1e-290){ x=0;y=0;z=MOBIUS_S; }            // 平面端 -> 四重点
+    else{
+      const iv=1/d2;
+      x=(n1r*dr+n1i*di)*iv;  y=(n2r*dr+n2i*di)*iv;  z=(n3r*dr+n3i*di)*iv;
+      const zz=z-MOBIUS_S, r2=x*x+y*y+zz*zz;
+      if(!(r2>1e-290)){ x=0;y=0;z=MOBIUS_S; }
+      else { const ir=1/r2; x*=ir; y*=ir; z=MOBIUS_S+zz*ir; }
+    }
+    X[3*i]=x; X[3*i+1]=y; X[3*i+2]=z;
+  }
+  return X;
+}
+
+/* ================================================================
+   3.  离散弹性弯曲能与它的解析梯度
+       Aᵥ = (顶点星面积)/3,  Kᵥ = ∂(总面积)/∂xᵥ = 2 Aᵥ Hᵥ nᵥ
+       W  = Σᵥ |Kᵥ|²/(4Aᵥ)  ——  圆球给出 4π，半程模型给出 16π。
+       梯度用三角形面积 Hessian 的闭式解逐面累加（已与差分校验到 1e-10）。
+   ================================================================ */
+function Solver(mesh,adj,perm){
+  const n=mesh.n, m=mesh.m, F=mesh.F;
+  const K=new Float64Array(3*n), A=new Float64Array(n),
+        C=new Float64Array(3*n), Wt=new Float64Array(n);
+  const tmp=new Float64Array(3*n), tmp2=new Float64Array(3*n), nrm=new Float64Array(3*n);
+
+  function energy(X){
+    K.fill(0); A.fill(0);
+    for(let f=0;f<m;f++){
+      const a=F[3*f],b=F[3*f+1],c=F[3*f+2];
+      const ax=X[3*a],ay=X[3*a+1],az=X[3*a+2];
+      const bx=X[3*b],by=X[3*b+1],bz=X[3*b+2];
+      const cx=X[3*c],cy=X[3*c+1],cz=X[3*c+2];
+      const ux=bx-ax,uy=by-ay,uz=bz-az, vx=cx-ax,vy=cy-ay,vz=cz-az;
+      const nx=uy*vz-uz*vy, ny=uz*vx-ux*vz, nz=ux*vy-uy*vx;
+      const ln=Math.sqrt(nx*nx+ny*ny+nz*nz); if(ln<1e-290) continue;
+      const il=1/ln, Ux=nx*il, Uy=ny*il, Uz=nz*il, a3=ln/6;
+      A[a]+=a3; A[b]+=a3; A[c]+=a3;
+      const e0x=cx-bx,e0y=cy-by,e0z=cz-bz;   // 对顶边 e_i
+      const e1x=ax-cx,e1y=ay-cy,e1z=az-cz;
+      const e2x=bx-ax,e2y=by-ay,e2z=bz-az;
+      K[3*a]+=0.5*(Uy*e0z-Uz*e0y); K[3*a+1]+=0.5*(Uz*e0x-Ux*e0z); K[3*a+2]+=0.5*(Ux*e0y-Uy*e0x);
+      K[3*b]+=0.5*(Uy*e1z-Uz*e1y); K[3*b+1]+=0.5*(Uz*e1x-Ux*e1z); K[3*b+2]+=0.5*(Ux*e1y-Uy*e1x);
+      K[3*c]+=0.5*(Uy*e2z-Uz*e2y); K[3*c+1]+=0.5*(Uz*e2x-Ux*e2z); K[3*c+2]+=0.5*(Ux*e2y-Uy*e2x);
+    }
+    let E=0;
+    for(let i=0;i<n;i++){
+      if(A[i]<1e-290){C[3*i]=C[3*i+1]=C[3*i+2]=0;Wt[i]=0;continue;}
+      const s=1/(2*A[i]);
+      const cx=K[3*i]*s, cy=K[3*i+1]*s, cz=K[3*i+2]*s;
+      C[3*i]=cx;C[3*i+1]=cy;C[3*i+2]=cz;
+      Wt[i]=cx*cx+cy*cy+cz*cz;
+      E+=Wt[i]*A[i];
+    }
+    return E;
+  }
+
+  function grad(X,G){
+    const E=energy(X);
+    G.fill(0);
+    for(let f=0;f<m;f++){
+      const a=F[3*f],b=F[3*f+1],c=F[3*f+2];
+      const ax=X[3*a],ay=X[3*a+1],az=X[3*a+2];
+      const bx=X[3*b],by=X[3*b+1],bz=X[3*b+2];
+      const cx=X[3*c],cy=X[3*c+1],cz=X[3*c+2];
+      const ux=bx-ax,uy=by-ay,uz=bz-az, vx=cx-ax,vy=cy-ay,vz=cz-az;
+      const nx=uy*vz-uz*vy, ny=uz*vx-ux*vz, nz=ux*vy-uy*vx;
+      const ln=Math.sqrt(nx*nx+ny*ny+nz*nz); if(ln<1e-290) continue;
+      const il=1/ln, Ux=nx*il, Uy=ny*il, Uz=nz*il;
+      const ex=[cx-bx,ax-cx,bx-ax], ey=[cy-by,ay-cy,by-ay], ez=[cz-bz,az-cz,bz-az];
+      const id=[a,b,c];
+      let qx=0,qy=0,qz=0;                     // q = Σ e_i × c_i
+      for(let t=0;t<3;t++){
+        const i=id[t], Cx=C[3*i],Cy=C[3*i+1],Cz=C[3*i+2];
+        qx+=ey[t]*Cz-ez[t]*Cy; qy+=ez[t]*Cx-ex[t]*Cz; qz+=ex[t]*Cy-ey[t]*Cx;
+      }
+      const ud=Ux*qx+Uy*qy+Uz*qz;
+      const Px=qx-ud*Ux, Py=qy-ud*Uy, Pz=qz-ud*Uz;
+      const W3=(Wt[a]+Wt[b]+Wt[c])/6, k1=-0.5*il;
+      for(let t=0;t<3;t++){
+        const p=id[t], i1=id[(t+1)%3], i2=id[(t+2)%3];
+        let gx=k1*(ey[t]*Pz-ez[t]*Py), gy=k1*(ez[t]*Px-ex[t]*Pz), gz=k1*(ex[t]*Py-ey[t]*Px);
+        const dx=C[3*i2]-C[3*i1], dy=C[3*i2+1]-C[3*i1+1], dz=C[3*i2+2]-C[3*i1+2];
+        gx+=0.5*(Uy*dz-Uz*dy); gy+=0.5*(Uz*dx-Ux*dz); gz+=0.5*(Ux*dy-Uy*dx);
+        gx-=W3*(Uy*ez[t]-Uz*ey[t]); gy-=W3*(Uz*ex[t]-Ux*ez[t]); gz-=W3*(Ux*ey[t]-Uy*ex[t]);
+        G[3*p]+=gx; G[3*p+1]+=gy; G[3*p+2]+=gz;
+      }
+    }
+    return E;
+  }
+
+  /* Sobolev 预条件：以 Jacobi 迭代近似 (I + βL)⁻¹，用两次 ≈ Δ⁻²。
+     四阶流的刚性极强，没有它步长会小到无法推进。 */
+  function precond(src,dst,beta,iters){
+    dst.set(src); const d=1/(1+beta);
+    for(let it=0;it<iters;it++)
+      for(let i=0;i<n;i++){
+        let sx=0,sy=0,sz=0,c=0;
+        for(let e=adj.off[i];e<adj.off[i+1];e++){
+          const j=adj.vj[e]; sx+=dst[3*j]; sy+=dst[3*j+1]; sz+=dst[3*j+2]; c++;
+        }
+        dst[3*i]=(src[3*i]+beta*sx/c)*d;
+        dst[3*i+1]=(src[3*i+1]+beta*sy/c)*d;
+        dst[3*i+2]=(src[3*i+2]+beta*sz/c)*d;
+      }
+  }
+
+  /* 论文全程保持绕对称轴的 2 重空间对称 H₋ₜ = ρ₄Hₜ 之平方，此处显式施加。*/
+  function symmetrize2(X){
+    for(let i=0;i<n;i++){
+      const j=perm[perm[i]];                        // σ² on the parameter sphere
+      tmp[3*i]  =0.5*(X[3*i]  -X[3*j]);             // Rz(180): (x,y,z) -> (−x,−y,z)
+      tmp[3*i+1]=0.5*(X[3*i+1]-X[3*j+1]);
+      tmp[3*i+2]=0.5*(X[3*i+2]+X[3*j+2]);
+    }
+    X.set(tmp);
+  }
+
+  function vertexNormals(X,N){
+    N.fill(0);
+    for(let f=0;f<m;f++){
+      const a=F[3*f],b=F[3*f+1],c=F[3*f+2];
+      const ux=X[3*b]-X[3*a],uy=X[3*b+1]-X[3*a+1],uz=X[3*b+2]-X[3*a+2];
+      const vx=X[3*c]-X[3*a],vy=X[3*c+1]-X[3*a+1],vz=X[3*c+2]-X[3*a+2];
+      const nx=uy*vz-uz*vy,ny=uz*vx-ux*vz,nz=ux*vy-uy*vx;
+      N[3*a]+=nx;N[3*a+1]+=ny;N[3*a+2]+=nz;
+      N[3*b]+=nx;N[3*b+1]+=ny;N[3*b+2]+=nz;
+      N[3*c]+=nx;N[3*c+1]+=ny;N[3*c+2]+=nz;
+    }
+    for(let i=0;i<n;i++){
+      const l=Math.hypot(N[3*i],N[3*i+1],N[3*i+2])||1;
+      N[3*i]/=l;N[3*i+1]/=l;N[3*i+2]/=l;
+    }
+  }
+
+  /* Evolver 的 "V"（顶点平均）：只在切向重排顶点，不改变曲面形状。 */
+  function tangentialRelax(X,mu){
+    vertexNormals(X,nrm);
+    for(let i=0;i<n;i++){
+      let sx=0,sy=0,sz=0,c=0;
+      for(let e=adj.off[i];e<adj.off[i+1];e++){
+        const j=adj.vj[e]; sx+=X[3*j];sy+=X[3*j+1];sz+=X[3*j+2];c++;
+      }
+      let dx=sx/c-X[3*i], dy=sy/c-X[3*i+1], dz=sz/c-X[3*i+2];
+      const d=dx*nrm[3*i]+dy*nrm[3*i+1]+dz*nrm[3*i+2];
+      tmp2[3*i]=mu*(dx-d*nrm[3*i]);
+      tmp2[3*i+1]=mu*(dy-d*nrm[3*i+1]);
+      tmp2[3*i+2]=mu*(dz-d*nrm[3*i+2]);
+    }
+    for(let k=0;k<3*n;k++) X[k]+=tmp2[k];
+  }
+
+  function meanEdge(X){
+    let s=0,c=0;
+    for(let i=0;i<n;i++)
+      for(let e=adj.off[i];e<adj.off[i+1];e++){
+        const j=adj.vj[e];
+        s+=Math.hypot(X[3*i]-X[3*j],X[3*i+1]-X[3*j+1],X[3*i+2]-X[3*j+2]); c++;
+      }
+    return s/c;
+  }
+  return {energy:energy,grad:grad,precond:precond,symmetrize2:symmetrize2,
+          tangentialRelax:tangentialRelax,meanEdge:meanEdge,vertexNormals:vertexNormals,n:n};
+}
+
+/* ================================================================
+   4.  Möbius 零模投影
+   光滑的 W 是 Möbius 不变的，所以梯度流会沿 Möbius 方向漂移 —— 论文
+   第 3 节明确抱怨过这个假象。把这 10 个模（平移/旋转/位似/特殊共形）
+   从下降方向里投影掉，动画就不再漂移、不再抖动。
+   ================================================================ */
+function MobiusModes(n){
+  const NV=10, modes=[];
+  for(let k=0;k<NV;k++) modes.push(new Float64Array(3*n));
+  let keep=[];
+  function build(X){
+    let cx=0,cy=0,cz=0;
+    for(let i=0;i<n;i++){cx+=X[3*i];cy+=X[3*i+1];cz+=X[3*i+2];}
+    cx/=n;cy/=n;cz/=n;
+    for(let i=0;i<n;i++){
+      const x=X[3*i]-cx,y=X[3*i+1]-cy,z=X[3*i+2]-cz,r2=x*x+y*y+z*z,M=modes;
+      M[0][3*i]=1;M[0][3*i+1]=0;M[0][3*i+2]=0;
+      M[1][3*i]=0;M[1][3*i+1]=1;M[1][3*i+2]=0;
+      M[2][3*i]=0;M[2][3*i+1]=0;M[2][3*i+2]=1;
+      M[3][3*i]=0;M[3][3*i+1]=-z;M[3][3*i+2]=y;
+      M[4][3*i]=z;M[4][3*i+1]=0;M[4][3*i+2]=-x;
+      M[5][3*i]=-y;M[5][3*i+1]=x;M[5][3*i+2]=0;
+      M[6][3*i]=x;M[6][3*i+1]=y;M[6][3*i+2]=z;
+      M[7][3*i]=2*x*x-r2;M[7][3*i+1]=2*x*y;   M[7][3*i+2]=2*x*z;
+      M[8][3*i]=2*y*x;   M[8][3*i+1]=2*y*y-r2;M[8][3*i+2]=2*y*z;
+      M[9][3*i]=2*z*x;   M[9][3*i+1]=2*z*y;   M[9][3*i+2]=2*z*z-r2;
+    }
+    keep=[];
+    for(let k=0;k<NV;k++){
+      const v=modes[k];
+      for(let q=0;q<keep.length;q++){
+        const u=keep[q]; let d=0;
+        for(let t=0;t<3*n;t++) d+=v[t]*u[t];
+        for(let t=0;t<3*n;t++) v[t]-=d*u[t];
+      }
+      let nn=0; for(let t=0;t<3*n;t++) nn+=v[t]*v[t];
+      nn=Math.sqrt(nn);
+      if(nn>1e-7){ for(let t=0;t<3*n;t++) v[t]/=nn; keep.push(v); }
+    }
+  }
+  function project(v){
+    for(let q=0;q<keep.length;q++){
+      const u=keep[q]; let d=0;
+      for(let t=0;t<3*n;t++) d+=v[t]*u[t];
+      for(let t=0;t<3*n;t++) v[t]-=d*u[t];
+    }
+  }
+  return {build:build,project:project};
+}
+
+/* ================================================================
+   5.  外翻计算：从半程模型出发的预条件共轭梯度下降
+   ================================================================ */
+const CFG={ KICK:0.08, BETA:30, JACOBI:20, RELAX_EVERY:3, RELAX_MU:0.3,
+            FRAME_THR:0.30, MAX_ITER:120000, STOP:1.0002 };
+
+function Eversion(level,onFrame){
+  const mesh=buildSphere(level);
+  const adj=buildAdj(mesh.n,mesh.F);
+  const perm=sigmaPerm(mesh.P,mesh.n);
+  const n=mesh.n;
+  const S=Solver(mesh,adj,perm);
+  const mob=MobiusModes(n);
+  /* 收敛目标取"同一三角剖分下的圆球"的离散能量，而不是连续值 4π：
+     离散 W 在粗网格上偏低（512 面时约 12.45 而非 12.57），用 4π 作阈值会停得太晚。*/
+  const W_round=S.energy(mesh.P);
+  const X=halfwayModel(mesh.P,n);
+
+  /* 从鞍点推离：法向扰动 φ·n，φ = x² − y² 在 ρ₄ 下为奇，在 ρ₄² 下为偶。
+     论文指出 4 重对称子空间里半程模型是极小，唯一的不稳定方向必在其外；
+     这个扰动恰好落在该子空间里，一个碗胀、另一个碗缩。 */
+  (function kick(){
+    const N=new Float64Array(3*n);
+    S.vertexNormals(X,N);
+    const e=S.meanEdge(X);
+    let mx=0; const phi=new Float64Array(n);
+    for(let i=0;i<n;i++){ phi[i]=X[3*i]*X[3*i]-X[3*i+1]*X[3*i+1]; mx=Math.max(mx,Math.abs(phi[i])); }
+    const s=CFG.KICK*e/mx;
+    for(let i=0;i<n;i++){
+      const t=s*phi[i];
+      X[3*i]+=t*N[3*i]; X[3*i+1]+=t*N[3*i+1]; X[3*i+2]+=t*N[3*i+2];
+    }
+    S.symmetrize2(X);
+  })();
+
+  const G=new Float64Array(3*n), Y=new Float64Array(3*n), D=new Float64Array(3*n),
+        Dir=new Float64Array(3*n), Gp=new Float64Array(3*n), Sp=new Float64Array(3*n),
+        Xt=new Float64Array(3*n), last=new Float64Array(3*n);
+  last.set(X);
+  let E=S.energy(X);
+  let h=0.01*S.meanEdge(X);
+  const thr=CFG.FRAME_THR*S.meanEdge(X);
+  let fresh=true, iter=0, done=false;
+
+  onFrame(X,E);                                   // tope 0 = 半程模型
+
+  function step(){
+    if(done) return false;
+    E=S.grad(X,G);
+    mob.build(X); mob.project(G);
+    S.precond(G,Y,CFG.BETA,CFG.JACOBI);
+    S.precond(Y,D,CFG.BETA,CFG.JACOBI);
+    mob.project(D);
+    if(!fresh){                                   // Polak-Ribière+ 共轭梯度
+      let num=0,den=0;
+      for(let k=0;k<3*n;k++){ num+=(G[k]-Gp[k])*D[k]; den+=Gp[k]*Sp[k]; }
+      const beta=den>0?Math.max(0,num/den):0;
+      for(let k=0;k<3*n;k++) Dir[k]=D[k]+beta*Dir[k];
+      let dot=0; for(let k=0;k<3*n;k++) dot+=G[k]*Dir[k];
+      if(dot<=0) Dir.set(D);
+    } else Dir.set(D);
+    Gp.set(G); Sp.set(D); fresh=false;
+
+    let ok=false;
+    for(let attempt=0; attempt<2 && !ok; attempt++){
+      if(attempt===1){ Dir.set(D); fresh=true; h=0.01*S.meanEdge(X); }
+      let dmax=0;
+      for(let i=0;i<n;i++) dmax=Math.max(dmax,Math.hypot(Dir[3*i],Dir[3*i+1],Dir[3*i+2]));
+      if(dmax<1e-16){ done=true; return false; }
+      for(let t=0;t<24;t++){
+        const s=h/dmax;
+        for(let k=0;k<3*n;k++) Xt[k]=X[k]-s*Dir[k];
+        S.symmetrize2(Xt);
+        const En=S.energy(Xt);
+        if(En<E && isFinite(En)){ X.set(Xt); E=En; h*=1.3; ok=true; break; }
+        h*=0.5;
+      }
+    }
+    if(!ok){ done=true; return false; }
+
+    if(iter%CFG.RELAX_EVERY===0){ S.tangentialRelax(X,CFG.RELAX_MU); S.symmetrize2(X); fresh=true; }
+    iter++;
+
+    let md=0;
+    for(let i=0;i<n;i++)
+      md=Math.max(md,Math.hypot(X[3*i]-last[3*i],X[3*i+1]-last[3*i+1],X[3*i+2]-last[3*i+2]));
+    if(md>thr){ onFrame(X,E); last.set(X); }
+
+    if(E < W_round*CFG.STOP || iter>=CFG.MAX_ITER){ onFrame(X,E); done=true; return false; }
+    return true;
+  }
+  return {mesh:mesh,X:X,step:step,W_round:W_round,
+          get energy(){return E;},get iter(){return iter;},
+          get done(){return done;}, stop(){done=true;}};
+}
+
+/* 关键帧归一化：面积加权重心移到原点，面积加权 RMS 半径归一。
+   W 本身是尺度不变的（Möbius 不变），流动中的整体平移与缩放纯属漂移假象，
+   归一化后播放才不漂不缩、各阶段视觉大小一致。*/
+const _nf={m:0,gx:null,gy:null,gz:null,ga:null};
+function normalizeFrame(X,F,n,out){
+  const m=F.length/3;
+  let A=0,cx=0,cy=0,cz=0;
+  if(_nf.m!==m){
+    _nf.m=m; _nf.gx=new Float64Array(m); _nf.gy=new Float64Array(m);
+    _nf.gz=new Float64Array(m); _nf.ga=new Float64Array(m);
+  }
+  const gx=_nf.gx, gy=_nf.gy, gz=_nf.gz, ga=_nf.ga;
+  for(let f=0;f<m;f++){
+    const a=F[3*f],b=F[3*f+1],c=F[3*f+2];
+    const ux=X[3*b]-X[3*a],uy=X[3*b+1]-X[3*a+1],uz=X[3*b+2]-X[3*a+2];
+    const vx=X[3*c]-X[3*a],vy=X[3*c+1]-X[3*a+1],vz=X[3*c+2]-X[3*a+2];
+    const nx=uy*vz-uz*vy,ny=uz*vx-ux*vz,nz=ux*vy-uy*vx;
+    const ar=0.5*Math.sqrt(nx*nx+ny*ny+nz*nz);
+    ga[f]=ar; A+=ar;
+    gx[f]=(X[3*a]+X[3*b]+X[3*c])/3;
+    gy[f]=(X[3*a+1]+X[3*b+1]+X[3*c+1])/3;
+    gz[f]=(X[3*a+2]+X[3*b+2]+X[3*c+2])/3;
+    cx+=ar*gx[f]; cy+=ar*gy[f]; cz+=ar*gz[f];
+  }
+  const O = out || new Float32Array(3*n);
+  if(A<1e-12){ O.set(X); return O; }
+  cx/=A; cy/=A; cz/=A;
+  let r2=0;
+  for(let f=0;f<m;f++){
+    const dx=gx[f]-cx, dy=gy[f]-cy, dz=gz[f]-cz;
+    r2+=ga[f]*(dx*dx+dy*dy+dz*dz);
+  }
+  const s=1/Math.sqrt(r2/A);
+  for(let i=0;i<n;i++){
+    O[3*i]=(X[3*i]-cx)*s; O[3*i+1]=(X[3*i+1]-cy)*s; O[3*i+2]=(X[3*i+2]-cz)*s;
+  }
+  return O;
+}
+
+/* ================================================================
+   6.  WebGL 渲染
+   ================================================================ */
+const VS=`
+attribute vec3 aPos; attribute vec3 aNrm;
+uniform mat4 uMVP, uMV; uniform mat3 uNM;
+varying vec3 vNv, vNo, vPo, vPv;
+void main(){
+  vNo=aNrm; vNv=uNM*aNrm; vPo=aPos;
+  vec4 p=uMV*vec4(aPos,1.0); vPv=p.xyz;
+  gl_Position=uMVP*vec4(aPos,1.0);
+}`;
+const FS=`
+precision highp float;
+varying vec3 vNv, vNo, vPo, vPv;
+uniform float uClip; uniform float uClipOn; uniform float uSwap; uniform float uSolid;
+uniform vec3 uSolidCol;
+void main(){
+  if(uClipOn>0.5 && vPo.z > uClip) discard;
+  if(uSolid>0.5){ gl_FragColor=vec4(uSolidCol,1.0); return; }
+  vec3 N=normalize(vNv);
+  bool front=gl_FrontFacing;
+  if(uSwap>0.5) front=!front;
+  if(!gl_FrontFacing) N=-N;                    // 双面光照：法向翻向观察者
+  vec3 no=normalize(vNo)*(uSwap>0.5?-1.0:1.0);
+  float s=0.5+0.5*no.z;                        // 论文：色调由面片法向与对称轴的夹角决定
+  vec3 col = front ? mix(vec3(0.96,0.42,0.13), vec3(1.00,0.82,0.25), s)
+                   : mix(vec3(0.13,0.77,0.84), vec3(0.54,0.36,0.96), s);
+  vec3 V=normalize(-vPv);
+  vec3 L1=normalize(vec3(0.45,0.62,0.75)), L2=normalize(vec3(-0.55,-0.25,0.45));
+  float d=max(dot(N,L1),0.0)*0.85 + max(dot(N,L2),0.0)*0.28;
+  vec3 H=normalize(L1+V);
+  float sp=pow(max(dot(N,H),0.0),42.0)*0.42;
+  float rim=pow(1.0-max(dot(N,V),0.0),3.0)*0.20;
+  gl_FragColor=vec4(col*(0.26+d)+vec3(sp)+col*rim,1.0);
+}`;
+
+function compile(gl,type,src){
+  const s=gl.createShader(type); gl.shaderSource(s,src); gl.compileShader(s);
+  if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+  return s;
+}
+
+/* --------- 矩阵 --------- */
+function mIdent(){return new Float32Array([1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]);}
+function mMul(a,b,o){
+  o=o||new Float32Array(16);
+  for(let i=0;i<4;i++)for(let j=0;j<4;j++){
+    let s=0; for(let k=0;k<4;k++) s+=a[k*4+j]*b[i*4+k];
+    o[i*4+j]=s;
+  }
+  return o;
+}
+function mPersp(fov,asp,near,far){
+  const f=1/Math.tan(fov/2), o=new Float32Array(16);
+  o[0]=f/asp; o[5]=f; o[10]=(far+near)/(near-far); o[11]=-1; o[14]=2*far*near/(near-far);
+  return o;
+}
+function mFromQuat(q){
+  const [x,y,z,w]=q;
+  return new Float32Array([
+    1-2*(y*y+z*z), 2*(x*y+z*w),   2*(x*z-y*w),   0,
+    2*(x*y-z*w),   1-2*(x*x+z*z), 2*(y*z+x*w),   0,
+    2*(x*z+y*w),   2*(y*z-x*w),   1-2*(x*x+y*y), 0,
+    0,0,0,1]);
+}
+function qMul(a,b){
+  return [a[3]*b[0]+a[0]*b[3]+a[1]*b[2]-a[2]*b[1],
+          a[3]*b[1]-a[0]*b[2]+a[1]*b[3]+a[2]*b[0],
+          a[3]*b[2]+a[0]*b[1]-a[1]*b[0]+a[2]*b[3],
+          a[3]*b[3]-a[0]*b[0]-a[1]*b[1]-a[2]*b[2]];
+}
+function qNorm(q){const l=Math.hypot(q[0],q[1],q[2],q[3])||1;return [q[0]/l,q[1]/l,q[2]/l,q[3]/l];}
+function qAxis(ax,ang){
+  const s=Math.sin(ang/2), l=Math.hypot(ax[0],ax[1],ax[2])||1;
+  return [ax[0]/l*s,ax[1]/l*s,ax[2]/l*s,Math.cos(ang/2)];
+}
+
+/* ================================================================
+   7.  自交曲线（double locus）—— 论文第 4 节的主角
+   均匀网格加速的三角形-三角形求交。
+   ================================================================ */
+function doubleLocus(P,F,n){
+  const m=F.length/3;
+  let mnx=1e30,mny=1e30,mnz=1e30,mxx=-1e30,mxy=-1e30,mxz=-1e30;
+  for(let i=0;i<n;i++){
+    const x=P[3*i],y=P[3*i+1],z=P[3*i+2];
+    if(x<mnx)mnx=x; if(y<mny)mny=y; if(z<mnz)mnz=z;
+    if(x>mxx)mxx=x; if(y>mxy)mxy=y; if(z>mxz)mxz=z;
+  }
+  const ext=Math.max(mxx-mnx,mxy-mny,mxz-mnz)||1;
+  const R=Math.max(4,Math.min(28,Math.round(Math.cbrt(m)*1.5)));
+  const cs=ext/R+1e-9;
+  const cells=new Map();
+  const key=(i,j,k)=>((i*73856093)^(j*19349663)^(k*83492791))>>>0;
+  const bb=new Float64Array(6*m);
+  for(let f=0;f<m;f++){
+    const a=F[3*f],b=F[3*f+1],c=F[3*f+2];
+    let x0=1e30,y0=1e30,z0=1e30,x1=-1e30,y1=-1e30,z1=-1e30;
+    for(const v of [a,b,c]){
+      const x=P[3*v],y=P[3*v+1],z=P[3*v+2];
+      if(x<x0)x0=x; if(y<y0)y0=y; if(z<z0)z0=z;
+      if(x>x1)x1=x; if(y>y1)y1=y; if(z>z1)z1=z;
+    }
+    bb[6*f]=x0;bb[6*f+1]=y0;bb[6*f+2]=z0;bb[6*f+3]=x1;bb[6*f+4]=y1;bb[6*f+5]=z1;
+    const i0=Math.floor((x0-mnx)/cs), i1=Math.floor((x1-mnx)/cs);
+    const j0=Math.floor((y0-mny)/cs), j1=Math.floor((y1-mny)/cs);
+    const k0=Math.floor((z0-mnz)/cs), k1=Math.floor((z1-mnz)/cs);
+    for(let i=i0;i<=i1;i++)for(let j=j0;j<=j1;j++)for(let k=k0;k<=k1;k++){
+      const h=key(i,j,k); let L=cells.get(h);
+      if(!L){L=[];cells.set(h,L);} L.push(f);
+    }
+  }
+  const segs=[];
+  const seen=new Set();
+  const A=new Float64Array(9), B=new Float64Array(9), da=new Float64Array(3);
+  function tri(v,f){ for(let t=0;t<3;t++){const p=F[3*f+t];v[3*t]=P[3*p];v[3*t+1]=P[3*p+1];v[3*t+2]=P[3*p+2];} }
+  cells.forEach(function(list){
+    for(let p=0;p<list.length;p++)for(let q=p+1;q<list.length;q++){
+      const f=list[p], g=list[q];
+      if(f>=g) continue;
+      const id=f*m+g; if(seen.has(id)) continue; seen.add(id);
+      // 共享顶点的相邻面必然"相交"于公共边，跳过
+      let share=false;
+      for(let s=0;s<3;s++)for(let t=0;t<3;t++) if(F[3*f+s]===F[3*g+t]) share=true;
+      if(share) continue;
+      if(bb[6*f+3]<bb[6*g]||bb[6*g+3]<bb[6*f]||bb[6*f+4]<bb[6*g+1]||
+         bb[6*g+4]<bb[6*f+1]||bb[6*f+5]<bb[6*g+2]||bb[6*g+5]<bb[6*f+2]) continue;
+      tri(A,f); tri(B,g);
+      const s=triTri(A,B,da);
+      if(s) segs.push(s[0],s[1],s[2],s[3],s[4],s[5]);
+    }
+  });
+  return new Float32Array(segs);
+}
+/* A 与 B 的交线段：A 与 B 所在平面相交得线段，再在该平面内裁到 B 内部。*/
+function triTri(A,B,d){
+  const bx=B[3]-B[0],by=B[4]-B[1],bz=B[5]-B[2];
+  const cx=B[6]-B[0],cy=B[7]-B[1],cz=B[8]-B[2];
+  let nx=by*cz-bz*cy, ny=bz*cx-bx*cz, nz=bx*cy-by*cx;
+  const nl=Math.hypot(nx,ny,nz); if(nl<1e-14) return null;
+  nx/=nl;ny/=nl;nz/=nl;
+  const dp=nx*B[0]+ny*B[1]+nz*B[2];
+  let pos=0,neg=0;
+  for(let i=0;i<3;i++){
+    d[i]=nx*A[3*i]+ny*A[3*i+1]+nz*A[3*i+2]-dp;
+    if(d[i]>1e-12)pos++; else if(d[i]<-1e-12)neg++;
+  }
+  if(pos===0||neg===0) return null;
+  const pts=[];
+  for(let i=0;i<3;i++){
+    const j=(i+1)%3;
+    if((d[i]>0)!==(d[j]>0)){
+      const t=d[i]/(d[i]-d[j]);
+      pts.push([A[3*i]+t*(A[3*j]-A[3*i]), A[3*i+1]+t*(A[3*j+1]-A[3*i+1]), A[3*i+2]+t*(A[3*j+2]-A[3*i+2])]);
+    }
+  }
+  if(pts.length<2) return null;
+  // 在 B 的平面内把线段裁剪到 B 的内部
+  let t0=0,t1=1;
+  const P0=pts[0], P1=pts[1];
+  const ex=P1[0]-P0[0], ey=P1[1]-P0[1], ez=P1[2]-P0[2];
+  for(let i=0;i<3;i++){
+    const j=(i+1)%3;
+    const ux=B[3*j]-B[3*i], uy=B[3*j+1]-B[3*i+1], uz=B[3*j+2]-B[3*i+2];
+    // 指向三角形内部的法向 = n × u
+    const wx=ny*uz-nz*uy, wy=nz*ux-nx*uz, wz=nx*uy-ny*ux;
+    const f0=(P0[0]-B[3*i])*wx+(P0[1]-B[3*i+1])*wy+(P0[2]-B[3*i+2])*wz;
+    const fd=ex*wx+ey*wy+ez*wz;
+    if(Math.abs(fd)<1e-15){ if(f0<0) return null; continue; }
+    const t=-f0/fd;
+    if(fd>0){ if(t>t0) t0=t; } else { if(t<t1) t1=t; }
+    if(t0>t1) return null;
+  }
+  if(t1-t0<1e-9) return null;
+  return [P0[0]+t0*ex,P0[1]+t0*ey,P0[2]+t0*ez, P0[0]+t1*ex,P0[1]+t1*ey,P0[2]+t1*ez];
+}
+
+/* ================================================================
+   8.  应用主体
+   ================================================================ */
+(function main(){
+  const canvas=$('gl');
+  let gl=null;
+  try{ gl=canvas.getContext('webgl',{antialias:true,depth:true,alpha:false})
+         ||canvas.getContext('experimental-webgl',{antialias:true,depth:true,alpha:false}); }catch(e){}
+  if(!gl){ $('err').style.display='flex'; return; }
+
+  const prog=gl.createProgram();
+  gl.attachShader(prog,compile(gl,gl.VERTEX_SHADER,VS));
+  gl.attachShader(prog,compile(gl,gl.FRAGMENT_SHADER,FS));
+  gl.bindAttribLocation(prog,0,'aPos'); gl.bindAttribLocation(prog,1,'aNrm');
+  gl.linkProgram(prog);
+  if(!gl.getProgramParameter(prog,gl.LINK_STATUS)){ $('err').style.display='flex'; return; }
+  gl.useProgram(prog);
+  const U={};
+  ['uMVP','uMV','uNM','uClip','uClipOn','uSwap','uSolid','uSolidCol'].forEach(k=>U[k]=gl.getUniformLocation(prog,k));
+  const posBuf=gl.createBuffer(), nrmBuf=gl.createBuffer(),
+        idxBuf=gl.createBuffer(), lineBuf=gl.createBuffer();
+  gl.enable(gl.DEPTH_TEST);
+  gl.clearColor(0.051,0.055,0.078,1);
+
+  /* ------------- 状态 ------------- */
+  const st={
+    level:16, ev:null, mesh:null, frames:[], energies:[],
+    t:-1, playing:false, dir:1, speed:0.55,
+    shrink:1, clip:1, clipOn:false, smooth:false, wire:false, dbl:false, spin:true,
+    quat:qNorm(qMul(qAxis([0,1,0],0.55),qAxis([1,0,0],Math.PI/2))),
+    dist:5.4, computing:false, t0:0, elapsed:0,
+    vbo:null, nbo:null, lineIdx:null, dblCache:{key:'',data:null}
+  };
+
+  /* ------------- 交互：轨迹球 ------------- */
+  let drag=false,lx=0,ly=0;
+  canvas.addEventListener('pointerdown',e=>{drag=true;lx=e.clientX;ly=e.clientY;canvas.setPointerCapture(e.pointerId);});
+  canvas.addEventListener('pointerup',e=>{drag=false;});
+  canvas.addEventListener('pointermove',e=>{
+    if(!drag) return;
+    const dx=(e.clientX-lx)/canvas.clientHeight, dy=(e.clientY-ly)/canvas.clientHeight;
+    lx=e.clientX; ly=e.clientY;
+    const ang=Math.hypot(dx,dy)*3.0;
+    if(ang<1e-6) return;
+    st.quat=qNorm(qMul(qAxis([dy/ang*3.0,dx/ang*3.0,0],ang),st.quat));
+  });
+  canvas.addEventListener('wheel',e=>{
+    e.preventDefault();
+    st.dist=Math.max(2.0,Math.min(16,st.dist*Math.exp(e.deltaY*0.0011)));
+  },{passive:false});
+
+  /* ------------- 计算控制 -------------
+     Eversion 在构造期就会回调第 0 帧（半程模型），那时 mesh 还没交出来，
+     所以用一个延迟包装：构造完成后再开闸，并单独补上第 0 帧。 */
+  function startCompute(level){
+    if(st.ev) st.ev.stop();
+    st.level=level; st.frames=[]; st.energies=[];
+    st.t=0; st.playing=false; st.computing=true; st.t0=performance.now();
+    st.dblCache={key:'',data:null};
+    $('overlay').style.display='flex';
+    $('ovt').textContent='正在计算外翻过程…';
+    $('ovp').innerHTML='从半程模型（W = 16π 的鞍点）出发，沿弹性弯曲能的梯度下降。<br>这正是论文所述方法本身在您的浏览器中运行。';
+    let F=null, N=0;
+    const push=(X,E)=>{
+      if(F){ st.frames.push(normalizeFrame(X,F,N)); st.energies.push(E); }
+    };
+    const ev=EversionDeferred(level,push,(mesh)=>{F=mesh.F;N=mesh.n;});
+    st.ev=ev; st.mesh=ev.mesh;
+    // 构造期漏掉的第 0 帧（半程模型）补上
+    if(st.frames.length===0){ st.frames.push(normalizeFrame(ev.X,ev.mesh.F,ev.mesh.n)); st.energies.push(ev.energy); }
+    buildLineIndex();
+    $('kmesh').textContent=st.mesh.n+' / '+st.mesh.m;
+  }
+  function EversionDeferred(level,onFrame,onMesh){
+    let ready=false;
+    const wrapped=(X,E)=>{ if(ready) onFrame(X,E); };
+    const ev=Eversion(level,wrapped);
+    onMesh(ev.mesh); ready=true;
+    return ev;
+  }
+
+  function buildLineIndex(){
+    const m=st.mesh.m, idx=new Uint16Array(m*6);
+    for(let f=0;f<m;f++){
+      const b=3*f;
+      idx[6*f]=b; idx[6*f+1]=b+1; idx[6*f+2]=b+1; idx[6*f+3]=b+2; idx[6*f+4]=b+2; idx[6*f+5]=b;
+    }
+    st.lineIdx=idx;
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,idxBuf);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,idx,gl.STATIC_DRAW);
+    st.vbo=new Float32Array(m*9);
+    st.nbo=new Float32Array(m*9);
+    st.interp=new Float32Array(st.mesh.n*3);
+    st.live=new Float32Array(st.mesh.n*3);
+    st.vnrm=new Float32Array(st.mesh.n*3);
+  }
+
+  function runCompute(budgetMs){
+    const t0=performance.now();
+    let alive=true;
+    while(alive && performance.now()-t0<budgetMs) alive=st.ev.step();
+    st.elapsed=(performance.now()-st.t0)/1000;
+    const E=st.ev.energy;
+    const p=Math.max(0,Math.min(1,(W_HALFWAY-E)/(W_HALFWAY-st.ev.W_round)));
+    $('progbar').style.width=(p*100).toFixed(1)+'%';
+    $('ovw').textContent=E.toFixed(3)+'   ('+(E/Math.PI).toFixed(2)+' π)';
+    $('ovi').textContent=st.ev.iter+' / '+st.frames.length;
+    $('kframes').textContent=st.frames.length;
+    $('kiter').textContent=st.ev.iter;
+    $('ktime').textContent=st.elapsed.toFixed(1)+' s';
+    if(!alive){
+      st.computing=false;
+      $('overlay').style.display='none';
+      st.t=-1; st.dir=1; st.playing=true; $('play').textContent='❚❚';
+      drawPlot();
+    }
+  }
+
+  /* ------------- 由 t 取几何 ------------- */
+  function geometryAt(t){
+    const NF=st.frames.length;
+    if(NF===0) return null;
+    const a=Math.abs(t)*(NF-1);
+    const i0=Math.max(0,Math.min(NF-1,Math.floor(a))), i1=Math.min(NF-1,i0+1);
+    const u=a-i0;
+    const A=st.frames[i0], B=st.frames[i1], out=st.interp, n=st.mesh.n;
+    if(u<1e-6) out.set(A);
+    else for(let k=0;k<3*n;k++) out[k]=A[k]+(B[k]-A[k])*u;
+    // t<0：ρ₄ = 绕 z 轴 90°，并交换内外颜色（论文的时间对称）
+    if(t<0){
+      for(let i=0;i<n;i++){ const x=out[3*i], y=out[3*i+1]; out[3*i]=-y; out[3*i+1]=x; }
+    }
+    return {X:out, E:st.energies[i0]+(st.energies[i1]-st.energies[i0])*u};
+  }
+
+  function buildBuffers(X){
+    const F=st.mesh.F, m=st.mesh.m, n=st.mesh.n;
+    const V=st.vbo, N=st.nbo, sh=st.shrink;
+    if(st.smooth){
+      const VN=st.vnrm; VN.fill(0);
+      for(let f=0;f<m;f++){
+        const a=F[3*f],b=F[3*f+1],c=F[3*f+2];
+        const ux=X[3*b]-X[3*a],uy=X[3*b+1]-X[3*a+1],uz=X[3*b+2]-X[3*a+2];
+        const vx=X[3*c]-X[3*a],vy=X[3*c+1]-X[3*a+1],vz=X[3*c+2]-X[3*a+2];
+        const nx=uy*vz-uz*vy,ny=uz*vx-ux*vz,nz=ux*vy-uy*vx;
+        VN[3*a]+=nx;VN[3*a+1]+=ny;VN[3*a+2]+=nz;
+        VN[3*b]+=nx;VN[3*b+1]+=ny;VN[3*b+2]+=nz;
+        VN[3*c]+=nx;VN[3*c+1]+=ny;VN[3*c+2]+=nz;
+      }
+      for(let i=0;i<n;i++){
+        const l=Math.hypot(VN[3*i],VN[3*i+1],VN[3*i+2])||1;
+        VN[3*i]/=l;VN[3*i+1]/=l;VN[3*i+2]/=l;
+      }
+    }
+    for(let f=0;f<m;f++){
+      const a=F[3*f],b=F[3*f+1],c=F[3*f+2];
+      let ax=X[3*a],ay=X[3*a+1],az=X[3*a+2];
+      let bx=X[3*b],by=X[3*b+1],bz=X[3*b+2];
+      let cx=X[3*c],cy=X[3*c+1],cz=X[3*c+2];
+      const ux=bx-ax,uy=by-ay,uz=bz-az, vx=cx-ax,vy=cy-ay,vz=cz-az;
+      let nx=uy*vz-uz*vy,ny=uz*vx-ux*vz,nz=ux*vy-uy*vx;
+      const l=Math.hypot(nx,ny,nz)||1; nx/=l;ny/=l;nz/=l;
+      if(sh<0.999){
+        const gx=(ax+bx+cx)/3,gy=(ay+by+cy)/3,gz=(az+bz+cz)/3;
+        ax=gx+(ax-gx)*sh; ay=gy+(ay-gy)*sh; az=gz+(az-gz)*sh;
+        bx=gx+(bx-gx)*sh; by=gy+(by-gy)*sh; bz=gz+(bz-gz)*sh;
+        cx=gx+(cx-gx)*sh; cy=gy+(cy-gy)*sh; cz=gz+(cz-gz)*sh;
+      }
+      const o=9*f;
+      V[o]=ax;V[o+1]=ay;V[o+2]=az; V[o+3]=bx;V[o+4]=by;V[o+5]=bz; V[o+6]=cx;V[o+7]=cy;V[o+8]=cz;
+      if(st.smooth){
+        const VN=st.vnrm;
+        N[o]=VN[3*a];N[o+1]=VN[3*a+1];N[o+2]=VN[3*a+2];
+        N[o+3]=VN[3*b];N[o+4]=VN[3*b+1];N[o+5]=VN[3*b+2];
+        N[o+6]=VN[3*c];N[o+7]=VN[3*c+1];N[o+8]=VN[3*c+2];
+      }else{
+        N[o]=nx;N[o+1]=ny;N[o+2]=nz; N[o+3]=nx;N[o+4]=ny;N[o+5]=nz; N[o+6]=nx;N[o+7]=ny;N[o+8]=nz;
+      }
+    }
+    gl.bindBuffer(gl.ARRAY_BUFFER,posBuf); gl.bufferData(gl.ARRAY_BUFFER,V,gl.DYNAMIC_DRAW);
+    gl.bindBuffer(gl.ARRAY_BUFFER,nrmBuf); gl.bufferData(gl.ARRAY_BUFFER,N,gl.DYNAMIC_DRAW);
+  }
+
+  /* ------------- 绘制 ------------- */
+  function draw(X,swap){
+    const dpr=Math.min(window.devicePixelRatio||1,2);
+    const w=Math.max(1,Math.round(canvas.clientWidth*dpr)), h=Math.max(1,Math.round(canvas.clientHeight*dpr));
+    if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
+    gl.viewport(0,0,w,h);
+    gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+    if(!X) return;
+
+    const rot=mFromQuat(st.quat);
+    const view=mIdent(); view[14]=-st.dist;
+    const mv=mMul(view,rot);
+    const proj=mPersp(0.72,w/h,0.1,80);
+    const mvp=mMul(proj,mv);
+    const nm=new Float32Array([mv[0],mv[1],mv[2], mv[4],mv[5],mv[6], mv[8],mv[9],mv[10]]);
+
+    gl.useProgram(prog);
+    gl.uniformMatrix4fv(U.uMVP,false,mvp);
+    gl.uniformMatrix4fv(U.uMV,false,mv);
+    gl.uniformMatrix3fv(U.uNM,false,nm);
+    gl.uniform1f(U.uClip,st.clip*3.6-1.8);   // 沿对称轴的水平剖切面（论文 Color Plate 9）
+    gl.uniform1f(U.uClipOn,st.clipOn?1:0);
+    gl.uniform1f(U.uSwap,swap?1:0);
+    gl.uniform1f(U.uSolid,0);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER,posBuf);
+    gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0,3,gl.FLOAT,false,0,0);
+    gl.bindBuffer(gl.ARRAY_BUFFER,nrmBuf);
+    gl.enableVertexAttribArray(1); gl.vertexAttribPointer(1,3,gl.FLOAT,false,0,0);
+    gl.drawArrays(gl.TRIANGLES,0,st.mesh.m*3);
+
+    if(st.wire){
+      gl.uniform1f(U.uSolid,1); gl.uniform3f(U.uSolidCol,0.06,0.06,0.09);
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,idxBuf);
+      gl.drawElements(gl.LINES,st.mesh.m*6,gl.UNSIGNED_SHORT,0);
+    }
+    if(st.dbl){
+      const key=st.t.toFixed(4)+'|'+st.frames.length;
+      if(st.dblCache.key!==key){
+        st.dblCache={key:key,data:doubleLocus(X,st.mesh.F,st.mesh.n)};
+      }
+      const D=st.dblCache.data;
+      $('rdbl').textContent = D ? (D.length? (D.length/6)+' 段' : '无（嵌入）') : '—';
+      if(D&&D.length){
+        gl.bindBuffer(gl.ARRAY_BUFFER,lineBuf);
+        gl.bufferData(gl.ARRAY_BUFFER,D,gl.DYNAMIC_DRAW);
+        gl.enableVertexAttribArray(0); gl.vertexAttribPointer(0,3,gl.FLOAT,false,0,0);
+        gl.disableVertexAttribArray(1); gl.vertexAttrib3f(1,0,0,1);
+        gl.uniform1f(U.uSolid,1); gl.uniform3f(U.uSolidCol,0.16,1.0,0.55);
+        // 自交曲线恰好躺在曲面上，开深度测试会被 z-fighting 打成麻点；
+        // 关掉深度测试当作叠加图看（正如论文 Fig.5 把 double locus 单独画出来）
+        gl.disable(gl.DEPTH_TEST);
+        gl.drawArrays(gl.LINES,0,D.length/3);
+        gl.enable(gl.DEPTH_TEST);
+        gl.enableVertexAttribArray(1);
+      }
+    }
+  }
+
+  /* ------------- 能量曲线 ------------- */
+  function drawPlot(curE){
+    const cv=$('plot'), dpr=Math.min(window.devicePixelRatio||1,2);
+    const w=cv.clientWidth||280, h=96;
+    cv.width=w*dpr; cv.height=h*dpr;
+    const c=cv.getContext('2d'); c.scale(dpr,dpr);
+    c.clearRect(0,0,w,h);
+    const NF=st.energies.length; if(NF<2) return;
+    const pad=6, lo=W_SPHERE*0.93, hi=W_HALFWAY*1.04;
+    const Y=e=>h-pad-(e-lo)/(hi-lo)*(h-2*pad);
+    const Xp=t=>pad+(t+1)/2*(w-2*pad);
+    [[W_HALFWAY,'16π','#ffc24a'],[8*Math.PI,'8π','#7f89ad'],[W_SPHERE,'4π','#5fd3a8']].forEach(g=>{
+      c.strokeStyle=g[2]; c.globalAlpha=0.32; c.setLineDash([3,3]); c.lineWidth=1;
+      c.beginPath(); c.moveTo(pad,Y(g[0])); c.lineTo(w-pad,Y(g[0])); c.stroke();
+      c.setLineDash([]); c.globalAlpha=1;
+      c.fillStyle=g[2]; c.font='9px system-ui'; c.fillText(g[1],w-pad-14,Y(g[0])-2);
+    });
+    c.strokeStyle='#ffc24a'; c.lineWidth=1.6; c.beginPath();
+    for(let i=0;i<NF;i++){
+      const t=i/(NF-1);
+      const x=Xp(t), y=Y(st.energies[i]);
+      i?c.lineTo(x,y):c.moveTo(x,y);
+    }
+    for(let i=NF-1;i>=0;i--){
+      const t=-i/(NF-1);
+      c.lineTo(Xp(t),Y(st.energies[i]));
+    }
+    c.stroke();
+    if(curE!==undefined){
+      c.fillStyle='#fff'; c.beginPath(); c.arc(Xp(st.t),Y(curE),3,0,TWO_PI); c.fill();
+    }
+  }
+
+  /* ------------- 阶段说明（与论文第 4 节对应）
+     按 |t| 判定而非按 W：离散 W 随分辨率变化，而各次灾变发生的 |t| 很稳定
+     （本实现测得首次自交 D₀ 在 |t| ≈ 0.60，1152 面与 2048 面一致）。 */
+  const STAGES=[
+    {min:0.93, name:'圆球 · round sphere',
+     desc:'W = 4π，Willmore 能的全局极小。t = −1 与 t = +1 是同一个圆球，但内外已经交换 —— 这就是"外翻"。'},
+    {min:0.76, name:'内陷 · invagination',
+     desc:'球面向内凹陷，如囊胚内陷成原肠胚。这一段仍是嵌入的同痕（isotopy），曲面尚未穿过自己。'},
+    {min:0.60, name:'原肠胚 · gastrula',
+     desc:'两层同心球面由一条近似悬链面的颈相连，W ≈ 8π，约为圆球的两倍。球面与悬链面都是 W-临界的，此处梯度极小；论文在这一段也必须靠 saddle 步才推得动。'},
+    {min:0.34, name:'腰果 · cashew（D₀ 之后）',
+     desc:'内层球面穿透外层，诞生自交圆周（D₀ 灾变），内部变成环状空腔，外形像腰果。打开"自交曲线"可以看到它。'},
+    {min:0.12, name:'三重点诞生 · T⁺T⁺',
+     desc:'两条自交曲线相触，成对生出四个三重点。论文给出的完整灾变序列为 D₀D₀(T⁺T⁺)(D₁D₁D₁ / D₁ Q D₁)(T⁻T⁻)D₂D₂。'},
+    {min:-1, name:'半程模型 · halfway model',
+     desc:'Kusner 的 4 重对称 Morin 曲面：W = 16π 的不稳定 Willmore 鞍点，带一个四重点与一个极点等距点，四个三重点在此汇成四重点 Q。绕轴转 90° 即回到自身但内外互换 —— 整个外翻正是靠这条对称性拼接而成。'}
+  ];
+  function stageFor(t){
+    const a=Math.abs(t);
+    for(const s of STAGES) if(a>=s.min) return s;
+    return STAGES[STAGES.length-1];
+  }
+
+  /* ------------- 主循环 ------------- */
+  let lastT=performance.now();
+  function loop(){
+    requestAnimationFrame(loop);
+    const now=performance.now(), dt=Math.min(0.05,(now-lastT)/1000); lastT=now;
+
+    if(st.computing && st.ev){
+      runCompute(26);
+      if(st.spin) st.quat=qNorm(qMul(qAxis([0,0,1],dt*0.35),st.quat));
+      const LX=normalizeFrame(st.ev.X,st.mesh.F,st.mesh.n,st.live);
+      buildBuffers(LX);
+      draw(LX,true);                        // 计算中实时观察当前曲面（属 t ≥ 0 半程）
+      $('rw').textContent=st.ev.energy.toFixed(2);
+      $('rwpi').textContent='= '+(st.ev.energy/Math.PI).toFixed(2)+' π';
+      $('rt').textContent='—';
+      $('stname').textContent='梯度下降中 · gradient descent';
+      $('stdesc').textContent='曲面正沿 −∇W 从 16π 的鞍点滑向 4π 的圆球。中途会经过腰果与原肠胚两个阶段，'
+        +'最终停在一个嵌入的圆球上；负半程随后由 4 重对称直接生成，无需再算。';
+      return;
+    }
+
+    if(st.playing && st.frames.length>1){
+      st.t+=st.dir*st.speed*dt*0.5;
+      if(st.t>=1){ st.t=1; st.dir=-1; }
+      if(st.t<=-1){ st.t=-1; st.dir=1; }
+      $('tslider').value=Math.round(st.t*1000);
+    }
+    if(st.spin) st.quat=qNorm(qMul(qAxis([0,0,1],dt*0.25),st.quat));
+
+    const g=geometryAt(st.t);
+    if(g){
+      buildBuffers(g.X);
+      // 两个半程用相反的内外配色约定；这一对翻转正是 σ⁻¹ 反转参数定向的体现，
+      // 也保证 t = 0 两侧画面严格连续（ρ₄ 把半程模型映回自身但交换两面）。
+      draw(g.X, st.t>=0);
+      $('rt').textContent=(st.t<0?'−':' ')+Math.abs(st.t).toFixed(3);
+      $('rw').textContent=g.E.toFixed(2);
+      $('rwpi').textContent='= '+(g.E/Math.PI).toFixed(2)+' π';
+      const s=stageFor(st.t);
+      $('stname').textContent=s.name; $('stdesc').textContent=s.desc;
+      drawPlot(g.E);
+    }else draw(null,false);
+  }
+
+  /* ------------- UI 绑定 ------------- */
+  $('play').onclick=()=>{
+    st.playing=!st.playing;
+    $('play').textContent=st.playing?'❚❚':'▶';
+  };
+  $('rev').onclick=()=>{ st.dir*=-1; };
+  $('tslider').oninput=e=>{ st.t=+e.target.value/1000; st.playing=false; $('play').textContent='▶'; };
+  $('speed').oninput=e=>{ st.speed=+e.target.value/100; $('vspeed').textContent=st.speed.toFixed(2); };
+  $('shrink').oninput=e=>{ st.shrink=+e.target.value/100; $('vshrink').textContent=st.shrink.toFixed(2); };
+  $('clip').oninput=e=>{
+    const v=+e.target.value/100; st.clip=v; st.clipOn=v<0.995;
+    $('vclip').textContent=st.clipOn?v.toFixed(2):'off';
+  };
+  $('smooth').onchange=e=>st.smooth=e.target.checked;
+  $('wire').onchange=e=>st.wire=e.target.checked;
+  $('dbl').onchange=e=>{
+    st.dbl=e.target.checked; st.dblCache={key:'',data:null};
+    $('rdblrow').style.display=st.dbl?'block':'none';
+  };
+  $('spin').onchange=e=>st.spin=e.target.checked;
+  $('vaxis').onclick=()=>{ st.quat=qNorm([0,0,0,1]); };
+  $('vside').onclick=()=>{ st.quat=qNorm(qAxis([1,0,0],Math.PI/2)); };
+  $('vreset').onclick=()=>{ st.quat=qNorm(qMul(qAxis([0,1,0],0.55),qAxis([1,0,0],Math.PI/2))); st.dist=5.4; };
+  document.querySelectorAll('#resseg button').forEach(b=>{
+    b.onclick=()=>{
+      document.querySelectorAll('#resseg button').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on'); st.level=+b.dataset.lv;
+    };
+  });
+  $('recompute').onclick=()=>startCompute(st.level);
+  $('stopbtn').onclick=()=>{
+    if(st.ev&&st.computing){
+      st.ev.stop(); st.computing=false; $('overlay').style.display='none';
+      st.t=-1; st.dir=1; st.playing=true; $('play').textContent='❚❚'; drawPlot();
+    }
+  };
+  window.addEventListener('keydown',e=>{
+    if(e.code==='Space'){ e.preventDefault(); $('play').click(); }
+    if(e.code==='ArrowRight'){ st.playing=false;$('play').textContent='▶';
+      st.t=Math.min(1,st.t+1/Math.max(1,st.frames.length-1)); $('tslider').value=Math.round(st.t*1000); }
+    if(e.code==='ArrowLeft'){ st.playing=false;$('play').textContent='▶';
+      st.t=Math.max(-1,st.t-1/Math.max(1,st.frames.length-1)); $('tslider').value=Math.round(st.t*1000); }
+  });
+
+  startCompute(st.level);
+  loop();
+})();
+</script>
+</body>
+</html>
